@@ -1,11 +1,12 @@
 from typing import Callable, NewType
 
-from logis.alg.pathfinding.model import (
+from logis.alg.path_finding import Finder
+from logis.alg.path_finding.model import (
     PathFindingAlgorithmType,
     PathFindingInput,
 )
-from logis.types import Predicate
-from logis.types.point import Point
+from logis.data_type import Predicate
+from logis.data_type.point import Point
 
 
 def test_pathfinding_model():
@@ -16,3 +17,7 @@ def test_pathfinding_model():
 
     input = PathFindingInput(start=Point.of(1, 2), end=Point.of(3, 4))
     input.graph
+
+
+def test_pathfinding_alg():
+    pass

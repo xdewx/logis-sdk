@@ -2,6 +2,8 @@ from abc import ABCMeta, abstractmethod
 from inspect import isclass
 from typing import TYPE_CHECKING, Type
 
+from pathfinding.finder.finder import Finder
+
 from .model import *
 
 __doc__ = "寻路算法模块"
@@ -15,7 +17,7 @@ class PathFindingAlgorithm(metaclass=ABCMeta):
     寻路算法
     """
 
-    type: PathFindingAlgorithmType
+    type: PathFindingAlgorithmType | str
 
     @abstractmethod
     def find_path(self, input: PathFindingInput, **kwargs) -> PathFindingOutput:
@@ -65,3 +67,7 @@ def find_algorithm(resolver: AlgorithmTypeResolver, **kwargs):
     """
     type = resolver(**kwargs)
     return get_algorithm(type)
+
+
+if __name__ == "__main__":
+    pass

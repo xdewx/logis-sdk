@@ -11,13 +11,26 @@ pip install logis-sdk
 ## 使用示例
 
 ```python
+from logis.alg.pathfinding import Finder
+
+class MyPathFinder(Finder):
+    """
+    基于pathfinding模块实现自定义寻路算法
+    """
+    pass
+
+```
+
+```python
 from logis.alg.pathfinding import PathFindingAlgorithm,PathFindingInput,PathFindingOutput
 
 class MyPathFindingAlgorithm(PathFindingAlgorithm):
+    """
+    基于自定义输入输出实现具体寻路算法
+    """
     def find_path(self, input: PathFindingInput) -> PathFindingOutput:
         # 实现具体的寻路算法
         pass
-
 ```
 
 ## 贡献指南

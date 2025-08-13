@@ -1,6 +1,6 @@
 from typing import Optional, Tuple
 
-from logis.types import Number, TuplePoint
+from logis.data_type import Number, TuplePoint
 
 
 class Point:

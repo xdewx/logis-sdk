@@ -1,4 +1,4 @@
-from logis.types import Point
+from logis.data_type import Point
 
 
 def test_point():

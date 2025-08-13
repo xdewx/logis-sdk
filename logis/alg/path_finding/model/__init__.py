@@ -4,7 +4,7 @@ from networkx import DiGraph, Graph
 from pydantic import BaseModel, Field
 
 from logis.conf import PYDANTIC_DEFAULT_MODEL_CONFIG
-from logis.types import Point
+from logis.data_type import Point
 
 PathFindingAlgorithmType = NewType("PathFindingAlgorithmType", str)
 
