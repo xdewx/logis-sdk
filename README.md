@@ -11,7 +11,7 @@ pip install logis-sdk
 ## 使用示例
 
 ```python
-from logis.alg.pathfinding import Finder
+from logis.alg.path_finding import Finder
 
 class MyPathFinder(Finder):
     """
@@ -22,7 +22,7 @@ class MyPathFinder(Finder):
 ```
 
 ```python
-from logis.alg.pathfinding import PathFindingAlgorithm,PathFindingInput,PathFindingOutput
+from logis.alg.path_finding import PathFindingAlgorithm,PathFindingInput,PathFindingOutput
 
 class MyPathFindingAlgorithm(PathFindingAlgorithm):
     """
