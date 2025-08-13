@@ -27,3 +27,7 @@ TaskType = NewType("TaskType", str)
 TuplePoint: TypeAlias = Tuple[Optional[Number], Optional[Number], Optional[Number]]
 
 from .point import *
+
+__doc__ = """
+类型模块
+"""
