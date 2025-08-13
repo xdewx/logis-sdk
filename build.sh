@@ -1,4 +1,7 @@
 #!/bin/bash
+
+find . -name __pycache__|xargs -I{} rm -r {}
+
 # 清理旧构建
 rm -rf dist/ build/ *.egg-info
 

@@ -28,8 +28,8 @@ PathFindingAlgorithmType = NewType("PathFindingAlgorithmType", str)
 AlgorithmTypeResolver: TypeAlias = Callable[[Any], PathFindingAlgorithmType]
 
 # TODO: 完善名字、补充类型
-A_STAR_ALGORITHM = PathFindingAlgorithmType("a_star_neighbor_dict")
-DIJKSTRA_ALGORITHM = PathFindingAlgorithmType("dijkstra_neighbor_dict")
+A_STAR_ALGORITHM = PathFindingAlgorithmType("a_star")
+DIJKSTRA_ALGORITHM = PathFindingAlgorithmType("dijkstra")
 
 
 class PathFindingInput(BaseModel):
@@ -73,31 +73,6 @@ class PathFindingAlgorithm(metaclass=ABCMeta):
         寻找从start到end的路径
         """
         pass
-
-
-class AStarPathFinding(PathFindingAlgorithm):
-    """
-    A*寻路算法实现
-    """
-
-    type = A_STAR_ALGORITHM
-
-    def find_path(self, input: PathFindingInput, **kwargs) -> PathFindingOutput:
-        """
-        使用A*算法寻找从start到end的路径
-        """
-        from src.util.pathfinding import a_star_ndic
-
-        success, path = a_star_ndic(
-            starter=input.start,
-            ender=input.end,
-            nb_dis_dic=input.distance_matrix,
-            heuristic_func=input.heuristic_func,
-            excluded_vertices=input.excluded_vertices,
-            **kwargs,
-        )
-        return PathFindingOutput(success=success, path=path)
-
 
 def default_algorithm_matcher(method: str) -> PathFindingAlgorithmType:
     """
