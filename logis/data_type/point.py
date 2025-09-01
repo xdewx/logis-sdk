@@ -1,3 +1,4 @@
+from itertools import count
 from typing import Optional, Tuple
 
 from logis.data_type import Number, TuplePoint
@@ -8,6 +9,8 @@ class Point:
     支持x,y,z三维坐标点，也可当作二维坐标使用
     TODO: 处理单位
     """
+
+    __counter = count(0, step=1)
 
     @classmethod
     def try_parse(cls, dc: dict) -> "Point":
@@ -41,6 +44,7 @@ class Point:
 
         TODO: 不应该自动转float、不应该自动保留两位小数
         """
+        self._id = next(self.__counter)
         self.unit: str | None = None
         self.x: Optional[Number] = None
         self.y: Optional[Number] = None
@@ -105,3 +109,13 @@ class Point:
             self.y,
             self.z,
         )
+
+    def __str__(self):
+        return f"Point(id={self._id},x={self.x},y={self.y},z={self.z})"
+
+
+if __name__ == "__main__":
+    # printPoint(1,2))
+    # printPoint([1,2,3,4,5,6,7]))
+    # printPoint((1,2,3)))
+    pass

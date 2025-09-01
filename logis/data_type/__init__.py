@@ -2,6 +2,8 @@ from decimal import Decimal
 from numbers import Number
 from typing import Callable, NewType, Optional, Tuple, TypeAlias, TypeVar, Union
 
+from pydantic import ConfigDict
+
 StringNumber: TypeAlias = str
 
 ComponentIntId: TypeAlias = int
@@ -25,6 +27,8 @@ EventType = NewType("EventType", str)
 TaskType = NewType("TaskType", str)
 
 TuplePoint: TypeAlias = Tuple[Optional[Number], Optional[Number], Optional[Number]]
+
+DEFAULT_PYDANTIC_MODEL_CONFIG = ConfigDict(arbitrary_types_allowed=True)
 
 from .point import *
 
