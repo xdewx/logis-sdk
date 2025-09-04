@@ -1,16 +1,13 @@
 from collections import defaultdict
 from decimal import Decimal
+from fractions import Fraction
 from functools import reduce
-from numbers import Number
 from typing import Callable, List, NewType, Tuple, TypeAlias
 
 from pydantic import BaseModel
 
 from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG as MODEL_CONFIG
-from logis.data_type import (
-    RatioComputer,
-    Unit,
-)
+from logis.data_type import Number, Unit
 
 from .point import *
 
@@ -18,17 +15,21 @@ from .point import *
 class NumberUnit(BaseModel):
     model_config = MODEL_CONFIG
 
-    quantity: Number | Decimal
-    unit: Unit | None = None
+    quantity: Decimal | int | Number
+    unit: str | Unit | None = None
 
     # 自定义倍率转换器
-    _ratio_computer: RatioComputer | None = None
+    _unit_config_: Optional["UnitConfig"] = None
 
     def __auto_validate__(self, other: "NumberUnit"):
-        if self._ratio_computer is None:
-            assert self.unit == other.unit, "unit must be the same"
+        if self._unit_config_ is None:
+            assert (
+                self.unit == other.unit
+            ), f"unit must be the same, but {self.unit} != {other.unit}"
         else:
-            other = unify_quantified_value(other, self.unit, self._ratio_computer)
+            other = unify_quantified_value(
+                other, self.unit, unit_config=self._unit_config_
+            )
         return other
 
     def __sub__(self, other: "NumberUnit"):
@@ -182,40 +183,111 @@ def get_time_3d(delta_distance: Point, v: ThreeDimensionalVelocity):
     )
 
 
-def default_ratio_computer(src: Unit, dst: Unit) -> Number:
+DEFAULT_UNIT_CONFIG = dict()
+
+
+class UnitConfig(dict):
     """
-    默认的倍率计算器
+    有关单位的配置项
     """
-    if src == dst:
-        return 1
-    map = dict(km=10**3, m=1, dm=10**-1, cm=10**-2, mm=10**-3, nm=10**-9)
-    map |= dict(kl=10**3, l=1, dl=10**-1, cl=10**-2, ml=10**-3)
-    src, dst = src.lower(), dst.lower()
-    assert src in map, f"unknown source unit: {src}"
-    assert dst in map, f"unknown target unit: {dst}"
-    return float(Decimal(map[src]) / Decimal(f"{map[dst]:.20f}"))
+
+    def get_ratio(self, src: Unit, dst: Unit) -> Fraction:
+        """
+        获取 src 到 dst 的倍率
+        """
+        if src == dst:
+            return Fraction(1, 1)
+        if src in self and dst in self:
+            return Fraction(self[dst], self[src])
+        raise ValueError(f"unknown unit: {src} or {dst}")
+
+    def get_float_ratio(self, src: Unit, dst: Unit) -> float:
+        """
+        获取 src 到 dst 的倍率
+        """
+        return float(self.get_ratio(src, dst))
+
+    def get_int_ratio(self, src: Unit, dst: Unit) -> int:
+        """
+        获取 src 到 dst 的倍率
+        """
+        return int(self.get_ratio(src, dst))
+
+    def alias(self, unit: Unit, *aliases: Unit):
+        """
+        为单位添加别名
+        """
+        for alias in aliases:
+            self[alias] = self.get(unit)
+        return self
+
+    def __or__(self, value):
+        return UnitConfig(super().__or__(value))
+
+
+class UnitConfigBuilder:
+    """
+    单位配置构建器
+    """
+
+    def __init__(self, base_unit: Unit):
+        self.__unit_config__ = UnitConfig([[base_unit, 1]])
+
+    @staticmethod
+    def with_base(unit: Unit):
+        return UnitConfigBuilder(unit)
+
+    def add(self, unit: Unit, multiplier_to_base: Number | Fraction):
+        """
+        Args:
+            unit: 单位
+            multiplier_to_base: 转换到1base单位所需要的倍率，例如：base为1m时，cm到1m需要100倍
+        """
+        self.__unit_config__[unit] = multiplier_to_base
+        return self
+
+    def alias(self, unit: Unit, *aliases: Unit):
+        """
+        为单位添加别名
+        """
+        self.__unit_config__.alias(unit=unit, *aliases)
+        return self
+
+    def build(self) -> UnitConfig:
+        return self.__unit_config__
+
+
+TIME_UNIT_CONFIG = UnitConfig(
+    天=1, 小时=24, 分钟=24 * 60, 秒=24 * 60 * 60, 毫秒=24 * 60 * 60 * 10**3
+)
+VOLUME_UNIT_CONFIG = UnitConfig(kl=Fraction(1, 10**3), l=1, dl=10, cl=100, ml=10**3)
+LENGTH_UNIT_CONFIG = UnitConfig(
+    km=Fraction(1, 10**3), m=1, dm=10, cm=100, mm=10**3, nm=10**9
+)
+
+DEFAULT_UNIT_CONFIG = TIME_UNIT_CONFIG | VOLUME_UNIT_CONFIG | LENGTH_UNIT_CONFIG
 
 
 def unify_quantified_value(
     self: QuantifiedValue,
     target_unit: Unit | None = None,
-    ratio_computer: RatioComputer = default_ratio_computer,
+    unit_config: UnitConfig = DEFAULT_UNIT_CONFIG,
 ):
     """
     单位转换
     """
     same_unit = self.unit == target_unit
-    if ratio_computer is None:
+    if unit_config is None:
         assert same_unit, "unit must be the same if no radio_computer given"
     else:
-        ratio = 1 if same_unit else ratio_computer(self.unit, target_unit)
+        ratio = 1 if same_unit else unit_config.get_ratio(self.unit, target_unit)
         dc = self.model_dump() | dict(quantity=self.quantity * ratio, unit=target_unit)
         return type(self)(**dc)
 
 
 def merge_quantified_value(
     items: List[QuantifiedValue],
-    ratio_computer: RatioComputer | None = default_ratio_computer,
+    unit_config: UnitConfig | None = DEFAULT_UNIT_CONFIG,
     target_unit: Unit | None = None,
 ):
     """
@@ -231,14 +303,14 @@ def merge_quantified_value(
     if len(items) != 2:
         return reduce(
             lambda a, b: merge_quantified_value(
-                [a, b], target_unit=target_unit, ratio_computer=ratio_computer
+                [a, b], target_unit=target_unit, unit_config=unit_config
             ),
             items,
         )
     self, other = unify_quantified_value(
-        items[0], target_unit=target_unit, ratio_computer=ratio_computer
+        items[0], target_unit=target_unit, unit_config=unit_config
     ), unify_quantified_value(
-        items[1], target_unit=target_unit, ratio_computer=ratio_computer
+        items[1], target_unit=target_unit, unit_config=unit_config
     )
     dc = self.model_dump() | dict(
         quantity=self.quantity + other.quantity, unit=target_unit

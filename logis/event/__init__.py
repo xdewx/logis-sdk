@@ -10,10 +10,15 @@ T = TypeVar("T")
 
 
 class EventContext(BaseModel, Generic[T]):
+    # 事件所携带的数据
     payload: T | None = None
-    source: str | None = None
-    target: Optional[Any] = None
+    # 事件源ID
+    source_id: str | None = None
+    # 事件目标ID
+    target_id: Optional[Any] = None
+    # 事件名称
     name: str
+    # 附加数据
     extra: Any = None
 
 

@@ -28,7 +28,13 @@ TaskType = NewType("TaskType", str)
 
 TuplePoint: TypeAlias = Tuple[Optional[Number], Optional[Number], Optional[Number]]
 
-DEFAULT_PYDANTIC_MODEL_CONFIG = ConfigDict(arbitrary_types_allowed=True)
+# 这里不要随便改，如果不满足自己的需求，可以新建配置
+DEFAULT_PYDANTIC_MODEL_CONFIG = ConfigDict(
+    arbitrary_types_allowed=True,
+    extra="ignore",
+    validate_by_alias=True,
+    validate_by_name=True,
+)
 
 from .point import *
 
