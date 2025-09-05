@@ -45,6 +45,11 @@ class NumberUnit(BaseModel):
         # TODO: 处理精度问题
         return self.quantity / other.quantity
 
+    def __mul__(self, times: int | float):
+        data = self.model_dump()
+        data["quantity"] *= times
+        return type(self).model_validate(data)
+
     def __gt__(self, other: "NumberUnit"):
         other = self.__auto_validate__(other)
         return self.quantity > other.quantity
