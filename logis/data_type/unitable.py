@@ -1,5 +1,5 @@
+from abc import ABCMeta
 from collections import defaultdict
-from decimal import Decimal
 from fractions import Fraction
 from functools import reduce
 from typing import Callable, List, NewType, Tuple, TypeAlias
@@ -7,15 +7,14 @@ from typing import Callable, List, NewType, Tuple, TypeAlias
 from pydantic import BaseModel
 
 from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG as MODEL_CONFIG
-from logis.data_type import Number, Unit
+from logis.data_type import NumberType, Unit
 
 from .point import *
 
 
-class NumberUnit(BaseModel):
-    model_config = MODEL_CONFIG
+class NumberUnit(metaclass=ABCMeta):
 
-    quantity: Decimal | int | Number
+    quantity: NumberType
     unit: str | Unit | None = None
 
     # 自定义倍率转换器
@@ -79,7 +78,7 @@ class NumberUnit(BaseModel):
         self.quantity = new_value
 
     @classmethod
-    def parse_tuple(cls, input: Tuple[Number, Unit]):
+    def parse_tuple(cls, input: Tuple[NumberType, Unit]):
         """
         解析形如[1,"个"]的数据
         """
@@ -97,18 +96,19 @@ class NumberUnit(BaseModel):
         return cls(quantity=number_type(tmps[0]), unit=tmps[1])
 
     @classmethod
-    def of(cls, num: Number, unit: str | None = None):
+    def of(cls, num: NumberType, unit: str | None = None):
         return cls(quantity=num, unit=unit)
 
-    def increase(self, num: Number) -> None:
+    def increase(self, num: NumberType) -> None:
         self.quantity += num
 
-    def decrease(self, num: Number) -> None:
+    def decrease(self, num: NumberType) -> None:
         self.quantity -= num
 
 
 # 量化值
-QuantifiedValue: TypeAlias = NumberUnit
+class QuantifiedValue(BaseModel, NumberUnit):
+    model_config = MODEL_CONFIG
 
 
 class Capacity(QuantifiedValue):
@@ -140,9 +140,9 @@ class ThreeDimensionalVelocity(BaseModel):
     @classmethod
     def of(
         cls,
-        x: Number | None = None,
-        y: Number | None = None,
-        z: Number | None = None,
+        x: NumberType | None = None,
+        y: NumberType | None = None,
+        z: NumberType | None = None,
         unit: str | None = None,
     ):
         return cls(
@@ -242,7 +242,7 @@ class UnitConfigBuilder:
     def with_base(unit: Unit):
         return UnitConfigBuilder(unit)
 
-    def add(self, unit: Unit, multiplier_to_base: Number | Fraction):
+    def add(self, unit: Unit, multiplier_to_base: NumberType):
         """
         Args:
             unit: 单位

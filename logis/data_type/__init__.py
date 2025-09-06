@@ -1,10 +1,14 @@
 from decimal import Decimal
+from fractions import Fraction
 from numbers import Number
 from typing import Callable, NewType, Optional, Tuple, TypeAlias, TypeVar, Union
 
 from pydantic import ConfigDict
 
 StringNumber: TypeAlias = str
+
+BaseNumberType: TypeAlias = Union[int, float]
+NumberType: TypeAlias = Union[Decimal, int, float, Fraction, Number]
 
 ComponentIntId: TypeAlias = int
 

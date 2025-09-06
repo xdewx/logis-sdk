@@ -1,4 +1,6 @@
-from typing import Literal
+from typing import Any, Literal
+
+from logis.data_type.unitable import NumberUnit
 
 
 def split_integer(
@@ -45,3 +47,12 @@ def split_integer(
     for times, value in arrs:
         for _ in range(times):
             yield value
+
+
+def get_numeric_value(some: Any):
+    """
+    获取输入对象的数值
+    """
+    if isinstance(some, NumberUnit):
+        return some.value
+    return some
