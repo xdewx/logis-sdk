@@ -1,9 +1,19 @@
 from decimal import Decimal
 from fractions import Fraction
 from numbers import Number
-from typing import Callable, NewType, Optional, Tuple, TypeAlias, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    NewType,
+    Optional,
+    Tuple,
+    TypeAlias,
+    TypeVar,
+    Union,
+)
 
-from pydantic import ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 StringNumber: TypeAlias = str
 
@@ -45,3 +55,12 @@ from .point import *
 __doc__ = """
 类型模块
 """
+
+
+class CallableInput(BaseModel):
+    args: Tuple = Field(default_factory=tuple)
+    kwargs: Dict[str, Any] = Field(default_factory=dict)
+
+    @staticmethod
+    def of(*args, **kwargs):
+        return CallableInput(args=args, kwargs=kwargs)
