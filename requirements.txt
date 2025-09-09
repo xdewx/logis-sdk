@@ -31,4 +31,5 @@ requests==2.32.4
 websocket-client==1.8.0
 python-i18n==0.3.9
 pathfinding==1.0.17
+python-dateutil==1.17.0
 
