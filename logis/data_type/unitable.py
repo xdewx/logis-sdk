@@ -1,8 +1,8 @@
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 from fractions import Fraction
 from functools import reduce
-from typing import Callable, List, NewType, Tuple, TypeAlias
+from typing import Any, Callable, Dict, List, NewType, Tuple, TypeAlias
 
 from pydantic import BaseModel
 
@@ -20,6 +20,14 @@ class NumberUnit(metaclass=ABCMeta):
     # 自定义倍率转换器
     _unit_config_: Optional["UnitConfig"] = None
 
+    @abstractmethod
+    def model_dump(self) -> Dict[str, Any]:
+        pass
+
+    @abstractmethod
+    def model_validate(cls, data: Dict[str, Any]) -> "NumberUnit":
+        pass
+
     def __auto_validate__(self, other: "NumberUnit"):
         if self._unit_config_ is None:
             assert (
@@ -33,11 +41,15 @@ class NumberUnit(metaclass=ABCMeta):
 
     def __sub__(self, other: "NumberUnit"):
         other = self.__auto_validate__(other)
-        return type(self)(quantity=self.quantity - other.quantity, unit=self.unit)
+        dc = self.model_dump()
+        dc["quantity"] = self.quantity - other.quantity
+        return type(self).model_validate(dc)
 
     def __add__(self, other: "NumberUnit"):
         other = self.__auto_validate__(other)
-        return type(self)(quantity=self.quantity + other.quantity, unit=self.unit)
+        dc = self.model_dump()
+        dc["quantity"] += other.quantity
+        return type(self)(**dc)
 
     def __truediv__(self, other: "NumberUnit"):
         other = self.__auto_validate__(other)
