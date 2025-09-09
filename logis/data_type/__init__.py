@@ -64,3 +64,16 @@ class CallableInput(BaseModel):
     @staticmethod
     def of(*args, **kwargs):
         return CallableInput(args=args, kwargs=kwargs)
+
+
+class InvokeResult:
+    def __init__(self):
+        self.is_generator = False
+        self.return_value: Any = None
+        self.yield_values: Any = []
+
+    @staticmethod
+    def returns(value: Any):
+        self = InvokeResult()
+        self.return_value = value
+        return self

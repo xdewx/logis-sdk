@@ -8,6 +8,7 @@ from pydantic import BaseModel
 
 from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG as MODEL_CONFIG
 from logis.data_type import NumberType, Unit
+from logis.iface import Storable
 
 from .point import *
 
@@ -19,6 +20,13 @@ class NumberUnit(metaclass=ABCMeta):
 
     # 自定义倍率转换器
     _unit_config_: Optional["UnitConfig"] = None
+
+    @property
+    def kind(self):
+        """
+        默认情况下返回类名,实际使用时可以重写
+        """
+        return self.__class__.__name__
 
     @abstractmethod
     def model_dump(self) -> Dict[str, Any]:
@@ -346,3 +354,17 @@ def group_merge_quantified_value(items: List[QuantifiedValue]) -> List[Quantifie
     for unit, items in unit_items_map.items():
         result.append(merge_quantified_value(items))
     return result
+
+
+class QuantifiedValueContainer(Storable):
+
+    def __init__(self):
+        self.__container__: Dict[str, Dict[str, NumberType]] = defaultdict(
+            defaultdict(0)
+        )
+
+    def store(self, v: "NumberUnit"):
+        self.__container__[v.kind][v.unit] += v.quantity
+
+    def retrieve(self, v: "NumberUnit"):
+        self.__container__[v.kind][v.unit] -= v.quantity
