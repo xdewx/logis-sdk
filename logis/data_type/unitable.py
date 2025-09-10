@@ -222,7 +222,10 @@ Quantity = ureg.Quantity
 # 2. 将中文与内置单位关联
 # 长度单位
 ureg.define("米 = meter")
+ureg.define("分米 = decimeter")
 ureg.define("厘米 = centimeter")
+ureg.define("毫米 = millimeter")
+ureg.define("纳米 = nanometer")
 ureg.define("千米 = kilometer")
 ureg.define("公里 = kilometer")
 
@@ -259,31 +262,31 @@ class UnitConfig(dict):
     有关单位的配置项
     """
 
-    def get_ratio(self, src: Unit, dst: Unit) -> Fraction:
+    def get_ratio(self, src: Unit, dst: Unit, src_quantity: NumberType = 1) -> Fraction:
         """
         获取 src 到 dst 的倍率
         """
         if src == dst:
-            return Fraction(1, 1)
+            return Fraction(src_quantity, 1)
         if src in self and dst in self:
-            return Fraction(self[dst], self[src])
+            return Fraction(self[dst] * src_quantity, self[src])
         try:
-            return Fraction(get_unit_ratio(src, dst))
+            return Fraction(get_unit_ratio(src, dst, src_quantity=src_quantity))
         except:
             pass
         raise ValueError(f"unknown unit: {src} or {dst}")
 
-    def get_float_ratio(self, src: Unit, dst: Unit) -> float:
+    def get_float_ratio(self, src: Unit, dst: Unit, *args, **kwargs) -> float:
         """
         获取 src 到 dst 的倍率
         """
-        return float(self.get_ratio(src, dst))
+        return float(self.get_ratio(src, dst, *args, **kwargs))
 
-    def get_int_ratio(self, src: Unit, dst: Unit) -> int:
+    def get_int_ratio(self, src: Unit, dst: Unit, *args, **kwargs) -> int:
         """
         获取 src 到 dst 的倍率
         """
-        return int(self.get_ratio(src, dst))
+        return int(self.get_ratio(src, dst, *args, **kwargs))
 
     def alias(self, unit: Unit, *aliases: Unit):
         """

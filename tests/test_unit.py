@@ -1,10 +1,14 @@
 import math
 
+from logis.data_type.unitable import DEFAULT_UNIT_CONFIG
 from logis.data_type.unitable import Quantity as Q_
 from logis.data_type.unitable import get_unit_ratio
 
-temp = Q_(25, "摄氏度")
-print(temp.to("degree_Fahrenheit"))
+
+def test_unit_config():
+    unit_config = DEFAULT_UNIT_CONFIG
+    assert unit_config.get_ratio("m", "cm", 10) == 1000
+    assert unit_config.get_ratio("km", "cm") == 1000 * 100
 
 
 def test_unit():
@@ -12,6 +16,7 @@ def test_unit():
     assert math.floor(speed.to("米/秒").magnitude) == 16
 
     assert Q_(36000, "千米/小时").to("千米/秒").magnitude == 10
+    assert Q_(36000, "km/h").to("km/s").magnitude == 10
 
     assert get_unit_ratio("千米每小时", "千米/秒", 36000) == 10
 
