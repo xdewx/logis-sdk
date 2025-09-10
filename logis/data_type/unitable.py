@@ -210,6 +210,49 @@ def get_time_3d(delta_distance: Point, v: ThreeDimensionalVelocity):
 
 DEFAULT_UNIT_CONFIG = dict()
 
+from pint import UnitRegistry, set_application_registry
+
+# 1. 初始化单位注册表
+ureg = UnitRegistry()
+# 设置为全局注册表（避免重复注册）
+set_application_registry(ureg)
+
+Quantity = ureg.Quantity
+
+# 2. 将中文与内置单位关联
+# 长度单位
+ureg.define("米 = meter")
+ureg.define("厘米 = centimeter")
+ureg.define("千米 = kilometer")
+ureg.define("公里 = kilometer")
+
+# 重量单位
+ureg.define("千克 = kilogram")
+ureg.define("克 = gram")
+ureg.define("吨 = tonne")
+
+# 时间单位
+ureg.define("年 = year")
+ureg.define("月 = month")
+ureg.define("周 = week")
+ureg.define("星期 = week")
+ureg.define("天 = day")
+ureg.define("小时 = hour")
+ureg.define("分钟 = minute")
+ureg.define("秒 = second")
+
+# 温度单位
+ureg.define("摄氏度 = degree_Celsius")
+ureg.define("华氏度 = degree_Fahrenheit")
+
+
+def get_unit_ratio(src: Unit, dst: Unit, src_quantity: NumberType = 1) -> float:
+    """
+    获取 src 到 dst 的倍率
+    """
+    src, dst = src.replace("每", "/"), dst.replace("每", "/")
+    return ureg.Quantity(src_quantity, src).to(dst).magnitude
+
 
 class UnitConfig(dict):
     """
@@ -224,6 +267,10 @@ class UnitConfig(dict):
             return Fraction(1, 1)
         if src in self and dst in self:
             return Fraction(self[dst], self[src])
+        try:
+            return Fraction(get_unit_ratio(src, dst))
+        except:
+            pass
         raise ValueError(f"unknown unit: {src} or {dst}")
 
     def get_float_ratio(self, src: Unit, dst: Unit) -> float:
