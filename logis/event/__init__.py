@@ -5,6 +5,7 @@ from pyee import EventEmitter
 from pyee.base import Handler
 
 from logis.ctx import Context
+from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG
 
 T = TypeVar("T")
 
@@ -20,6 +21,8 @@ class EventContext(BaseModel, Generic[T]):
     name: str
     # 附加数据
     extra: Any = None
+
+    model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
 
 
 class EventBus(Context):

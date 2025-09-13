@@ -26,9 +26,9 @@ class Context:
             return False
 
     @classmethod
-    def init(cls, v={}):
+    def init(cls, default={}):
         if cls._context_vars_.get() is None:
-            cls._context_vars_.set(v)
+            cls._context_vars_.set(default)
 
     @classmethod
     def set(cls, key, value):
