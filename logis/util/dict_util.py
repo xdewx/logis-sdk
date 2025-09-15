@@ -2,6 +2,8 @@ __doc__ = """
 字典工具类
 """
 
+from typing import Any, Iterable
+
 cn_en_dict = dict(
     半径="radius",
 )
@@ -21,3 +23,12 @@ def unify_key_name(input: dict, mappings: dict = cn_en_dict) -> dict:
             raise ValueError(f"Duplicate key found: {new_key} in input dictionary.")
         output[new_key] = v
     return output
+
+
+def remove_key_not_in(dc: dict, keys: Iterable[Any]):
+    """
+    移除不在指定范围内的key
+    """
+    for key in list(dc.keys()):
+        if key not in keys:
+            dc.pop(key)

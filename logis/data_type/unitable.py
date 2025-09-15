@@ -347,6 +347,7 @@ def unify_quantified_value(
     self: QuantifiedValue,
     target_unit: Unit | None = None,
     unit_config: UnitConfig = DEFAULT_UNIT_CONFIG,
+    modify_ref: bool = False,
 ):
     """
     单位转换
@@ -356,6 +357,11 @@ def unify_quantified_value(
         assert same_unit, "unit must be the same if no radio_computer given"
     else:
         ratio = 1 if same_unit else unit_config.get_ratio(self.unit, target_unit)
+        if modify_ref:
+            self.quantity = self.quantity * ratio
+            self.unit = target_unit
+            return self
+        # 上面这种方式能尽可能避免属性丢失，但修改的是原始对象
         dc = self.model_dump() | dict(quantity=self.quantity * ratio, unit=target_unit)
         return type(self)(**dc)
 
