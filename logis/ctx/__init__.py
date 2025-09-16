@@ -38,7 +38,7 @@ class Context:
         # setattr(cls._thread_local, key, value)
 
     @classmethod
-    def get(cls, key, default=None, create=False):
+    def get[T](cls, key, default: T = None, create=False):
         dc = cls.get_all()
         result = default if dc is None else dc.get(key, default)
         if create:

@@ -130,6 +130,7 @@ class NumberUnit(metaclass=ABCMeta):
 class QuantifiedValue(BaseModel, NumberUnit):
     model_config = MODEL_CONFIG
 
+    name: str | None = None
 
 class Capacity(QuantifiedValue):
     pass

@@ -1,5 +1,5 @@
 from abc import ABCMeta
-from typing import Protocol, runtime_checkable
+from typing import Generic, Protocol, runtime_checkable
 
 
 @runtime_checkable
@@ -61,6 +61,12 @@ class Storable(Protocol):
 
     使用鸭子类型实现，相比ABC更灵活
     """
+
+    def pre_store(self, *args, **kwargs):
+        pass
+
+    def pre_retrieve(self, *args, **kwargs):
+        pass
 
     def store(self, *args, **kwargs) -> StoreResult:
         pass
