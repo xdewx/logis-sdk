@@ -61,7 +61,7 @@ class Context:
         # cls._thread_local.__dict__.clear()
 
     @classmethod
-    def count(cls, name: str, value: Number, override=False):
+    def count(cls, name: str, value: Number, override=False) -> Number:
         """
         计数
         Args:
@@ -76,6 +76,8 @@ class Context:
             cls.get(k)[name] = value
         else:
             cls.get(k)[name] += value
+
+        return cls.get(k)[name]
 
     @classmethod
     def start_timing_if_not(cls, key: str, now: float) -> bool:
