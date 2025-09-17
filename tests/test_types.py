@@ -1,3 +1,5 @@
+from typing import Protocol, runtime_checkable
+
 from logis.data_type import Point
 from logis.data_type.unitable import TIME_UNIT_CONFIG, UnitConfigBuilder
 
@@ -28,3 +30,14 @@ def test_unit_config_builder():
 
     ratio = x.get_ratio("秒", "毫秒")
     assert ratio == 1000
+
+
+def test_protocal():
+    @runtime_checkable
+    class MyProtocal(Protocol):
+        pass
+
+    class SomeClass:
+        pass
+
+    assert isinstance(SomeClass(), MyProtocal)

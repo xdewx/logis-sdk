@@ -2,8 +2,7 @@ from abc import ABCMeta
 from typing import Generic, Protocol, runtime_checkable
 
 
-@runtime_checkable
-class Shape(Protocol):
+class Shape(metaclass=ABCMeta):
     """
     形状，例如路径、节点等
     """
