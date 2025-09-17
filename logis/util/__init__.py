@@ -1,7 +1,14 @@
 __doc__ = "工具类"
 
 
-from typing import Any, Callable
+from typing import Any, Callable, Optional
+
+
+def first_not_none[T](*args: T) -> Optional[T]:
+    for item in args:
+        if item is not None:
+            return item
+    return None
 
 
 def none_if_in(some_value: Any, *choices: Any):
