@@ -2,7 +2,7 @@ __doc__ = """
 字典工具类
 """
 
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable, Tuple
 
 cn_en_dict = dict(
     半径="radius",
@@ -32,3 +32,13 @@ def remove_key_not_in(dc: dict, keys: Iterable[Any]):
     for key in list(dc.keys()):
         if key not in keys:
             dc.pop(key)
+
+
+def get_the_first_existent_key(obj: dict, *keys) -> Tuple[Any, Any]:
+    """
+    获取第一个存在的key的值
+    """
+    for key in keys:
+        if key in obj:
+            return key, obj[key]
+    return None, None
