@@ -1,9 +1,5 @@
-import re
-
 import pytest
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, ValidationError
-
-from logis.event import T
 
 
 class TestModel(BaseModel):

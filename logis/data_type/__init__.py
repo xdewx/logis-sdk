@@ -51,6 +51,7 @@ DEFAULT_PYDANTIC_MODEL_CONFIG = ConfigDict(
 )
 
 from .point import *
+from .unitable import *
 
 __doc__ = """
 类型模块

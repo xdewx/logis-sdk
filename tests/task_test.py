@@ -1,21 +1,27 @@
 import pytest
 from networkx import NetworkXError
 
-from logis.task.model import Task, TaskGraph
+from logis.task import Task, TaskGraph
 
 
 def test_task_graph():
     graph = TaskGraph()
     task1 = Task(id="task1")
     task2 = Task(id="task2")
+    task3 = Task(id="task3")
+
     graph.add_task(task1)
     graph.add_task_if_absent(task1.model_copy(update=dict(name="task1 copy")))
     assert graph.get_task(task1.id).name is None
 
     # 测试父子关系
     graph.add_task(task2, parent=task1)
-    assert graph.get_parent_id(task2.id) == task1.id
+    graph.add_task(task3, parent=task2)
+    assert list(graph.get_parents_id(task2.id)) == [task1.id]
     assert list(graph.get_children_id(task1.id)) == [task2.id]
+    assert graph.has_parent_child_relationship(task1, task2)
+    assert graph.has_parent_child_relationship(task1, task3, strict=True) is False
+    assert graph.has_parent_child_relationship(task1, task3, strict=False) is True
 
     # 测试删除
     with pytest.raises(NetworkXError):
@@ -25,3 +31,13 @@ def test_task_graph():
 
     assert list(graph.get_children_id(task1)) == []
     assert task1.get_task_id() in graph
+
+    task4 = Task(id="task4")
+    task5 = Task(id="task5")
+    graph.add_task(task4, parent=task3)
+    graph.add_task(task5, parent=task4)
+    graph.remove_task(task3, cascade=True)
+
+    assert graph.task_size() == 1
+    assert list(graph.tasks()) == [task1]
+    assert list(graph.tasks(only_id=True)) == [task1.id]
