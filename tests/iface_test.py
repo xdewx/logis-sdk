@@ -19,6 +19,15 @@ class MyBox2:
         print(item, config)
         return True
 
+    def pre_store(self, item, **config):
+
+        print(item, config)
+        return True
+
+    def pre_retrieve(self, item, **config):
+        print(item, config)
+        return True
+
 
 class MyBox3:
     def store(self, *args, **config):
@@ -28,6 +37,12 @@ class MyBox3:
     def retrieve(self, *args, **config):
         print(args, config)
         return True
+
+    def pre_store(self, **config):
+        pass
+
+    def pre_retrieve(self, **config):
+        pass
 
 
 def test_issubclass():

@@ -5,7 +5,7 @@ from networkx import DiGraph
 from pydantic import BaseModel, Field
 
 TaskId: TypeAlias = str | int
-TaskStatus = Literal[""]
+TaskStatus = Literal["started", "finished", "cancelled", "failed"]
 
 
 class ITask(metaclass=ABCMeta):
@@ -13,9 +13,8 @@ class ITask(metaclass=ABCMeta):
     任务基础抽象类
     """
 
-    @property
     @abstractmethod
-    def id(self) -> TaskId:
+    def get_task_id(self) -> TaskId:
         pass
 
 
@@ -43,6 +42,9 @@ class Task(BaseModel, ITask):
     status: TaskStatus | None = None
 
     remark: str | None = None
+
+    def get_task_id(self) -> TaskId:
+        return self.id
 
 
 class TaskGraph(DiGraph):
