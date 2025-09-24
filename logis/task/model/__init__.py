@@ -1,11 +1,22 @@
 from abc import ABCMeta, abstractmethod
+from enum import Enum
 from typing import Iterable, Literal, TypeAlias
 
 from pydantic import BaseModel, Field
 
 TaskId: TypeAlias = str | int
-TaskStatus = Literal["started", "finished", "cancelled", "failed"]
 TaskPriority: TypeAlias = str | int
+
+
+class TaskStatus(Enum):
+    """
+    任务状态
+    """
+
+    STARTED = "started"
+    FINISHED = "finished"
+    CANCELLED = "cancelled"
+    FAILED = "failed"
 
 
 class ITask(metaclass=ABCMeta):
@@ -21,6 +32,20 @@ class ITask(metaclass=ABCMeta):
     def get_priority(self) -> TaskPriority:
         """
         任务优先级
+        """
+        pass
+
+    @abstractmethod
+    def update_status(self, status: TaskStatus):
+        """
+        更新任务状态
+        """
+        pass
+
+    @abstractmethod
+    def is_status_at(self, status: TaskStatus) -> bool:
+        """
+        检查任务状态是否为指定值
         """
         pass
 
@@ -64,3 +89,9 @@ class Task(BaseModel, ITask):
 
     def get_priority(self) -> TaskPriority:
         return self.priority
+
+    def update_status(self, status: TaskStatus):
+        self.status = status
+
+    def is_status_at(self, status: TaskStatus) -> bool:
+        return self.status == status

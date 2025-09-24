@@ -3,7 +3,7 @@ from typing import Iterable, Iterator
 
 from networkx import DiGraph, has_path
 
-from .model import ITask, TaskId, TaskLike
+from .model import ITask, TaskId, TaskLike, TaskStatus
 
 
 class AbstractTaskManager(metaclass=ABCMeta):
@@ -132,6 +132,8 @@ class TaskGraph(AbstractTaskManager):
     以任务id作为节点id组成的任务树,内部数据结构是一个有向无环图
     """
 
+    __KEY_TASK__ = "task"
+
     def __init__(self, **attr):
         self.__graph__ = DiGraph()
 
@@ -150,7 +152,7 @@ class TaskGraph(AbstractTaskManager):
 
     def get_task(self, task_id: TaskId) -> ITask | None:
         node = self.__graph__.nodes.get(task_id)
-        return node.get("task") if node else None
+        return node.get(self.__KEY_TASK__) if node else None
 
     def find_by(self):
         raise NotImplementedError("TaskGraph.find_by not implemented")
@@ -214,3 +216,39 @@ class TaskGraph(AbstractTaskManager):
         检查任务是否存在
         """
         return self.__graph__.has_node(self.parse_task_id(task))
+
+    def update_task_status(self, task: TaskId, status: TaskStatus):
+        """
+        将任务状态设置为指定值
+        """
+        task_id = self.parse_task_id(task)
+        task: ITask = self.get_task(task_id)
+        assert task, f"任务 {task_id} 不存在"
+        task.update_status(status)
+
+    def is_task_finished(self, task: TaskLike, update: bool = True) -> bool:
+        """
+        检查任务是否已完成,如果任务的所有子任务都已完成,则将任务状态设置为已完成
+        Args:
+            task (TaskLike): 任务对象
+            update (bool, optional): 是否在检测到任务已完成时自动更新任务属性
+
+        Returns:
+            bool: 任务是否已完成
+        """
+        task_id = self.parse_task_id(task)
+        task: ITask = self.get_task(task_id)
+        finished = task.is_status_at(TaskStatus.FINISHED)
+
+        if finished is True:
+            return finished
+
+        children_ids = list(self.get_children_id(task_id, strict=True))
+        all_children_finished = (
+            False
+            if not children_ids
+            else all(self.is_task_finished(child_id) for child_id in children_ids)
+        )
+        if all_children_finished and update:
+            self.update_task_status(task_id, TaskStatus.FINISHED)
+        return all_children_finished

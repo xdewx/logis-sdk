@@ -1,7 +1,7 @@
 import pytest
 from networkx import NetworkXError
 
-from logis.task import Task, TaskGraph
+from logis.task import Task, TaskGraph, TaskStatus
 
 
 def test_task_graph():
@@ -22,6 +22,11 @@ def test_task_graph():
     assert graph.has_parent_child_relationship(task1, task2)
     assert graph.has_parent_child_relationship(task1, task3, strict=True) is False
     assert graph.has_parent_child_relationship(task1, task3, strict=False) is True
+
+    # 测试任务完成状态
+    assert graph.is_task_finished(task1) is False
+    graph.update_task_status(task3, TaskStatus.FINISHED)
+    assert graph.is_task_finished(task1) is True
 
     # 测试删除
     with pytest.raises(NetworkXError):
