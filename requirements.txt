@@ -34,3 +34,4 @@ pathfinding==1.0.17
 python-dateutil
 Pint==0.25
 
+ruff==0.13.1

@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 from fractions import Fraction
 from functools import reduce
-from typing import Any, Callable, Dict, List, NewType, Tuple, TypeAlias
+from typing import Any, Callable, Dict, List, NewType, Optional, Tuple, TypeAlias
 
 from pydantic import BaseModel
 
@@ -408,8 +408,8 @@ def group_merge_quantified_value(items: List[QuantifiedValue]) -> List[Quantifie
     unit_items_map = defaultdict(list)
     for item in items:
         unit_items_map[item.unit].append(item)
-    for unit, items in unit_items_map.items():
-        result.append(merge_quantified_value(items))
+    for _, tmps in unit_items_map.items():
+        result.append(merge_quantified_value(tmps))
     return result
 
 

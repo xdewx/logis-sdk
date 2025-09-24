@@ -23,7 +23,7 @@ def generate_all(v: GeneratorType):
 
 def invoke(func, *args, **kwargs):
     """
-    调用函数，返回结果,支持普通函数\生成器函数
+    调用函数，返回结果,支持普通函数、生成器函数
 
     :param func: 函数
     :param args: 位置参数

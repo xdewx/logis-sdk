@@ -1,0 +1,22 @@
+line-length=88
+fix = false
+
+[lint]
+select = [
+    "E", "W", # pycodestyle
+    "PL", # pylint
+    #"I", # isort,跟原生isort的规则可能有冲突，暂不启用
+]
+ignore = [
+    "F401",
+    "F403",
+    "F405",
+    "F841", # 未使用的变量
+    "E741", # 变量名有歧义
+    "E722", # except
+    "E501", # 行长度太长
+    "E402", # import不在顶部
+    "PLR2004", # 魔法值
+    "PLW1641", # 未实现hash方法
+    "RUF012", # docs必须前缀加个r
+]

@@ -49,10 +49,6 @@ class ITask(metaclass=ABCMeta):
         """
         pass
 
-    # @abstractmethod
-    # def get_status(self) -> TaskStatus:
-    #     pass
-
 
 TaskLike: TypeAlias = ITask | TaskId
 
