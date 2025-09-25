@@ -78,3 +78,6 @@ class InvokeResult:
         self = InvokeResult()
         self.return_value = value
         return self
+
+
+ErrorHandler: TypeAlias = Callable[[Exception], Any]

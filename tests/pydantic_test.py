@@ -12,9 +12,17 @@ class NumberUnit(metaclass=ABCMeta):
     unit: str | None = None
     quantity: int | float = 1
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-class QuantifiedValue(BaseModel, NumberUnit):
+
+class QuantifiedValue(NumberUnit, BaseModel):
+
+    def __init__(cls, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     model_config = MODEL_CONFIG
+    name: str | None = None
 
 
 class OverideQuantifiedValue(QuantifiedValue):
@@ -45,3 +53,35 @@ def test_override_quantified_value():
     y = Yyy.model_validate(dict(quantity=10, xxx="m"))
     assert y.quantity == 10
     assert y.unit == "m"
+
+
+class ComplexClass:
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.name: str = "hello"
+
+
+def test_mro():
+    import inspect
+
+    class Combined2(QuantifiedValue, ComplexClass):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+
+    class Combined(ComplexClass, QuantifiedValue):
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
+            # QuantifiedValue.__init__(self, **kwargs)
+            # ComplexClass.__init__(self, **kwargs)
+
+    from logis.util.visual_util import draw_mro_tree
+
+    draw_mro_tree(Combined, Combined2)
+
+    c = Combined()
+    assert c.name == "hello"
+
+    with pytest.raises(AssertionError):
+        c2 = Combined2()
+        assert c2.name == "hello"
