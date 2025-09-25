@@ -13,6 +13,7 @@ class TaskStatus(Enum):
     任务状态
     """
 
+    NOT_STARTED = "not_started"
     STARTED = "started"
     FINISHED = "finished"
     CANCELLED = "cancelled"
