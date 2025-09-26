@@ -161,8 +161,11 @@ class TaskGraph(AbstractTaskManager):
         self.__graph__ = DiGraph()
 
     def parse_task_id(self, task: TaskLike) -> TaskId:
-        return task.get_task_id() if isinstance(task, ITask) else task
-
+        if isinstance(task, (str, int)):
+            return task
+        if isinstance(task, ITask):
+            return task.get_task_id()
+        raise ValueError(f"Unknown task type {type(task)}")
     def task_size(self) -> int:
         """
         获取任务数量

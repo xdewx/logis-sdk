@@ -79,6 +79,8 @@ class NumberUnit(metaclass=ABCMeta):
         return self.quantity < other.quantity
 
     def __eq__(self, other: "NumberUnit"):
+        if not other:
+            return False
         other = self.__auto_validate__(other)
         return self.quantity == other.quantity
 
