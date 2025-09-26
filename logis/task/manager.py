@@ -186,6 +186,9 @@ class TaskGraph(AbstractTaskManager):
         if parent:
             parent_id = self.parse_task_id(parent)
             self.add_task_if_absent(parent)
+            assert (
+                parent_id != task_id
+            ), f"parent task {parent_id} and task itself {task_id} should be different"
             self.__graph__.add_edge(parent_id, task_id)
 
     def add_task_if_absent(
