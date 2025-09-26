@@ -12,6 +12,19 @@ class AbstractTaskManager(metaclass=ABCMeta):
     """
 
     @abstractmethod
+    def is_task_finished(self, task: TaskLike, update: bool = True, infer=True) -> bool:
+        """
+        检查任务是否已完成
+        Args:
+            task (TaskLike): 任务对象
+            update (bool, optional): 是否在检测到任务已完成时自动更新任务属性
+            infer (bool, optional): 是否根据子任务的状态推测本任务的状态
+        Returns:
+            bool: 任务是否已完成
+        """
+        pass
+
+    @abstractmethod
     def task_size(self) -> int:
         """
         获取任务数量
@@ -126,6 +139,16 @@ class AbstractTaskManager(metaclass=ABCMeta):
         """
         pass
 
+    @abstractmethod
+    def update_task_status(self, task: TaskId, status: TaskStatus):
+        """
+        更新任务状态
+        Args:
+            task (TaskId): 任务ID
+            status (TaskStatus): 任务状态
+        """
+        pass
+
 
 class TaskGraph(AbstractTaskManager):
     """
@@ -226,23 +249,15 @@ class TaskGraph(AbstractTaskManager):
         assert task, f"任务 {task_id} 不存在"
         task.update_status(status)
 
-    def is_task_finished(self, task: TaskLike, update: bool = True) -> bool:
-        """
-        检查任务是否已完成,如果任务的所有子任务都已完成,则将任务状态设置为已完成
-        Args:
-            task (TaskLike): 任务对象
-            update (bool, optional): 是否在检测到任务已完成时自动更新任务属性
-
-        Returns:
-            bool: 任务是否已完成
-        """
+    def is_task_finished(self, task: TaskLike, update: bool = True, infer=True):
         task_id = self.parse_task_id(task)
         task: ITask = self.get_task(task_id)
         finished = task.is_status_at(TaskStatus.FINISHED)
 
         if finished is True:
             return finished
-
+        if not infer:
+            return finished
         children_ids = list(self.get_children_id(task_id, strict=True))
         all_children_finished = (
             False

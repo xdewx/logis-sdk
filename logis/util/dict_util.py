@@ -34,11 +34,19 @@ def remove_key_not_in(dc: dict, keys: Iterable[Any]):
             dc.pop(key)
 
 
-def get_the_first_existent_key(obj: dict, *keys) -> Tuple[Any, Any]:
+def get_the_first_existent_key(obj: dict, *keys, default=None) -> Tuple[Any, Any]:
     """
     获取第一个存在的key的值
+
+    Args:
+        obj (dict): 输入的字典，键名可能是中文或其他形式。
+        keys (Iterable[Any]): 要查找的键名列表。
+        default (Any, optional): 如果没有找到任何键，返回的默认值。默认值为None。
+
+    Returns:
+        (Tuple[Any, Any]): 第一个存在的键值对，键为存在的键名，值为对应的值。如果没有找到任何键，返回(None, default)。
     """
     for key in keys:
         if key in obj:
             return key, obj[key]
-    return None, None
+    return None, default
