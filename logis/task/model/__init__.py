@@ -50,6 +50,10 @@ class ITask(metaclass=ABCMeta):
         """
         pass
 
+    @property
+    def finished(self) -> bool:
+        return self.is_status_at(TaskStatus.FINISHED)
+
 
 TaskLike: TypeAlias = ITask | TaskId
 

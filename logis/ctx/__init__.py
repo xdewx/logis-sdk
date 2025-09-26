@@ -68,6 +68,8 @@ class Context:
             name: 待统计量
             value: 值
             override: 是否直接覆盖旧值
+        Returns:
+            Number: 最新值
         """
         k = "__logis_counter__"
         if k not in cls.get_all():

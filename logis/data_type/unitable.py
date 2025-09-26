@@ -32,6 +32,7 @@ class NumberUnit(metaclass=ABCMeta):
     def model_dump(self) -> Dict[str, Any]:
         pass
 
+    @classmethod
     @abstractmethod
     def model_validate(cls, data: Dict[str, Any]) -> "NumberUnit":
         pass
@@ -131,6 +132,7 @@ class QuantifiedValue(BaseModel, NumberUnit):
     model_config = MODEL_CONFIG
 
     name: str | None = None
+
 
 class Capacity(QuantifiedValue):
     pass

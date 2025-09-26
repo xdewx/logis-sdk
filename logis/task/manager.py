@@ -252,12 +252,13 @@ class TaskGraph(AbstractTaskManager):
     def is_task_finished(self, task: TaskLike, update: bool = True, infer=True):
         task_id = self.parse_task_id(task)
         task: ITask = self.get_task(task_id)
-        finished = task.is_status_at(TaskStatus.FINISHED)
 
+        finished = task.finished
         if finished is True:
             return finished
         if not infer:
             return finished
+
         children_ids = list(self.get_children_id(task_id, strict=True))
         all_children_finished = (
             False
