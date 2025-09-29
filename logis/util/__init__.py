@@ -3,6 +3,8 @@ __doc__ = "工具类"
 
 from typing import Any, Callable, Optional
 
+from pandas import isna
+
 from logis.data_type import ErrorHandler
 
 
@@ -16,7 +18,10 @@ def first_not_none[T](*args: T) -> Optional[T]:
 def none_if_in(some_value: Any, *choices: Any):
     """
     如果值在choices中，返回None，否则返回原值
+    此方法处理了pd.isna的情况
     """
+    if isna(some_value):
+        return some_value if next(filter(isna, choices), None) is None else None
     return None if some_value in choices else some_value
 
 
