@@ -15,7 +15,7 @@ def split_integer(
     Args:
         total: 总整数
         n: 需要分成的份数或每份的值
-        mode: 模式
+        mode: 模式，limit_parts表示将total尽可能平均分成n份，limit_per_part表示每份都需要是n
         order: 排序方式
     """
     n = int(n)
