@@ -1,8 +1,11 @@
 import logging
 import time
+from abc import ABC
 from typing import Any
 
 import simpy
+import simpy.resources
+import simpy.resources.resource
 
 
 def try_put(
@@ -64,3 +67,29 @@ def interrupt_if_timeout(
             logging.debug(f"neither timeout nor terninate is received")
 
     return env.process(inner())
+
+
+class ISimLock(ABC):
+
+    def __init__(self, env: simpy.Environment):
+        self._occupied_ = simpy.Resource(env, capacity=1)
+        self._lock_ = False
+
+    @property
+    def is_occupied(self):
+        """
+        判断锁是否被占用
+        """
+        return self._occupied_.count > 0
+
+    def lock(self):
+        """
+        请求锁
+        """
+        return self._occupied_.request()
+
+    def unlock(self, req: simpy.resources.resource.Request):
+        """
+        请求解锁
+        """
+        return self._occupied_.release(req)
