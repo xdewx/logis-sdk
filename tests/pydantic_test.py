@@ -1,4 +1,5 @@
 from abc import ABCMeta
+from pathlib import Path
 
 import pytest
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field
@@ -85,3 +86,11 @@ def test_mro():
     with pytest.raises(AssertionError):
         c2 = Combined2()
         assert c2.name == "hello"
+
+
+def test_path():
+    class MyModel(BaseModel):
+        path: Path | None = None
+
+    m = MyModel.model_validate(dict(path="."))
+    assert m.path.exists()
