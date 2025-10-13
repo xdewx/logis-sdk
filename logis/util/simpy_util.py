@@ -22,9 +22,27 @@ def try_put(
 
 
 def resize_container(container: simpy.Container, capacity: int | float, is_delta=False):
-    capacity = capacity + container.capacity if is_delta else capacity
+    """
+    调整容器容量
+    Args:
+        container (simpy.Container): 容器
+        capacity (int | float): 新容量
+        is_delta (bool, optional): 是否是增量调整. 默认False
+    """
+    old_capacity = container.capacity
+    capacity = capacity + old_capacity if is_delta else capacity
+    dx = capacity - old_capacity
+    if not dx:
+        return
+    # 如果是减容，先触发取操作
+    if dx < 0:
+        container._trigger_get(None)
+        assert (
+            container.level <= capacity
+        ), f"容器当前等级{container.level}大于新容量{capacity}，无法完成减容"
     container._capacity = capacity
-    # return simpy.Container(container._env, capacity, container.level)
+    if dx > 0:
+        container._trigger_put(None)
 
 
 def resource_to_dict(resource: Any):
