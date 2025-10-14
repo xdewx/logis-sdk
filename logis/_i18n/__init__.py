@@ -2,6 +2,8 @@ from pathlib import Path
 
 import i18n
 
+from .locales import *
+
 INNER_LOCALES_DIR = Path(__file__).parent.joinpath("locales")
 
 # 设置默认语言
@@ -9,7 +11,8 @@ i18n.set("locale", "zh")
 i18n.set("fallback", "en")
 i18n.set("filename_format", "{locale}.{format}")
 i18n.set("skip_locale_root_data", True)
-i18n.load_path.append(str(INNER_LOCALES_DIR))
+if INNER_LOCALES_DIR.exists():
+    i18n.load_path.append(str(INNER_LOCALES_DIR))
 
 
 def add_locale_dir(path: str | list[str]):
