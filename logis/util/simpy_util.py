@@ -6,6 +6,7 @@ from typing import Any
 import simpy
 import simpy.resources
 import simpy.resources.resource
+from simpy.events import URGENT
 
 
 def try_put(
@@ -55,6 +56,37 @@ def resource_to_dict(resource: Any):
     print("unexpected type:" + resource)
 
 
+def schedule_event_at(
+    env: simpy.Environment, at: float | int, ev: simpy.Event | None = None
+):
+    """
+    计划在指定时间触发事件
+    Args:
+        env (simpy.Environment): 仿真环境
+        at (float | int): 触发时间
+        ev (simpy.Event | None, optional): 事件. 默认None
+    """
+    if at < env.now:
+        return
+    if ev is None:
+        ev = env.event()
+        ev._ok = True
+        ev._value = None
+    env.schedule(ev, URGENT, at - env.now)
+    return ev
+
+
+def interrupt_on_event(env: simpy.Environment, ev: simpy.Event):
+    """
+    当事件触发时中断仿真
+    Args:
+        env (simpy.Environment): 仿真环境
+        ev (simpy.Event): 事件
+    """
+
+    raise NotImplementedError("interrupt_on_event not implemented")
+
+
 def interrupt_if_timeout(
     env: simpy.Environment,
     timeout: float | None = None,
@@ -72,19 +104,52 @@ def interrupt_if_timeout(
     """
 
     def inner():
-        if not timeout:
-            return
         cpu_start_time = time.time()
-        while not (exit_signal and exit_signal.triggered):
+        while True:
             dt = time.time() - cpu_start_time
-            if dt > timeout:
+            if timeout is not None and dt > timeout:
                 raise simpy.Interrupt(
                     f"仿真运行时间{dt}超过最大运行时间{timeout}，强制退出"
                 )
+            if exit_signal and exit_signal.triggered:
+                raise simpy.Interrupt(f"外部信号{exit_signal}触发，强制退出")
             yield env.timeout(check_interval)
-            logging.debug(f"neither timeout nor terninate is received")
 
     return env.process(inner())
+
+
+def run_until(
+    env: simpy.Environment,
+    exit_signal: simpy.Event | None = None,
+    max_sim_time: float | None = None,
+    extra_events: list[simpy.Event] | None = None,
+):
+    events = []
+    if exit_signal:
+        events.append(exit_signal)
+    if max_sim_time is not None:
+        dt = max(0, max_sim_time - env.now)
+        events.append(env.timeout(dt))
+    if extra_events:
+        events.extend(extra_events)
+    until = env.any_of(events) if events else None
+    return env.run(until=until)
+
+
+def stop_simulation(env: simpy.Environment):
+    """
+    停止仿真
+    1. 清空事件队列，诱发底层异常
+    """
+
+    def clear_queue():
+        size = len(env._queue)
+        logging.debug("will remove %s events in queue", size)
+        env._queue.clear()
+        yield env.timeout(0)
+        return size
+
+    env.process(clear_queue())
 
 
 class ISimLock(ABC):
