@@ -5,6 +5,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Literal,
     NewType,
     Optional,
     Tuple,
@@ -50,6 +51,7 @@ DEFAULT_PYDANTIC_MODEL_CONFIG = ConfigDict(
     validate_by_name=True,
 )
 
+from .exception import *
 from .point import *
 from .unitable import *
 
@@ -81,3 +83,11 @@ class InvokeResult:
 
 
 ErrorHandler: TypeAlias = Callable[[Exception], Any]
+
+
+class Notification(BaseModel):
+    title: str | None = None
+    duration: float | int = -1
+    content: str | None = None
+    closable: bool = True
+    type: Literal["info", "success", "warning", "error"] = "info"
