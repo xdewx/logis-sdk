@@ -22,6 +22,20 @@ def try_put(
     return v
 
 
+def get_free_capacity(container: simpy.Container):
+    """
+    获取容器的空闲容量
+    Args:
+        container (simpy.Container): 容器
+    Returns:
+        int | float: 空闲容量
+    """
+    # TODO：这里预先触发存取操作，可能会有性能影响，后续可考虑分离出去
+    container._trigger_put(None)
+    container._trigger_get(None)
+    return container.capacity - container.level
+
+
 def resize_container(container: simpy.Container, capacity: int | float, is_delta=False):
     """
     调整容器容量
