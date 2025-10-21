@@ -1,3 +1,11 @@
+import json
+import time
+from typing import Dict, Generic, TypeVar
+
+import pytest
+from numpy import byte
+from pydantic import BaseModel
+
 from logis.data_type import Number
 from logis.data_type.unitable import (
     Capacity,
@@ -78,3 +86,57 @@ def test_parse():
     v = QuantifiedValue.model_validate({"quantity": 10, "unit": "m"})
     assert v.quantity == 10
     assert v.unit == "m"
+
+
+def test_deserialize():
+    T = TypeVar("T")
+    from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG
+
+    class MyEvent(BaseModel):
+        event_type: str
+        timestamp: float | None = None
+
+    class MyGenericEvent(MyEvent, Generic[T]):
+
+        data: T
+
+        model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
+
+    class InnerData(BaseModel):
+        a: int
+        b: int
+
+    json_strings = [
+        json.dumps({"event_type": "test", "timestamp": i, "data": {"a": i, "b": i**2}})
+        for i in range(2, 100000)
+    ]
+
+    with pytest.raises(ValueError):
+        MyGenericEvent[bytes].model_validate_json(json_strings[0])
+        start = time.time()
+        for json_string in json_strings:
+            m = MyGenericEvent[bytes].model_validate_json(json_string)
+            assert isinstance(m.data, bytes)
+        dt = time.time() - start
+        print(f"bytes deserialize time: {dt}")
+
+    start = time.time()
+    for json_string in json_strings:
+        m = MyGenericEvent[dict].model_validate_json(json_string)
+        assert isinstance(m.data, dict)
+    dt = time.time() - start
+    print(f"dict deserialize time: {dt}")
+
+    start = time.time()
+    for json_string in json_strings:
+        m = MyGenericEvent[InnerData].model_validate_json(json_string)
+        assert isinstance(m.data, InnerData)
+    dt = time.time() - start
+    print(f"inner data deserialize time: {dt}")
+
+    start = time.time()
+    for json_string in json_strings:
+        m = MyEvent.model_validate_json(json_string)
+        assert m
+    dt = time.time() - start
+    print(f"inner data deserialize time: {dt}")
