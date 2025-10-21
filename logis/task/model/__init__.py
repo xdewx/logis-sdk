@@ -82,6 +82,7 @@ class Task(BaseModel, ITask):
     cancelled_at: int | None = None
 
     status: TaskStatus | None = None
+    stage: str | None = None
 
     remark: str | None = None
 

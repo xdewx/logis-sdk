@@ -1,6 +1,7 @@
 import asyncio
 from collections import defaultdict
 from contextvars import ContextVar
+from itertools import count
 from numbers import Number
 from typing import Any, List
 
@@ -71,7 +72,7 @@ class Context:
         Returns:
             Number: 最新值
         """
-        k = "__logis_counter__"
+        k = "__logis_count__"
         if k not in cls.get_all():
             cls.set(k, defaultdict(float))
         if override:
@@ -124,3 +125,23 @@ class Context:
         if update_end_time:
             obj[key][1] = now
         return None if first_time else now - obj[key][0]
+
+    @classmethod
+    def counter(cls, id: str = "_default_", start: int = 0, step: int = 1):
+        """
+        计数器
+
+        Args:
+            id: 计数器ID
+            start: 初始值
+            step: 步长
+        Returns:
+            count: 计数器的迭代器
+        """
+        k = "__logis_counter__"
+        dc = cls.get(k, default={}, create=True)
+        counter = dc.get(id)
+        if not counter:
+            counter = count(start=start, step=step)
+            dc[id] = counter
+        return counter
