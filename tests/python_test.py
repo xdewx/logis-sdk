@@ -51,3 +51,14 @@ def test_mro():
 
     assert D().method() == "C"
     assert D.mro() == [D, B, C, A, object]
+
+
+def test_try_except():
+    a = 0
+    with pytest.raises(ZeroDivisionError):
+        try:
+            1 / 0
+        finally:
+            a = 1
+
+    assert a == 1
