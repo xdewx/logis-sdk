@@ -29,3 +29,19 @@ def test_generator_result():
     result = invoke(c)
     assert result.return_value is None
     assert result.yield_values == []
+
+
+def test_invoke():
+    def a():
+        return 1
+
+    async def b():
+        return 2
+
+    result = invoke(a)
+    assert result.return_value == 1
+    assert result.yield_values == []
+
+    result = invoke(b)
+    assert result.return_value == 2
+    assert result.yield_values == []

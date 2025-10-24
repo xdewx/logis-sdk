@@ -1,4 +1,7 @@
+import asyncio
+import inspect
 from types import GeneratorType
+from typing import Any, Coroutine
 
 from logis.data_type import InvokeResult
 
@@ -21,6 +24,15 @@ def generate_all(v: GeneratorType):
     return result
 
 
+def invoke_async_func(coroutine: Coroutine[Any, Any, Any]):
+    try:
+        asyncio.get_running_loop()
+    except:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    return loop.run_until_complete(coroutine)
+
+
 def invoke(func, *args, **kwargs):
     """
     调用函数，返回结果,支持普通函数、生成器函数
@@ -31,6 +43,8 @@ def invoke(func, *args, **kwargs):
     :return: 函数返回值
     """
     result = func(*args, **kwargs)
-    if isinstance(result, GeneratorType):
+    if inspect.iscoroutinefunction(func):
+        result = invoke_async_func(result)
+    elif isinstance(result, GeneratorType):
         return generate_all(result)
     return InvokeResult.returns(result)
