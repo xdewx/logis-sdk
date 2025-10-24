@@ -1,5 +1,5 @@
 from abc import ABCMeta
-from typing import Generic, Protocol, runtime_checkable
+from typing import Generic, Protocol, TypeVar, runtime_checkable
 
 
 class Shape(metaclass=ABCMeta):
@@ -72,3 +72,40 @@ class Storable(Protocol):
 
     def retrieve(self, *args, **kwargs) -> RetrieveResult:
         pass
+
+
+T = TypeVar("T")
+
+
+@runtime_checkable
+class IQueue(Protocol[T]):
+    """
+    队列接口
+    """
+
+    def __init__(self, maxsize: int = 0):
+        super().__init__(maxsize)
+
+    def put(self, item: T, *args, **kwargs):
+        pass
+
+    def put_nowait(self, item: T):
+        pass
+
+    def get(self, *args, **kwargs) -> T:
+        pass
+
+    def get_nowait(self) -> T:
+        pass
+
+    def qsize(self) -> int:
+        pass
+
+    def empty(self) -> bool:
+        pass
+
+    def full(self) -> bool:
+        pass
+
+
+QueueType = TypeVar("QueueType", bound=IQueue[T])
