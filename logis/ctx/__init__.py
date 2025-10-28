@@ -3,7 +3,7 @@ from collections import defaultdict
 from contextvars import ContextVar
 from itertools import count
 from numbers import Number
-from typing import Any, List
+from typing import Any, Callable, List
 
 
 class Context:
@@ -16,7 +16,7 @@ class Context:
 
     @classmethod
     def errors(cls) -> List[Any]:
-        return cls.get("errors", [], create=True)
+        return cls.get("errors", default_factory=list, create=True)
 
     @classmethod
     def _is_in_asyncio(cls):
@@ -39,9 +39,11 @@ class Context:
         # setattr(cls._thread_local, key, value)
 
     @classmethod
-    def get[T](cls, key, default: T = None, create=False):
+    def get[T](cls, key, default_factory: Callable[[], T] = None, create=False):
         dc = cls.get_all()
-        result = default if dc is None else dc.get(key, default)
+        result = None if dc is None else dc.get(key, None)
+        if result is None and default_factory is not None:
+            result = default_factory()
         if create:
             cls.set(key, result)
         # return getattr(cls._thread_local, key, None)
@@ -117,7 +119,7 @@ class Context:
             float | None: 时长,如果是首次开始计时则返回None
         """
         k = "__logis_duration__"
-        obj = cls.get(k, default={}, create=True)
+        obj = cls.get(k, default_factory=dict, create=True)
         first_time = False
         if key not in obj:
             obj[key] = [now, None]
@@ -139,7 +141,7 @@ class Context:
             count: 计数器的迭代器
         """
         k = "__logis_counter__"
-        dc = cls.get(k, default={}, create=True)
+        dc = cls.get(k, default_factory=dict, create=True)
         counter = dc.get(id)
         if not counter:
             counter = count(start=start, step=step)

@@ -1,4 +1,4 @@
-from abc import ABCMeta
+from abc import ABC, ABCMeta
 from typing import Generic, Protocol, TypeVar, runtime_checkable
 
 

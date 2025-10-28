@@ -1,4 +1,5 @@
 import asyncio
+import atexit
 import inspect
 import logging
 import queue
@@ -11,6 +12,17 @@ from pydantic import BaseModel, ConfigDict
 
 from logis.data_type import T
 from logis.iface import QueueType
+from logis.util.lambda_util import invoke
+
+
+def get_or_new_event_loop(auto_set: bool = True) -> asyncio.AbstractEventLoop:
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        if auto_set:
+            asyncio.set_event_loop(loop)
+    return loop
 
 
 class WriteBufferConfig(BaseModel):
@@ -80,8 +92,6 @@ class WriteBuffer(ABC, Generic[T]):
 
     def start(self) -> None:
         """启动缓冲器（开启定时刷新线程）"""
-        if self._is_running:
-            return
         self._is_running = True
         self._last_flush_time = time.time()
 
@@ -109,7 +119,11 @@ class SyncWriteBuffer(WriteBuffer[T]):
         self._queue = self._config.get_queue(mode="sync")
         self._lock = threading.Lock()
 
+        atexit.register(self.stop)
+
     def start(self):
+        if self._is_running:
+            return
         super().start()
         t = threading.Thread(target=self._flush_loop, daemon=True)
         t.start()
@@ -158,10 +172,23 @@ class AsyncWriteBuffer(WriteBuffer[T]):
         super().__init__(config, **kwargs)
         self._queue = self._config.get_queue(mode="async")
         self._lock = asyncio.Lock()
+        self._loop = get_or_new_event_loop()
+        atexit.register(self.__wait_stop)
+
+    def __wait_stop(self):
+        if self._loop.is_closed():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        else:
+            loop = self._loop
+
+        loop.run_until_complete(self.stop())
 
     async def start(self):
+        if self._is_running:
+            return
         super().start()
-        self._flush_task = asyncio.create_task(self._flush_loop())
+        self._flush_task = self._loop.create_task(self._flush_loop())
         return self._flush_task
 
     async def stop(self):
@@ -199,4 +226,10 @@ class AsyncWriteBuffer(WriteBuffer[T]):
         while self._is_running:
             if self.need_flush():
                 await self.flush()
-            await asyncio.sleep(check_interval)  # 异步休眠
+            await asyncio.sleep(check_interval)
+            # TODO: 这里会出现乱序问题
+            # try:
+            #     item = await asyncio.wait_for(self._queue.get(), timeout=check_interval)
+            #     self._queue.put_nowait(item)
+            # except asyncio.TimeoutError:
+            #     pass

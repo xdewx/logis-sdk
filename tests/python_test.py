@@ -1,5 +1,7 @@
 import pytest
 
+from logis.util.lambda_util import invoke
+
 
 class A:
     @property
@@ -51,3 +53,21 @@ def test_mro():
 
     assert D().method() == "C"
     assert D.mro() == [D, B, C, A, object]
+
+
+def test_atexit():
+    from atexit import register
+
+    async def hello(name: str):
+        return print("hello " + name)
+
+    def handler():
+        print("atexit111")
+
+    register(handler)
+
+    class MyClass:
+        def __init__(self):
+            register(lambda: invoke(hello, "andy"))
+
+    MyClass()

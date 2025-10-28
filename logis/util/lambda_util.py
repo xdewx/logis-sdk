@@ -25,11 +25,9 @@ def generate_all(v: GeneratorType):
 
 
 def invoke_async_func(coroutine: Coroutine[Any, Any, Any]):
-    try:
-        asyncio.get_running_loop()
-    except:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+    from logis.util.io_util import get_or_new_event_loop
+
+    loop = get_or_new_event_loop(auto_set=True)
     return loop.run_until_complete(coroutine)
 
 
