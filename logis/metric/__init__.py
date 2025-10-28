@@ -6,8 +6,6 @@ __doc__ = """
 from abc import ABC, abstractmethod
 from typing import List, TypeVar
 
-from pydantic import BaseModel
-
 from logis.util.io_util import AsyncWriteBuffer, WriteBuffer, WriteBufferConfig
 from logis.util.lambda_util import invoke
 
@@ -47,13 +45,13 @@ class IMetricCollector(ABC):
         invoke(self._buffer.start)
 
     @abstractmethod
-    def submit(self, metrics: List[MetricModelType]):
+    def submit[A](self, metrics: List[A]):
         """
         提交指标
         """
         pass
 
-    def collect(self, metric: MetricModelType):
+    def collect[A](self, metric: A):
         """
         缓冲指标
         """
