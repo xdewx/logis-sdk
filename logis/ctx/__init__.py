@@ -39,11 +39,24 @@ class Context:
         # setattr(cls._thread_local, key, value)
 
     @classmethod
-    def get[T](cls, key, default_factory: Callable[[], T] = None, create=False):
+    def get[T](
+        cls,
+        key,
+        default: T | None = None,
+        default_factory: Callable[[], T] = None,
+        create=False,
+    ):
+        """
+        Args:
+            key: 键
+            default: 默认值,已废弃,请使用default_factory
+            default_factory: 默认值工厂
+            create: 是否创建
+        """
         dc = cls.get_all()
         result = None if dc is None else dc.get(key, None)
-        if result is None and default_factory is not None:
-            result = default_factory()
+        if result is None:
+            result = default_factory() if default_factory is not None else default
         if create:
             cls.set(key, result)
         # return getattr(cls._thread_local, key, None)
