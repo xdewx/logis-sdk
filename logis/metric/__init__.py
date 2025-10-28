@@ -4,9 +4,12 @@ __doc__ = """
 
 
 from abc import ABC, abstractmethod
-from typing import TypeVar
+from typing import List, TypeVar
 
 from pydantic import BaseModel
+
+from logis.util.io_util import AsyncWriteBuffer, WriteBuffer, WriteBufferConfig
+from logis.util.lambda_util import invoke
 
 
 class MetricModel(ABC):
@@ -21,5 +24,37 @@ class MetricModel(ABC):
         """
         pass
 
+    def to_influxdb_point(self):
+        """
+        转换为InfluxDB点
+        """
+        raise NotImplementedError("to_influxdb_point")
+
 
 MetricModelType = TypeVar("MetricModelType", bound=MetricModel)
+
+
+class IMetricCollector(ABC):
+    """
+    指标收集器
+    """
+
+    def __init__(self, write_buffer: WriteBuffer | None = None, **kwargs):
+        super().__init__(**kwargs)
+        self._buffer = write_buffer or AsyncWriteBuffer(
+            WriteBufferConfig(batch_size=100, flush_interval=10, handler=self.submit)
+        )
+        invoke(self._buffer.start)
+
+    @abstractmethod
+    def submit(self, metrics: List[MetricModelType]):
+        """
+        提交指标
+        """
+        pass
+
+    def collect(self, metric: MetricModelType):
+        """
+        缓冲指标
+        """
+        invoke(self._buffer.put, metric)

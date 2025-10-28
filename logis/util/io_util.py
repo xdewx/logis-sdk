@@ -101,7 +101,7 @@ class WriteBuffer(ABC, Generic[T]):
         self._is_running = False
 
     @abstractmethod
-    def flush(self, **kwargs):
+    def flush(self, flush_all: bool = False, **kwargs):
         pass
 
     def _flush_loop(self, **kwargs) -> None:
@@ -134,17 +134,19 @@ class SyncWriteBuffer(WriteBuffer[T]):
         super().stop()
         if self._flush_task:
             self._flush_task.join()
-        self.flush()  # 退出前强制刷新剩余数据
+        self.flush(flush_all=True)  # 退出前强制刷新剩余数据
 
-    def flush(self, **kwargs) -> None:
+    def flush(self, flush_all: bool = False, **kwargs) -> None:
         """强制刷新缓冲数据（批量处理）"""
         if self._queue.empty():
             return
 
-        # TODO：这里是一次性取出来，是否可以只取batch_size个且不用加锁
+        # TODO：是否可以不用加锁
         items: List[Any] = []
         with self._lock:
-            while not self._queue.empty():
+            while not self._queue.empty() and (
+                flush_all or len(items) < self._config.batch_size
+            ):
                 try:
                     items.append(self._queue.get_nowait())
                 except queue.Empty:
@@ -195,7 +197,7 @@ class AsyncWriteBuffer(WriteBuffer[T]):
         super().stop()
         if self._flush_task:
             await self._flush_task
-        await self.flush()
+        await self.flush(flush_all=True)
 
     async def put(self, item: Any):
         async with self._lock:
@@ -206,13 +208,16 @@ class AsyncWriteBuffer(WriteBuffer[T]):
         if self.need_flush():
             await self.flush()
 
-    async def flush(self, **kwargs):
+    async def flush(self, flush_all=False, **kwargs):
         if self._queue.empty():
             return
 
         items: List[Any] = []
+        # TODO：是否可以不用加锁
         async with self._lock:
-            while not self._queue.empty():
+            while not self._queue.empty() and (
+                flush_all or len(items) < self._config.batch_size
+            ):
                 items.append(await self._queue.get())
 
         if items:
