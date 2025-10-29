@@ -1,3 +1,5 @@
+import logging
+
 import psutil
 
 
@@ -10,14 +12,30 @@ def find_process_on_port(port: int):
     return None
 
 
-def kill_process_on_port(port) -> int | None:
+def kill_process_on_port(port, max_try: int | None = 1) -> int | None:
     """
     强制释放占用指定端口的进程。
 
-    :param port: 要释放的端口号
+    Args:
+        port (int): 要释放的端口号
+        max_try (int, optional): 最大尝试次数。默认值为 None，无限次尝试。
+
+    Returns:
+        int | None: 成功释放进程的 PID，如果不存在对应进程则返回 None。
     """
     p = find_process_on_port(port)
-    if p and (pid := p.pid):
-        p.kill()
-        return pid
-    return None
+    if not p:
+        return None
+    pid = p.pid
+
+    try_count = 0
+    while max_try is None or try_count < max_try:
+        try:
+            p.kill()
+            return pid
+        except Exception as e:
+            try_count += 1
+            logging.warning(
+                "kill process on port %s failed(x%s): %s", port, try_count, e
+            )
+    raise RuntimeError(f"kill process on port {port} failed after {try_count} times")
