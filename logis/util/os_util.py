@@ -24,7 +24,7 @@ def kill_process_on_port(port, max_try: int | None = 1) -> int | None:
         int | None: 成功释放进程的 PID，如果不存在对应进程则返回 None。
     """
     p = find_process_on_port(port)
-    if not p:
+    if not p or not p.pid:
         return None
     pid = p.pid
 
@@ -32,6 +32,7 @@ def kill_process_on_port(port, max_try: int | None = 1) -> int | None:
     while max_try is None or try_count < max_try:
         try:
             p.kill()
+            logging.info("process on port %s been killed: %s", port, pid)
             return pid
         except Exception as e:
             try_count += 1
