@@ -48,6 +48,7 @@ class InfluxCommand:
             stderr=subprocess.PIPE,  # 捕获标准错误
             text=True,
             start_new_session=True,
+            creationflags=subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS,
             **kwargs,
         )
         return p
