@@ -18,7 +18,7 @@ def kill_process_on_port(port, max_try: int | None = 1) -> int | None:
 
     Args:
         port (int): 要释放的端口号
-        max_try (int, optional): 最大尝试次数。默认值为 None，无限次尝试。
+        max_try (int, optional): 最大尝试次数。值为 None，代表无限次尝试。
 
     Returns:
         int | None: 成功释放进程的 PID，如果不存在对应进程则返回 None。

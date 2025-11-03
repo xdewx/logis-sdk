@@ -1,3 +1,8 @@
+from typing import Any, Callable, TypeAlias
+
+ErrorHandler: TypeAlias = Callable[[Exception], Any]
+
+
 class MyBaseException(Exception):
     """
     基础异常类，所有自定义异常都应该继承自这个类

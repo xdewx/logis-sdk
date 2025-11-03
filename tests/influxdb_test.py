@@ -1,10 +1,13 @@
 from datetime import datetime, timezone
+from pathlib import Path
 from random import randint
 from typing import Literal
 
 from influxdb_client.client.influxdb_client import InfluxDBClient
 from influxdb_client.client.influxdb_client_async import InfluxDBClientAsync
 from influxdb_client_3 import InfluxDBClient3, Point
+
+from logis.metric.influxdb import InfluxCommand
 
 database = "test"
 test_url = f"http://localhost:8181"
@@ -40,3 +43,27 @@ def test_query():
     )
     print(result.to_pandas())
     client.close()
+
+
+def test_command():
+    bin_dir = Path("D:\\app\\influxdb3-core-3.5.0-windows_amd64")
+    command = InfluxCommand(bin_dir)
+    token = command.generate_admin_token(
+        offline=False, path=bin_dir / "admin_token.json"
+    )
+    print("Process exited with code:", token)
+
+    token = command.generate_admin_token(
+        offline=True, path=bin_dir / "admin_token.json"
+    )
+    print("Process exited with code:", token)
+
+
+def test_serve():
+    bin_dir = Path("D:\\app\\influxdb3-core-3.5.0-windows_amd64")
+    command = InfluxCommand(bin_dir)
+    p = command.serve(
+        data_dir=bin_dir / "data",
+        object_store="file",
+    )
+    print(p)
