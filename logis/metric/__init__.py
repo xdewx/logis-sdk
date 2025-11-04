@@ -15,8 +15,8 @@ class MetricModel(ABC):
     指标模型
     """
 
-    @abstractmethod
-    def get_measurement(self) -> str:
+    @classmethod
+    def get_measurement(cls) -> str:
         """
         获取指标名称
         """
