@@ -84,6 +84,7 @@ class InfluxCommand:
             stdout=subprocess.PIPE,  # 捕获标准输出
             stderr=subprocess.PIPE,  # 捕获标准错误
             text=True,
+            creationflags=subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS,
         ) as p:
             stdout, stderr = p.communicate()
         if p.returncode != 0:
@@ -114,6 +115,7 @@ class InfluxCommand:
             stdout=subprocess.PIPE,  # 捕获标准输出
             stderr=subprocess.PIPE,  # 捕获标准错误
             text=True,
+            creationflags=subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS,
         ) as p:
             stdout, stderr = p.communicate()
         p.wait()

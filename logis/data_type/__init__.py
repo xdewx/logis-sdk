@@ -5,5 +5,6 @@ from .base import *
 from .exception import *
 from .net import *
 from .notice import *
+from .page import *
 from .point import *
 from .unitable import *
