@@ -1,7 +1,25 @@
 from datetime import datetime
+from enum import Enum
 
 import pandas as pd
 from dateutil.parser import parse
+
+
+class DateFormat(Enum):
+    """
+    日期格式枚举类
+    """
+
+    CHINESE_FULL = "%Y年%m月%d日%H点%M分%S秒"  # 2024年05月20日14点30分00秒
+    CHINESE_SIMPLE = "%Y年%m月%d日"  # 2024年05月20日
+    # 英文/国际标准格式
+    ISO_DATETIME = "%Y-%m-%d %H:%M:%S"  # 2024-05-20 14:30:00（最常用）
+    ISO_DATE = "%Y-%m-%d"  # 2024-05-20
+    ISO_TIME = "%H:%M:%S"  # 14:30:00
+    # 简写格式
+    SHORT_DATETIME = "%y-%m-%d %H:%M"  # 24-05-20 14:30
+    # 美式格式
+    US_DATETIME = "%m/%d/%Y %H:%M:%S"  # 05/20/2024 14:30:00
 
 
 def parse_datetime(date_str: str):
@@ -27,3 +45,13 @@ def parse_datetime(date_str: str):
         except ValueError:
             continue
     return parse(date_str)
+
+
+def format_datetime(dt: datetime, fmt: DateFormat | str = DateFormat.ISO_DATETIME):
+    """
+    将 datetime 对象转换为中文日期格式
+    """
+    dt = parse_datetime(dt)
+    if isinstance(fmt, DateFormat):
+        fmt = fmt.value
+    return dt.strftime(fmt)
