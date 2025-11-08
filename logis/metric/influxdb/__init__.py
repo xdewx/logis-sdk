@@ -34,6 +34,7 @@ class InfluxCommand:
         object_store: str = "file",
         host: str = "127.0.0.1",
         port: int = 8181,
+        start_new_session: bool = False,
         creationflags=subprocess.CREATE_NO_WINDOW,
         **kwargs,
     ):
@@ -58,7 +59,7 @@ class InfluxCommand:
             stdout=subprocess.PIPE,  # 捕获标准输出
             stderr=subprocess.PIPE,  # 捕获标准错误
             text=True,
-            start_new_session=True,
+            start_new_session=start_new_session,
             creationflags=creationflags,
             **kwargs,
         )
@@ -135,11 +136,17 @@ class InfluxCommand:
             raise RuntimeError(f"Command failed: {cmd}\n{stderr}")
         return stdout
 
-    def create_database(self, database: str, token: str):
+    def create_database(
+        self, database: str, token: str, retention_period: str | None = None
+    ):
         """
         创建一个新的数据库。
         """
-        return self.execute(f"CREATE DATABASE {database}", token=token)
+        rp = f"--retention-period {retention_period}" if retention_period else ""
+        return self.execute(
+            f"CREATE DATABASE {database} {rp}",
+            token=token,
+        )
 
     def list_database(self, token: str):
         """
@@ -151,13 +158,6 @@ class InfluxCommand:
             item["name"] = item.pop("iox::database")
 
         return items
-
-    def delete_database(self, database: str):
-        pass
-
-    def delete_table(self, table: str, database: str):
-        pass
-
 
 class InfluxRestClient:
     """
