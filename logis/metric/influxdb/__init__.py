@@ -1,14 +1,24 @@
+import json
 import platform
 import re
 import subprocess
 from pathlib import Path
 
+import requests
+
+from logis.data_type import ApiError, ApiResponse, TableQuery
+
 
 class InfluxCommand:
 
-    def __init__(self, binary_dir: Path, version="v3"):
+    def __init__(self, binary_dir: Path, version="v3", token: str | None = None):
         self._binary_dir = binary_dir
         self.version = version
+        self._token = token
+
+    @property
+    def token(self):
+        return self._token
 
     @property
     def binary(self):
@@ -24,6 +34,7 @@ class InfluxCommand:
         object_store: str = "file",
         host: str = "127.0.0.1",
         port: int = 8181,
+        creationflags=subprocess.CREATE_NO_WINDOW,
         **kwargs,
     ):
         """
@@ -48,7 +59,7 @@ class InfluxCommand:
             stderr=subprocess.PIPE,  # 捕获标准错误
             text=True,
             start_new_session=True,
-            creationflags=subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS,
+            creationflags=creationflags,
             **kwargs,
         )
         return p
@@ -59,6 +70,7 @@ class InfluxCommand:
         offline: bool = True,
         path: Path | None = None,
         expiry: str | None = None,  # "100y",
+        creationflags=subprocess.CREATE_NO_WINDOW,
     ):
         if offline:
             assert (
@@ -84,7 +96,7 @@ class InfluxCommand:
             stdout=subprocess.PIPE,  # 捕获标准输出
             stderr=subprocess.PIPE,  # 捕获标准错误
             text=True,
-            creationflags=subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS,
+            creationflags=creationflags,
         ) as p:
             stdout, stderr = p.communicate()
         if p.returncode != 0:
@@ -122,3 +134,65 @@ class InfluxCommand:
         if p.returncode != 0:
             raise RuntimeError(f"Command failed: {cmd}\n{stderr}")
         return stdout
+
+    def create_database(self, database: str, token: str):
+        """
+        创建一个新的数据库。
+        """
+        return self.execute(f"CREATE DATABASE {database}", token=token)
+
+    def list_database(self, token: str):
+        """
+        列出所有数据库。
+        """
+        items = json.loads(self.execute("show databases --format json", token=token))
+
+        for item in items:
+            item["name"] = item.pop("iox::database")
+
+        return items
+
+    def delete_database(self, database: str):
+        pass
+
+    def delete_table(self, table: str, database: str):
+        pass
+
+
+class InfluxRestClient:
+    """
+    官方SDK提供的接口太少了，这里暂且自己封装下
+    """
+
+    def __init__(self, base_url: str, token: str, version="v3", **kwargs):
+        self._url = f"{base_url.strip().rstrip("/")}/api/{version}"
+        self._token = token
+
+    def _get_default_headers(self):
+        return dict(Authorization=f"Bearer {self._token}")
+
+    def create_database(self, database: str):
+        r = requests.post(
+            f"{self._url}/configure/database",
+            json=dict(db=database),
+            headers=self._get_default_headers(),
+        )
+        return ApiResponse.from_http_response(r)
+
+    def delete_database(self, database: str, hard_delete_at: str | None = None):
+        r = requests.delete(
+            f"{self._url}/configure/database",
+            params=dict(db=database, hard_delete_at=hard_delete_at),
+            headers=self._get_default_headers(),
+        )
+        return ApiResponse.from_http_response(r, content_type="json")
+
+    def delete_table(
+        self, database: str, table: str, hard_delete_at: str | None = None
+    ):
+        r = requests.delete(
+            f"{self._url}/configure/table",
+            params=dict(db=database, table=table, hard_delete_at=hard_delete_at),
+            headers=self._get_default_headers(),
+        )
+        return ApiResponse.from_http_response(r, content_type="json")

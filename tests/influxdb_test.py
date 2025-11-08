@@ -7,11 +7,12 @@ from influxdb_client.client.influxdb_client import InfluxDBClient
 from influxdb_client.client.influxdb_client_async import InfluxDBClientAsync
 from influxdb_client_3 import InfluxDBClient3, Point
 
-from logis.metric.influxdb import InfluxCommand
+from logis.metric.influxdb import InfluxCommand, InfluxRestClient
 
 database = "test"
 test_url = f"http://localhost:8181"
-token = "apiv3_jZmK6lvgwT_F_AiYkKwlG4lEjpo3kObLQidb_kMJ7UQ1DOlCE8JYtZm074_VdYuxzhiH6byw5zn7_iCBCkChAg"
+admin_token_file = Path(__file__)
+token = "apiv3_9RtOrHrNRybmP8s-VnjxFU5nb89Ly_Xu5iWDN4vFUnPlK4-M0gbE0ODsLh4OGYvUyBGHsBwOm1RpDqQ-ZUqsyg"
 
 
 def get_client(
@@ -67,3 +68,12 @@ def test_serve():
         object_store="file",
     )
     print(p)
+
+
+def test_rest_client():
+    tmp_db = "xxxxxx"
+    client = InfluxRestClient("http://127.0.0.1:8181", token=token)
+    x = client.create_database(tmp_db)
+    assert x.success or x.error.code == 409, x
+    x = client.delete_database(tmp_db)
+    assert x.success, x

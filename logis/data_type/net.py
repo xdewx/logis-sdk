@@ -1,5 +1,7 @@
-from typing import Generic
+from json import JSONDecodeError
+from typing import Generic, Literal
 
+import requests
 from pydantic import BaseModel
 
 from .base import DEFAULT_PYDANTIC_MODEL_CONFIG, T
@@ -7,7 +9,7 @@ from .base import DEFAULT_PYDANTIC_MODEL_CONFIG, T
 
 class ApiError(BaseModel):
     code: int = -1
-    message: str = "未知错误"
+    message: str = "错误"
 
 
 class ApiResponse(BaseModel, Generic[T]):
@@ -27,3 +29,20 @@ class ApiResponse(BaseModel, Generic[T]):
     @staticmethod
     def negative(error: ApiError | str, **kwargs):
         return ApiResponse[None](success=False, error=error, **kwargs)
+
+    @staticmethod
+    def from_http_response(
+        r: requests.Response, content_type: Literal["json", "text"] | None = None
+    ):
+        ct = content_type or r.headers.get("content-type") or ""
+        try:
+            data = r.json() if "json" in ct else r.text
+        except JSONDecodeError:
+            data = r.text
+        return (
+            ApiResponse.positive(data)
+            if r.status_code == 200
+            else ApiResponse.negative(
+                ApiError(code=r.status_code, message=str(r.status_code))
+            )
+        )
