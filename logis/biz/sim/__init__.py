@@ -8,3 +8,6 @@ def test():
     测试函数
     """
     print("This is a test function in the sim module.")
+
+
+from .iface import *
