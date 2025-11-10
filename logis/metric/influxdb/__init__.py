@@ -5,8 +5,17 @@ import subprocess
 from pathlib import Path
 
 import requests
+from pydantic import BaseModel
 
-from logis.data_type import ApiError, ApiResponse, TableQuery
+from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG, ApiResponse
+
+
+class InfluxQuery(BaseModel):
+    model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
+    query: str
+    language: str = "sql"
+    mode: str = "all"
+    database: str | None = None
 
 
 class InfluxCommand:
