@@ -16,13 +16,16 @@ class MetricModel(ABC):
     """
 
     @classmethod
-    def get_measurement(cls) -> str:
+    @abstractmethod
+    def get_measurement(
+        cls, prefix: str | None = None, suffix: str | None = None, sep: str = ""
+    ) -> str:
         """
         获取指标名称
         """
         pass
 
-    def to_influxdb_point(self):
+    def to_influxdb_point(self, measurement: str | None = None):
         """
         转换为InfluxDB点
         """

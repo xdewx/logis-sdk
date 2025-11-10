@@ -188,11 +188,26 @@ class InfluxRestClient:
         return ApiResponse.from_http_response(r, content_type="json")
 
     def delete_table(
-        self, database: str, table: str, hard_delete_at: str | None = None
+        self,
+        database: str,
+        table: str,
+        hard_delete_at: str | None = None,
+        strict: bool = True,
     ):
-        r = requests.delete(
+        """
+        Args:
+            database: 数据库名称
+            table: 表名称
+            hard_delete_at: 强制删除时间，格式为RFC3339
+            strict: 是否严格模式，默认True, 若设置为False, 则当表不存在时不会报错
+        """
+        tmp = requests.delete(
             f"{self._url}/configure/table",
             params=dict(db=database, table=table, hard_delete_at=hard_delete_at),
             headers=self._get_default_headers(),
         )
-        return ApiResponse.from_http_response(r, content_type="json")
+        r = ApiResponse.from_http_response(tmp, content_type="json")
+        if not strict and r.error and r.error.code == 404:
+            r.error = None
+            r.success = True
+        return r

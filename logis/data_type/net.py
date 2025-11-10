@@ -11,7 +11,6 @@ class ApiError(BaseModel):
     code: int = -1
     message: str = "错误"
 
-
 class ApiResponse(BaseModel, Generic[T]):
 
     success: bool
