@@ -5,9 +5,24 @@ import subprocess
 from pathlib import Path
 
 import requests
+from influxdb_client_3 import Point as _Point
 from pydantic import BaseModel
 
 from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG, ApiResponse
+
+
+class Point(_Point):
+    """
+    继承自 influxdb_client_3.Point，避免用法上的错误
+    """
+
+    def tag(self, key: str, value: str | None):
+        """
+        避免value为None，确保value一定是字符串类型
+        """
+        if value is not None:
+            super().tag(key, str(value))
+        return self
 
 
 class InfluxQuery(BaseModel):

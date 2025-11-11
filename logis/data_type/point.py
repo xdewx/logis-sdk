@@ -18,7 +18,7 @@ class Point:
         尝试读取X、Y、Z坐标，返回一个Point对象
         """
         if not isinstance(dc, dict):
-            raise TypeError("Expected a dictionary for Point parsing.")
+            raise ValueError("Expected a dictionary for Point parsing.")
         xyz = [dc.get(k, None) for k in ("X", "Y", "Z")]
         return Point(xyz)
 

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any, Generic, Optional, TypeVar
 
 from pydantic import BaseModel
@@ -47,3 +48,21 @@ class EventBus(Context):
     @classmethod
     def add_listener(cls, event_name: str, listener: Handler):
         cls.get_event_emitter().add_listener(event_name, listener)
+
+
+class EventBaseModel(BaseModel, Generic[T]):
+    """
+    事件基础结构
+    """
+
+    # 设计为x.y.z的形式
+    event_type: str
+
+    value: T | None = None
+
+    source_id: str | None = None
+
+    # 事件发生的时间
+    event_time: float
+
+    created_at: datetime | None = None
