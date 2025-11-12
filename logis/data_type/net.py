@@ -1,4 +1,4 @@
-from json import JSONDecodeError
+import logging
 from typing import Generic, Literal
 
 import requests
@@ -10,6 +10,7 @@ from .base import DEFAULT_PYDANTIC_MODEL_CONFIG, T
 class ApiError(BaseModel):
     code: int = -1
     message: str = "错误"
+
 
 class ApiResponse(BaseModel, Generic[T]):
 
@@ -36,7 +37,8 @@ class ApiResponse(BaseModel, Generic[T]):
         ct = content_type or r.headers.get("content-type") or ""
         try:
             data = r.json() if "json" in ct else r.text
-        except JSONDecodeError:
+        except Exception as e:
+            logging.warning("解析响应体失败: %s", e)
             data = r.text
         return (
             ApiResponse.positive(data)

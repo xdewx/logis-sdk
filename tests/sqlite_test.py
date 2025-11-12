@@ -14,7 +14,9 @@ assert DATA_DIR.exists()
 
 class Event(SQLModel, table=True):
     __tablename__ = "event"
-    id: int = Field(default=None, primary_key=True)
+    id: int | None = Field(
+        default=None, primary_key=True, sa_column_kwargs={"autoincrement": True}
+    )
     time: float
     type: str
     data: str
