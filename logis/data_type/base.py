@@ -5,6 +5,8 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Generic,
+    List,
     Literal,
     NewType,
     Optional,
@@ -72,3 +74,11 @@ class InvokeResult:
         self = InvokeResult()
         self.return_value = value
         return self
+
+
+class Data(BaseModel, Generic[T]):
+    model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
+    type: str
+    value: T
+    tags: List[str] | None = None
+    description: str | None = None
