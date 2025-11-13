@@ -14,6 +14,7 @@ class DateFormat(Enum):
     CHINESE_SIMPLE = "%Y年%m月%d日"  # 2024年05月20日
     # 英文/国际标准格式
     ISO_DATETIME = "%Y-%m-%d %H:%M:%S"  # 2024-05-20 14:30:00（最常用）
+    ISO_8601 = "%Y-%m-%dT%H:%M:%SZ"
     ISO_DATE = "%Y-%m-%d"  # 2024-05-20
     ISO_TIME = "%H:%M:%S"  # 14:30:00
     # 简写格式

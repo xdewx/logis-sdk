@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import psutil
 
@@ -40,3 +41,8 @@ def kill_process_on_port(port, max_try: int | None = 1) -> int | None:
                 "kill process on port %s failed(x%s): %s", port, try_count, e
             )
     raise RuntimeError(f"kill process on port {port} failed after {try_count} times")
+
+
+def ensure_path(path: str | Path):
+    return Path(path)
+    # return path if isinstance(path, Path) else Path(path)
