@@ -1,4 +1,4 @@
-from typing import List, Tuple, TypeAlias
+from typing import Any, Dict, List, Tuple, TypeAlias
 
 from logis.data_type import Point
 
@@ -88,6 +88,121 @@ def to_grid(
             else:
                 tmp = tmp[idx]
     return grid
+
+import networkx as nx
+from pyecharts import options as opts
+from pyecharts.charts import Graph, Tree
+
+
+def nx_digraph_to_graph(
+    G: nx.DiGraph,
+    title: str | None = None,
+    node_size: int = 30,
+    node_size_key: str = None,  # 节点属性中控制大小的字段名（如 "weight"）
+    edge_width: int = 1,
+    edge_width_key: str = None,  # 边属性中控制宽度的字段名（如 "weight"）
+    layout: str = "force",  # 布局："force"（力导向）、"circular"（环形）等
+) -> Graph:
+    """
+    将 networkx.DiGraph 转换为 Pyecharts Graph 图表
+
+    参数:
+        G: networkx 有向图
+        title: 图表标题
+        node_size: 默认节点大小
+        node_size_key: 从节点属性中读取大小的字段（如节点有 "size" 属性则优先使用）
+        edge_width: 默认边宽度
+        edge_width_key: 从边属性中读取宽度的字段（如边有 "weight" 属性则优先使用）
+        layout: 布局方式
+
+    返回:
+        Pyecharts Graph 对象，可直接调用 render() 生成 HTML
+    """
+    nodes = []
+    for node, attrs in G.nodes(data=True):
+        size = attrs.get(node_size_key, node_size) if node_size_key else node_size
+        nodes.append(opts.GraphNode(name=str(node), symbol_size=size))
+
+    links = []
+    for u, v, attrs in G.edges(data=True):
+        width = attrs.get(edge_width_key, edge_width) if edge_width_key else edge_width
+        links.append(opts.GraphLink(source=str(u), target=str(v)))
+
+    graph = (
+        Graph()
+        .add(
+            series_name="",
+            nodes=nodes,
+            links=links,
+            layout=layout,
+            is_draggable=True,
+        )
+        .set_global_opts(
+            title_opts=opts.TitleOpts(title=title),
+            tooltip_opts=opts.TooltipOpts(trigger="item"),  # 鼠标悬停显示信息
+        )
+    )
+
+    return graph
+
+
+def nx_digraph_to_tree(
+    G: nx.DiGraph,
+    title: str | None = None,
+    layout: str = "orthogonal",
+    orient: str = "LR",
+    name_key: str = "name",
+    color_key: str = "color",
+    default_name: str = "node",
+) -> Tree:
+    """
+    将树状结构的 networkx.DiGraph 转换为 Pyecharts Tree 图表
+
+    参数:
+        G: 有向图（需为无环图且含单根节点）
+        title: 图表标题
+        layout: 布局方式（"orthogonal" 或 "radial"）
+        orient: 树方向（"LR"/"RL"/"TB"/"BT"）
+        name_key: 节点属性中用于显示名称的字段
+        color_key: 节点属性中用于颜色的字段
+        default_name: 无名称属性时的默认名称
+    """
+    # 校验图结构（无环 + 单根节点）
+    if not nx.is_directed_acyclic_graph(G):
+        raise ValueError("输入图必须是无环有向图（DAG）")
+    roots = [n for n, d in G.in_degree() if d == 0]
+
+    # 递归构建 Tree 数据
+    def build_node(current: Any) -> Dict[str, Any]:
+        attrs = G.nodes.get(current, {})
+        node = {
+            "name": attrs.get(name_key, str(current) or default_name),
+            "itemStyle": {"color": attrs[color_key]} if color_key in attrs else {},
+        }
+        children = [build_node(child) for _, child in G.out_edges(current)]
+        if children:
+            node["children"] = children
+        return node
+
+    tree = Tree().set_global_opts(
+        title_opts=opts.TitleOpts(title=title),
+        tooltip_opts=opts.TooltipOpts(trigger="item", formatter="{b}"),
+    )
+    for root in roots:
+        tree_data = [build_node(root)]
+        tree.add(
+            series_name=str(root),
+            data=tree_data,
+            layout=layout,
+            orient=orient,
+            label_opts=opts.LabelOpts(
+                position="left" if orient in ["LR", "RL"] else "top",
+                vertical_align="middle",
+                horizontal_align="right",
+            ),
+        )
+
+    return tree
 
 
 if __name__ == "__main__":

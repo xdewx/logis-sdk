@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from collections import defaultdict
 from typing import Iterable, Iterator
 
 from networkx import DiGraph, has_path
@@ -159,6 +160,7 @@ class TaskGraph(AbstractTaskManager):
 
     def __init__(self, **attr):
         self.__graph__ = DiGraph()
+        self.__id_task_map__ = defaultdict()
 
     def parse_task_id(self, task: TaskLike) -> TaskId:
         if isinstance(task, (str, int)):
@@ -177,6 +179,9 @@ class TaskGraph(AbstractTaskManager):
             yield node_id if only_id else self.get_task(node_id)
 
     def get_task(self, task_id: TaskId) -> ITask | None:
+        task = self.__id_task_map__.get(task_id)
+        if task:
+            return task
         node = self.__graph__.nodes.get(task_id)
         return node.get(self.__KEY_TASK__) if node else None
 
@@ -185,7 +190,8 @@ class TaskGraph(AbstractTaskManager):
 
     def add_task(self, task: TaskLike, parent: TaskLike | None = None, **attr):
         task_id = self.parse_task_id(task)
-        self.__graph__.add_node(task_id, task=task, **attr)
+        self.__id_task_map__[task_id] = task
+        self.__graph__.add_node(task_id, **attr)
         if parent:
             parent_id = self.parse_task_id(parent)
             self.add_task_if_absent(parent)
