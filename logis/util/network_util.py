@@ -154,6 +154,7 @@ def nx_digraph_to_tree(
     name_key: str = "name",
     color_key: str = "color",
     default_name: str = "node",
+    virtual_root_id: str | None = None,
 ) -> Tree:
     """
     将树状结构的 networkx.DiGraph 转换为 Pyecharts Tree 图表
@@ -166,11 +167,21 @@ def nx_digraph_to_tree(
         name_key: 节点属性中用于显示名称的字段
         color_key: 节点属性中用于颜色的字段
         default_name: 无名称属性时的默认名称
+        virtual_root_id: 虚拟根节点ID（当节点存在多个根节点时使用）
     """
     # 校验图结构（无环 + 单根节点）
     if not nx.is_directed_acyclic_graph(G):
         raise ValueError("输入图必须是无环有向图（DAG）")
     roots = [n for n, d in G.in_degree() if d == 0]
+
+    if virtual_root_id and len(roots) > 1:
+        if virtual_root_id not in G:
+            G = G.copy()
+            for root in roots:
+                G.add_edge(virtual_root_id, root)
+        roots = [virtual_root_id]
+    elif len(roots) != 1:
+        raise ValueError("图中必须有且仅有一个根节点（或指定虚拟根节点）")
 
     # 递归构建 Tree 数据
     def build_node(current: Any) -> Dict[str, Any]:
