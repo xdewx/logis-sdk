@@ -59,3 +59,9 @@ class IMetricCollector(ABC):
         缓冲指标
         """
         invoke(self._buffer.put, metric)
+
+    def flush(self, flush_all: bool = False, **kwargs):
+        """
+        刷新指标
+        """
+        invoke(self._buffer.flush, flush_all=flush_all, **kwargs)

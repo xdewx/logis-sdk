@@ -1,4 +1,5 @@
 import json
+import logging
 import platform
 import re
 import subprocess
@@ -195,13 +196,17 @@ class InfluxRestClient:
     def _get_default_headers(self):
         return dict(Authorization=f"Bearer {self._token}")
 
-    def create_database(self, database: str):
+    def create_database(self, database: str, strict: bool = True):
         r = requests.post(
             f"{self._url}/configure/database",
             json=dict(db=database),
             headers=self._get_default_headers(),
         )
-        return ApiResponse.from_http_response(r)
+        r = ApiResponse.from_http_response(r)
+        if not strict and r.error and r.error == 409:
+            logging.warning(f"Database {database} already exists")
+            r.success = True
+        return r
 
     def delete_database(self, database: str, hard_delete_at: str | None = None):
         r = requests.delete(
