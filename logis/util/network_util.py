@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Tuple, TypeAlias
+from typing import Any, Dict, List, Literal, Tuple, TypeAlias
 
 from logis.data_type import Point
 
@@ -91,17 +91,18 @@ def to_grid(
 
 import networkx as nx
 from pyecharts import options as opts
-from pyecharts.charts import Graph, Tree
+from pyecharts.charts import Graph, Sankey, Tree
 
 
 def nx_digraph_to_graph(
     G: nx.DiGraph,
     title: str | None = None,
     node_size: int = 30,
-    node_size_key: str = None,  # 节点属性中控制大小的字段名（如 "weight"）
-    edge_width: int = 1,
-    edge_width_key: str = None,  # 边属性中控制宽度的字段名（如 "weight"）
-    layout: str = "force",  # 布局："force"（力导向）、"circular"（环形）等
+    node_size_key: str = None,
+    layout: Literal["force", "circular"] = "force",
+    graph_opts: Dict[str, Any] = {},
+    virtual_root_id: str | None = None,
+    **kwargs,
 ) -> Graph:
     """
     将 networkx.DiGraph 转换为 Pyecharts Graph 图表
@@ -118,6 +119,12 @@ def nx_digraph_to_graph(
     返回:
         Pyecharts Graph 对象，可直接调用 render() 生成 HTML
     """
+    if virtual_root_id and (roots := [n for n, d in G.in_degree() if d == 0]):
+        if len(roots) > 1:
+            G = G.copy()
+            for r in roots:
+                G.add_edge(virtual_root_id, r)
+
     nodes = []
     for node, attrs in G.nodes(data=True):
         size = attrs.get(node_size_key, node_size) if node_size_key else node_size
@@ -125,7 +132,6 @@ def nx_digraph_to_graph(
 
     links = []
     for u, v, attrs in G.edges(data=True):
-        width = attrs.get(edge_width_key, edge_width) if edge_width_key else edge_width
         links.append(opts.GraphLink(source=str(u), target=str(v)))
 
     graph = (
@@ -136,6 +142,7 @@ def nx_digraph_to_graph(
             links=links,
             layout=layout,
             is_draggable=True,
+            **graph_opts,
         )
         .set_global_opts(
             title_opts=opts.TitleOpts(title=title),
@@ -214,6 +221,77 @@ def nx_digraph_to_tree(
         )
 
     return tree
+
+
+def nx_digraph_to_sankey(
+    G: nx.DiGraph,
+    title: str | None = None,
+    level_key: str = None,
+    **kwargs,
+) -> Sankey:
+    """
+    将 networkx.DiGraph 转换为 Pyecharts Sankey 图（适用于有向无环图DAG）
+
+    参数:
+        G: 有向图（建议DAG，避免循环影响层级）
+        title: 图表标题
+        weight_key: 边属性中权重的字段名（用于边的粗细）
+        default_weight: 边无权重时的默认值
+        level_key: 节点属性中存储层级的字段（如节点有 "level" 属性则优先使用）
+                   若为 None，自动通过拓扑排序推断层级
+        curve: 边的弯曲度（0为直线，1为最大弯曲）
+        node_width: 节点宽度（像素）
+        node_gap: 同层级节点间距（像素）
+    """
+    if level_key is not None:
+        # 从节点属性获取层级
+        node_levels = {
+            node: attrs.get(level_key, 0) for node, attrs in G.nodes(data=True)
+        }
+    else:
+        if not nx.is_directed_acyclic_graph(G):
+            raise ValueError(
+                "自动推断层级需要输入有向无环图（DAG），或通过 level_key 指定层级"
+            )
+        topo_order = list(nx.topological_sort(G))
+        node_levels = {node: 0 for node in topo_order}
+        for node in topo_order:
+            for predecessor in G.predecessors(node):
+                if node_levels[node] <= node_levels[predecessor]:
+                    node_levels[node] = node_levels[predecessor] + 1
+
+    nodes: List[Dict[str, Any]] = []
+    for node, attrs in G.nodes(data=True):
+        node_name = attrs.get("name", str(node))
+        nodes.append(
+            {
+                "name": node_name,
+                "level": node_levels[node],
+            }
+        )
+
+    links: List[Dict[str, Any]] = []
+    for u, v, attrs in G.edges(data=True):
+        u_name = G.nodes[u].get("name", str(u))
+        v_name = G.nodes[v].get("name", str(v))
+        links.append(
+            {
+                "source": u_name,
+                "target": v_name,
+                "value": max(1, len(u_name.split(","))) * 5,
+            }
+        )
+
+    return (
+        Sankey()
+        .add(
+            series_name=title or "Sankey",
+            nodes=nodes,
+            links=links,
+            **kwargs,
+        )
+        .set_global_opts(title_opts=opts.TitleOpts(title=title))
+    )
 
 
 if __name__ == "__main__":

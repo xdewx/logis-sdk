@@ -51,7 +51,7 @@ class Context:
             key: 键
             default: 默认值,已废弃,请使用default_factory
             default_factory: 默认值工厂
-            create: 是否创建
+            create: 是否在值不存在或为空时设置默认值
         """
         dc = cls.get_all()
         result = None if dc is None else dc.get(key, None)
