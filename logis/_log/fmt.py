@@ -8,10 +8,7 @@ FORMAT_NET_DEFAULT = (
     '%(asctime)s [%(levelname).1s] %(client_addr)s - "%(request_line)s" %(status_code)s'
 )
 
-import logging
 from enum import Enum
-
-import colorlog
 
 
 class LoggerFormat(Enum):

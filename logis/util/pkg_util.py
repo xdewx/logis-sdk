@@ -45,3 +45,17 @@ def collect_subclass_of[T](
 
     name_class_map: List[Tuple[str, T]] = inspect.getmembers(_from, predicate=predicate)
     return name_class_map
+
+
+def get_class_full_path(cls) -> str:
+    """
+    获取类的全路径表示（模块路径.类名）
+
+    参数:
+        cls: 目标类（需传入类本身，而非实例）
+
+    返回:
+        str: 类的全路径，格式为 "模块路径.类名"
+    """
+    # __qualname__ 获取类的限定名（含嵌套关系，如 "OuterClass.InnerClass"）
+    return f"{cls.__module__}.{cls.__qualname__}"
