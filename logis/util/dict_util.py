@@ -25,13 +25,18 @@ def unify_key_name(input: dict, mappings: dict = cn_en_dict) -> dict:
     return output
 
 
-def remove_key_not_in(dc: dict, keys: Iterable[Any]):
+def remove_key_not_in(dc: dict, keys: Iterable[Any], delete_value: bool = False):
     """
     移除不在指定范围内的key
+
+    Args:
+        delete_value: 是否同时del value
     """
     for key in list(dc.keys()):
         if key not in keys:
-            dc.pop(key)
+            v = dc.pop(key, None)
+            if delete_value and v is not None:
+                del v
 
 
 def get_the_first_existent_key(obj: dict, *keys, default=None) -> Tuple[Any, Any]:

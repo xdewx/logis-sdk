@@ -22,9 +22,9 @@ def collect_field_aliases(field: Union[PydanticField, SqlModelField]) -> Set[str
                 tmps.add(alias)
             elif isinstance(alias, AliasChoices):
                 for choice in alias.choices:
-                    tmps.add(_pick_alias(choice))
+                    tmps.update(_pick_alias(choice))
             elif isinstance(alias, AliasPath):
-                tmps.update(*(alias.convert_to_aliases()))
+                tmps.update(alias.convert_to_aliases())
             else:
                 logging.warning(f"Unknown alias type: {type(alias)}")
             return tmps
