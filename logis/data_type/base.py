@@ -52,6 +52,7 @@ DEFAULT_PYDANTIC_MODEL_CONFIG = ConfigDict(
     extra="ignore",
     validate_by_alias=True,
     validate_by_name=True,
+    coerce_numbers_to_str=True,
 )
 
 

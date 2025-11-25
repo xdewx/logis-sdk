@@ -7,7 +7,7 @@ from logis.util.pydantic_util import collect_field_aliases
 
 
 class TestTableModel(SQLModel, table=False):
-    model_config = ConfigDict(strict=False)
+    model_config = ConfigDict(strict=False, coerce_numbers_to_str=True)
     name: str = Field(
         "",
         alias="名字",

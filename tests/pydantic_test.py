@@ -122,7 +122,10 @@ def test_validation_alias_choices():
 def test_implict_type_cast():
     class MyModel(BaseModel):
         name: str
-        model_config = ConfigDict(strict=False)
+        model_config = ConfigDict(strict=False, coerce_numbers_to_str=True)
 
-    v = MyModel(name=1000)
+        age: float | int | None = None
+
+    v = MyModel(name=1000, age=100.0)
     assert v.name == "1000"
+    assert type(v.age) is float and v.age == 100
