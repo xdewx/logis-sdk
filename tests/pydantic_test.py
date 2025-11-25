@@ -117,3 +117,12 @@ def test_validation_alias_choices():
         m = TestModel.model_validate(form, by_alias=True)
         assert m.name == "张三"
         assert m.age == 18
+
+
+def test_implict_type_cast():
+    class MyModel(BaseModel):
+        name: str
+        model_config = ConfigDict(strict=False)
+
+    v = MyModel(name=1000)
+    assert v.name == "1000"

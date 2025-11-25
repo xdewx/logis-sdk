@@ -47,6 +47,7 @@ TuplePoint: TypeAlias = Tuple[Optional[Number], Optional[Number], Optional[Numbe
 
 # 这里不要随便改，如果不满足自己的需求，可以新建配置
 DEFAULT_PYDANTIC_MODEL_CONFIG = ConfigDict(
+    strict=False,
     arbitrary_types_allowed=True,
     extra="ignore",
     validate_by_alias=True,

@@ -49,10 +49,10 @@ def split_integer(
             yield value
 
 
-def get_numeric_value(some: Any):
+def get_numeric_value[V](some: V):
     """
     获取输入对象的数值
     """
     if isinstance(some, NumberUnit):
-        return some.value
+        return some.quantity
     return some

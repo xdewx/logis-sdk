@@ -1,5 +1,9 @@
 from abc import ABC, ABCMeta
-from typing import Generic, Protocol, TypeVar, runtime_checkable
+from collections import defaultdict
+from typing import Dict, Generic, Protocol, TypeVar, runtime_checkable
+
+from logis.data_type import NumberType, NumberUnit, SpatialProps
+from logis.util.num_util import get_numeric_value
 
 
 class Shape(metaclass=ABCMeta):
@@ -7,7 +11,13 @@ class Shape(metaclass=ABCMeta):
     形状，例如路径、节点等
     """
 
-    pass
+    @property
+    def rotation_value(self):
+        v = get_numeric_value(self.props.rotation) if self.props else None
+        return v or 0
+
+    def __init__(self, **kwargs):
+        self.props: SpatialProps | None = None
 
 
 @runtime_checkable
@@ -72,6 +82,20 @@ class Storable(Protocol):
 
     def retrieve(self, *args, **kwargs) -> RetrieveResult:
         pass
+
+
+class QuantifiedValueContainer(Storable):
+
+    def __init__(self):
+        self.__container__: Dict[str, Dict[str, NumberType]] = defaultdict(
+            defaultdict(0)
+        )
+
+    def store(self, v: "NumberUnit"):
+        self.__container__[v.kind][v.unit] += v.quantity
+
+    def retrieve(self, v: "NumberUnit"):
+        self.__container__[v.kind][v.unit] -= v.quantity
 
 
 T = TypeVar("T")

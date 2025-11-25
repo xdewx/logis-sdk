@@ -8,4 +8,5 @@ from .net import *
 from .notice import *
 from .page import *
 from .point import *
+from .spatial import *
 from .unitable import *
