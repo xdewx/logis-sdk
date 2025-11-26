@@ -84,3 +84,16 @@ class Data(BaseModel, Generic[T]):
     value: T
     tags: List[str] | None = None
     description: str | None = None
+
+
+from abc import ABCMeta
+from enum import EnumMeta
+
+
+class ABCEnumMeta(EnumMeta, ABCMeta):
+    """
+    适用于enum类继承但是提示metaclass冲突的情况
+    1. 置顶metaclass为本类即可
+    """
+
+    pass

@@ -46,3 +46,24 @@ def test_task_graph():
     assert graph.task_size() == 1
     assert list(graph.tasks()) == [task1]
     assert list(graph.tasks(only_id=True)) == [task1.id]
+
+
+def test_task_handler():
+    from logis.task import ITaskHandler, IWorkingMode, WorkingMode
+
+    class TestTaskHandler(ITaskHandler):
+        def get_working_mode(self) -> IWorkingMode:
+            return WorkingMode.SYNC
+
+        def on_task_received(self, *tasks, **kwargs):
+            pass
+
+        def handle(self, *args, **kwargs):
+            print(args, kwargs)
+
+        def on_task_succeeded(self, *args, **kwargs):
+            pass
+
+    handler = TestTaskHandler()
+
+    handler.handle(a=1, b=2, c=3)

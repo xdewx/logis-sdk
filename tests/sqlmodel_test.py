@@ -23,7 +23,7 @@ def test_collect_alias():
     name_field = TestTableModel.model_fields["name"]
     aliases = collect_field_aliases(name_field)
 
-    assert not aliases.difference(["名字", "userName"])
+    assert not aliases.difference(["名字", "userName", "name"])
 
 
 def test_implict_type_cast():
