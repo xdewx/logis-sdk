@@ -1,4 +1,5 @@
 from itertools import count
+from numbers import Number
 from typing import Generic, Optional, Tuple, TypeVar
 
 from logis.data_type import Number, TuplePoint
@@ -43,33 +44,43 @@ class GenericPoint(Generic[T]):
         x = compute("add", self.x, other.x)
         y = compute("add", self.y, other.y)
         z = compute("add", self.z, other.z)
-        return GenericPoint(x, y, z, precision=self.precision)
+        return self.__class__(x, y, z, precision=self.precision)
 
     def __sub__(self, other: "GenericPoint[T]") -> "GenericPoint[T]":
         assert self.precision == other.precision, "Precision must be the same."
         x = compute("subtract", self.x, other.x)
         y = compute("subtract", self.y, other.y)
         z = compute("subtract", self.z, other.z)
-        return GenericPoint(x, y, z, precision=self.precision)
+        return self.__class__(x, y, z, precision=self.precision)
 
     def __mul__(self, other: Number) -> "GenericPoint[T]":
         assert other is not None, "Multiplier must not be None."
         x = compute("multiply", self.x, other) if self.x is not None else None
         y = compute("multiply", self.y, other) if self.y is not None else None
         z = compute("multiply", self.z, other) if self.z is not None else None
-        return GenericPoint(x, y, z, precision=self.precision)
+        return self.__class__(x, y, z, precision=self.precision)
 
     def __truediv__(self, other: Number) -> "GenericPoint[T]":
         assert other is not None, "Divisor must not be None."
         x = compute("divide", self.x, other) if self.x is not None else None
         y = compute("divide", self.y, other) if self.y is not None else None
         z = compute("divide", self.z, other) if self.z is not None else None
-        return GenericPoint(x, y, z, precision=self.precision)
+        return self.__class__(x, y, z, precision=self.precision)
+
+    def __eq__(self, value):
+        if not isinstance(value, self.__class__):
+            return False
+        return (
+            self.x == value.x
+            and self.y == value.y
+            and self.z == value.z
+            and self.precision == value.precision
+        )
 
 
-class Point:
+class Point(GenericPoint[float]):
     """
-    deprecated: 此类已被废弃，建议使用GenericPoint
+    此类不通用，历史遗留，不建议使用，如有需要建议使用GenericPoint
     支持x,y,z三维坐标点，也可当作二维坐标使用
     TODO: 处理单位
     """
@@ -77,14 +88,21 @@ class Point:
     __counter = count(0, step=1)
 
     @classmethod
-    def try_parse(cls, dc: dict) -> "Point":
+    def try_parse(cls, dc: dict, precision: int = 3, **kwargs) -> "Point":
         """
         尝试读取X、Y、Z坐标，返回一个Point对象
         """
         if not isinstance(dc, dict):
             raise ValueError("Expected a dictionary for Point parsing.")
         xyz = [dc.get(k, None) for k in ("X", "Y", "Z")]
-        return Point(xyz)
+        return Point(xyz, precision=precision, **kwargs)
+
+    @classmethod
+    def from_tuple(cls, args: Tuple[Number], precision: int = 3, **kwargs):
+        """
+        从元组创建点
+        """
+        return cls(args, precision=precision, **kwargs)
 
     @classmethod
     def of(
@@ -92,16 +110,13 @@ class Point:
         x: Number | None = None,
         y: Number | None = None,
         z: Optional[Number] = None,
-        unit: str | None = None,
+        precision: int = 3,
+        **kwargs,
     ) -> "Point":
-        p = Point()
-        p.x = x
-        p.y = y
-        p.z = z
-        p.unit = unit
+        p = Point(x, y, z, precision=precision, **kwargs)
         return p
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, precision=3, **kwargs):
         """
         支持[x,y]、x,y、[x,y,z]、x,y,z传参赋值
         默认x=y=z=0
@@ -114,16 +129,16 @@ class Point:
         self.y: Optional[Number] = None
         self.z: Optional[Number] = None
         if len(args) == 1:
-            self.x = round(float(args[0][0]), 2)
-            self.y = round(float(args[0][1]), 2)
+            self.x = round(float(args[0][0]), precision)
+            self.y = round(float(args[0][1]), precision)
             if len(args[0]) > 2 and (z := args[0][2]) is not None:
-                self.z = round(float(z), 2)
+                self.z = round(float(z), precision)
 
         elif len(args) >= 2:
-            self.x = round(float(args[0]), 2)
-            self.y = round(float(args[1]), 2)
+            self.x = round(float(args[0]), precision)
+            self.y = round(float(args[1]), precision)
             if len(args) > 2 and (z := args[2]) is not None:
-                self.z = round(float(z), 2)
+                self.z = round(float(z), precision)
 
         # 调试过程中发现z有时候是None有时候是0，因此这里统一给了默认值
         # 实际上应该外层规范
@@ -131,16 +146,13 @@ class Point:
         self.y = self.y if self.y is not None else 0
         self.z = self.z if self.z is not None else 0
 
+        super().__init__(self.x, self.y, self.z, precision=precision, **kwargs)
+
     def __repr__(self):
         return f"Point({self.x}, {self.y}, {self.z})"
 
     def __hash__(self):
         return hash((self.x, self.y, self.z))
-
-    def __eq__(self, other):
-        if isinstance(other, Point):
-            return self.x == other.x and self.y == other.y and self.z == other.z
-        return False
 
     def __lt__(self, other):
         """
@@ -179,7 +191,4 @@ class Point:
 
 
 if __name__ == "__main__":
-    # printPoint(1,2))
-    # printPoint([1,2,3,4,5,6,7]))
-    # printPoint((1,2,3)))
     pass

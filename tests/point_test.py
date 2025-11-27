@@ -2,10 +2,23 @@ from decimal import Decimal
 
 import pytest
 
-from logis.data_type import GenericPoint
+from logis.data_type import GenericPoint, Point
 
 
 def test_point():
+    p1 = Point(1, 2, 0)
+    p2 = Point(1, 2, 3)
+    p3 = Point.from_tuple([1, 2, 3])
+    p4 = Point.from_tuple([10, 1, 0])
+    for p in [p1, p2, p3, p4]:
+        print(p)
+
+    assert p1 - p2 == Point(0, 0, -3)
+    assert p3 - p4 == Point(-9, 1, 3)
+    assert Point() - Point() == Point()
+
+
+def test_generic_point():
     p = GenericPoint[float](1.23456, 2.34567, 3.45678, precision=4)
     assert p.x == 1.2346
     assert p.y == 2.3457
