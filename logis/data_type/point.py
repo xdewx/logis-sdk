@@ -1,11 +1,75 @@
 from itertools import count
-from typing import Optional, Tuple
+from typing import Generic, Optional, Tuple, TypeVar
 
 from logis.data_type import Number, TuplePoint
+
+from ._math import compute
+
+T = TypeVar("T", bound=Number)
+
+
+class GenericPoint(Generic[T]):
+    def __init__(
+        self,
+        x: T | None = None,
+        y: T | None = None,
+        z: T | None = None,
+        *args,
+        precision: int | None = None,
+        **kwargs,
+    ):
+        """
+        Args:
+            x (T | None, optional): X coordinate. Defaults to None.
+            y (T | None, optional): Y coordinate. Defaults to None.
+            z (T | None, optional): Z coordinate. Defaults to None.
+            precision (int | None, optional): Precision. Defaults to None.
+        """
+        self.precision = precision
+        if precision is not None:
+            x = round(x, precision) if x is not None else x
+            y = round(y, precision) if y is not None else y
+            z = round(z, precision) if z is not None else z
+        self.x, self.y, self.z = x, y, z
+
+    @classmethod
+    def from_tuple(
+        cls, tp: Tuple[T], precision: int | None = None, **kwargs
+    ) -> "GenericPoint[T]":
+        return cls(*tp, precision=precision, **kwargs)
+
+    def __add__(self, other: "GenericPoint[T]") -> "GenericPoint[T]":
+        assert self.precision == other.precision, "Precision must be the same."
+        x = compute("add", self.x, other.x)
+        y = compute("add", self.y, other.y)
+        z = compute("add", self.z, other.z)
+        return GenericPoint(x, y, z, precision=self.precision)
+
+    def __sub__(self, other: "GenericPoint[T]") -> "GenericPoint[T]":
+        assert self.precision == other.precision, "Precision must be the same."
+        x = compute("subtract", self.x, other.x)
+        y = compute("subtract", self.y, other.y)
+        z = compute("subtract", self.z, other.z)
+        return GenericPoint(x, y, z, precision=self.precision)
+
+    def __mul__(self, other: Number) -> "GenericPoint[T]":
+        assert other is not None, "Multiplier must not be None."
+        x = compute("multiply", self.x, other) if self.x is not None else None
+        y = compute("multiply", self.y, other) if self.y is not None else None
+        z = compute("multiply", self.z, other) if self.z is not None else None
+        return GenericPoint(x, y, z, precision=self.precision)
+
+    def __truediv__(self, other: Number) -> "GenericPoint[T]":
+        assert other is not None, "Divisor must not be None."
+        x = compute("divide", self.x, other) if self.x is not None else None
+        y = compute("divide", self.y, other) if self.y is not None else None
+        z = compute("divide", self.z, other) if self.z is not None else None
+        return GenericPoint(x, y, z, precision=self.precision)
 
 
 class Point:
     """
+    deprecated: 此类已被废弃，建议使用GenericPoint
     支持x,y,z三维坐标点，也可当作二维坐标使用
     TODO: 处理单位
     """
