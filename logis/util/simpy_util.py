@@ -17,7 +17,7 @@ def try_put(
 ):
     x = container.put(amount)
     if timeout:
-        x = x | env.timeout(0.1)
+        x = x | env.timeout(timeout)
     v = yield x
     return v
 
