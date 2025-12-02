@@ -41,6 +41,12 @@ class ITaskHandler(IHandler):
         """
         raise NotImplementedError("get_task_manifest")
 
+    def is_task_all_done(self, **kwargs):
+        """
+        任务是否全部完成
+        """
+        raise NotImplementedError("is_task_all_done")
+
     @abstractmethod
     def on_task_received(self, *tasks: ITask, **kwargs):
         """
