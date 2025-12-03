@@ -3,7 +3,7 @@ import logging.config
 from logging import StreamHandler
 from logging.handlers import RotatingFileHandler
 
-from logis._log import LoggerBuilder
+from logis._log import LoggerBuilder, get_default_dict_config_builder
 from logis._log.util import DictConfigBuilder
 
 
@@ -13,7 +13,10 @@ def do_log(log: logging.Logger):
     log.warning("This is a warning message")
     log.error("This is an error message")
     log.critical("This is a critical message")
-    log.exception("This is an exception message")
+    try:
+        1 / 0
+    except Exception as e:
+        log.exception("This is an exception message", e)
 
 
 LOGGER_NAME = "test_logger"
@@ -42,6 +45,14 @@ def test_dict_config_builder():
     print(dict_config)
     logging.config.dictConfig(dict_config)
     log = logging.getLogger(LOGGER_NAME)
+    do_log(log)
+
+
+def test_default_dict_config_builder():
+    dict_config = get_default_dict_config_builder().build()
+    print(dict_config)
+    logging.config.dictConfig(dict_config)
+    log = logging.getLogger("app")
     do_log(log)
 
 

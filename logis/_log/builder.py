@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from platformdirs import user_data_dir
 
-from .util import add_formatter_if_not
+from .util import add_formatter_if_not, format_filename
 
 
 class LoggerBuilder:
@@ -27,14 +27,9 @@ class LoggerBuilder:
 
         self._handlers = []
 
-    def _resolve_file_path(self, file_name: str) -> Path:
-        assert file_name is not None, "File name must be provided for file handlers."
-        if not file_name.endswith(".log"):
-            file_name += ".log"
-
-        if self._log_dir:
-            return self._log_dir.joinpath(file_name)
-        return Path(file_name)
+    def _resolve_file_path(self, filename: str) -> Path:
+        assert filename is not None, "File name must be provided for file handlers."
+        return Path(format_filename(filename, self._log_dir))
 
     def name(self, name: str) -> "LoggerBuilder":
         """

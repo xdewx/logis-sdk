@@ -1,6 +1,7 @@
 import logging
 import logging.handlers
 from collections import defaultdict
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
@@ -9,6 +10,43 @@ from colorlog import ColoredFormatter
 from logis.util.pkg_util import get_class_full_path
 
 from .fmt import LoggerFormat
+from .model import HandlerDictConfig, LoggerDictConfig
+
+
+def format_filename(
+    filename: str,
+    log_dir: Optional[Path] = None,
+    ensure_suffix: str | None = ".log",
+) -> str:
+    """
+    格式化日志文件名，确保文件名以指定后缀结尾。
+    如果未指定后缀，则默认使用 ".log"。
+    如果未指定日志根目录，则直接返回文件名。
+    如果指定了日志根目录，则确保目录存在，并返回绝对路径。
+    """
+    if ensure_suffix and not filename.endswith(ensure_suffix):
+        filename += ensure_suffix
+    if log_dir is None:
+        return filename
+    log_dir = Path(log_dir)
+    log_dir.mkdir(parents=True, exist_ok=True)
+    return str(log_dir / filename)
+
+
+def format_filename_if_necessary(
+    handler: logging.Handler,
+    log_dir: Optional[Path] = None,
+    ensure_suffix: str | None = ".log",
+) -> None:
+    """
+    如果给定的handler是文件处理器类型，则格式化其文件名。
+    """
+    if not handler:
+        return
+    if isinstance(handler, logging.FileHandler):
+        handler.baseFilename = format_filename(
+            handler.baseFilename, log_dir, ensure_suffix
+        )
 
 
 def add_formatter_if_not(handler: logging.Handler) -> None:
@@ -103,9 +141,15 @@ class DictConfigBuilder:
     """
     支持从对象实例中提取配置，
     并将其转换为 logging.config.dictConfig 兼容的字典配置
+    1. 内置LoggerFormat枚举的所有格式
     """
 
+    def dir(self, log_dir: str):
+        self._log_dir = Path(log_dir)
+        return self
+
     def __init__(self):
+        self._log_dir: Optional[Path] = None
         self.__dict_config__ = get_dict_config_tmpl()
         self.__loggers__: Dict[str, Dict[str, Any]] = self.__dict_config__["loggers"]
         self.__handlers__: Dict[str, Dict[str, Any]] = self.__dict_config__["handlers"]
@@ -114,10 +158,17 @@ class DictConfigBuilder:
             "formatters"
         ]
 
+        for e in LoggerFormat:
+            if "color" in e.name.lower():
+                formatter = ColoredFormatter(fmt=e.value)
+            else:
+                formatter = logging.Formatter(fmt=e.value)
+            self.formatter(formatter, name=e.formatter_name())
+
     def build(self):
         return self.__dict_config__
 
-    def filter(self, f: logging.Filter, name: str | None = None) -> Dict[str, Any]:
+    def filter(self, f: logging.Filter, name: str | None = None):
         """
         将 logging.Filter 实例转换为 logging.config.dictConfig 兼容的字典配置
 
@@ -132,9 +183,7 @@ class DictConfigBuilder:
         filter_dict.update({"()": get_class_full_path(f.__class__)})
         return self
 
-    def handler(
-        self, handler: logging.Handler, name: str | None = None
-    ) -> Dict[str, Any]:
+    def handler(self, handler: logging.Handler, name: str | None = None):
         """
         将 logging.Handler 实例转换为 logging.config.dictConfig 兼容的字典配置
 
@@ -144,6 +193,10 @@ class DictConfigBuilder:
         if name is None:
             name = str(uuid4())
         handler.name = name
+
+        format_filename_if_necessary(
+            handler, log_dir=self._log_dir, ensure_suffix=".log"
+        )
 
         for f in handler.filters:
             if get_name_attr(f) is None:
@@ -164,9 +217,7 @@ class DictConfigBuilder:
         self.__handlers__[name].update(handler_dict)
         return self
 
-    def formatter(
-        self, formatter: logging.Formatter, name: str | None = None
-    ) -> Dict[str, Any]:
+    def formatter(self, formatter: logging.Formatter, name: str | None = None):
         """
         将 logging.Formatter 实例转换为 logging.config.dictConfig 兼容的字典配置
 
@@ -180,7 +231,7 @@ class DictConfigBuilder:
         self.__formatters__[name].update(formatter_dict)
         return self
 
-    def logger(self, logger: logging.Logger) -> Dict[str, Any]:
+    def logger(self, logger: logging.Logger):
         """
         将 logging.Logger 实例转换为 logging.config.dictConfig 兼容的字典配置
 
@@ -202,4 +253,15 @@ class DictConfigBuilder:
             }
         )
 
+        return self
+
+    def logger_dict(self, config: LoggerDictConfig):
+        self.__loggers__[config.name].update(config.model_dump(exclude={"name"}))
+        return self
+
+    def handler_dict(self, config: HandlerDictConfig):
+        config.filename = format_filename(
+            config.filename, log_dir=self._log_dir, ensure_suffix=".log"
+        )
+        self.__handlers__[config.name].update(config.model_dump(exclude={"name"}))
         return self

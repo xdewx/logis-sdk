@@ -19,3 +19,6 @@ class LoggerFormat(Enum):
     DEFAULT = FORMAT_DEFAULT
     NET_DEFAULT = FORMAT_NET_DEFAULT
     COLORED_DEFAULT = FORMAT_COLORED_DEFAULT
+
+    def formatter_name(self) -> str:
+        return self.name.lower()
