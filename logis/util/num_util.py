@@ -45,7 +45,7 @@ def split_integer(
     if order == "asc":
         arrs.reverse()
     for times, value in arrs:
-        for _ in range(times):
+        for _ in range(int(times)):
             yield value
 
 
