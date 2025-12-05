@@ -12,5 +12,5 @@ setup(
     author_email="present150608@sina.com",
     packages=find_packages(),
     install_requires=[],
-    python_requires=">=3.12",
+    python_requires=">=3.7",
 )

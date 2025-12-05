@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from platformdirs import user_data_dir
 
-from .util import add_formatter_if_not, format_filename
+from .util import add_formatter_if_not, format_filename, format_level
 
 
 class LoggerBuilder:
@@ -27,8 +27,9 @@ class LoggerBuilder:
 
         self._handlers = []
 
-    def _resolve_file_path(self, filename: str) -> Path:
-        assert filename is not None, "File name must be provided for file handlers."
+    def _resolve_file_path(self, filename: str) -> Path | None:
+        if not filename:
+            return None
         return Path(format_filename(filename, self._log_dir))
 
     def name(self, name: str) -> "LoggerBuilder":
@@ -58,6 +59,7 @@ class LoggerBuilder:
         """
         设置root日志级别
         """
+        level = format_level(level)
         self._level = level
         return self
 
@@ -101,20 +103,21 @@ class LoggerBuilder:
         """
         添加日志处理器
         """
+        filename = self._resolve_file_path(filename)
+        if isinstance(handler_type, logging.FileHandler) or issubclass(
+            handler_type, logging.FileHandler
+        ):
+            kwargs.update(encoding=self._encoding, filename=filename)
         if handler_type is TimedRotatingFileHandler:
             handler = TimedRotatingFileHandler(
-                filename=self._resolve_file_path(filename),
                 when=self._rotation_when,
                 backupCount=self._backup_count,
-                encoding=self._encoding,
                 **kwargs,
             )
         elif handler_type is RotatingFileHandler:
             handler = RotatingFileHandler(
-                filename=self._resolve_file_path(filename),
                 maxBytes=self._max_bytes,
                 backupCount=self._backup_count,
-                encoding=self._encoding,
                 **kwargs,
             )
         elif handler_type is StreamHandler:
@@ -128,10 +131,8 @@ class LoggerBuilder:
 
         add_formatter_if_not(handler)
 
-        if level is not None:
-            handler.setLevel(level)
-        else:
-            handler.setLevel(self._level)
+        level = level if level is not None else self._level
+        handler.setLevel(format_level(level))
 
         if name is not None:
             handler.name = name
@@ -146,6 +147,7 @@ class LoggerBuilder:
         return self
 
     def build(self) -> logging.Logger:
+        assert self._name, "Logger name must be provided."
         name = self._name if self._name is not None else "root"
         logger = logging.getLogger(name)
         if self._level is not None:

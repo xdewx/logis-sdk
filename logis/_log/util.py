@@ -2,7 +2,7 @@ import logging
 import logging.handlers
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from uuid import uuid4
 
 from colorlog import ColoredFormatter
@@ -11,6 +11,16 @@ from logis.util.pkg_util import get_class_full_path
 
 from .fmt import LoggerFormat
 from .model import HandlerDictConfig, LoggerDictConfig
+
+
+def format_level(level: int | str) -> int:
+    """
+    将日志级别统一调整为logging内置常量
+    """
+    if isinstance(level, str):
+        level = level.upper()
+        level = getattr(logging, level)
+    return level
 
 
 def format_filename(
