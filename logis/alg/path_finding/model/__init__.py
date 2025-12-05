@@ -3,8 +3,7 @@ from typing import Any, Callable, Dict, List, NewType, Optional, Tuple, Type, Ty
 from networkx import DiGraph, Graph
 from pydantic import BaseModel, Field
 
-from logis.conf import PYDANTIC_DEFAULT_MODEL_CONFIG
-from logis.data_type import Point
+from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG, Point
 
 PathFindingAlgorithmType = NewType("PathFindingAlgorithmType", str)
 
@@ -30,7 +29,7 @@ class PathFindingInput(BaseModel):
     # 排除的点或障碍点
     excluded_vertices: List[Point] = []
 
-    model_config = PYDANTIC_DEFAULT_MODEL_CONFIG
+    model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
 
 
 class PathFindingOutput(BaseModel):
@@ -47,4 +46,4 @@ class PathFindingOutput(BaseModel):
 
     next_point: Optional[Point] = None
 
-    model_config = PYDANTIC_DEFAULT_MODEL_CONFIG
+    model_config = DEFAULT_PYDANTIC_MODEL_CONFIG

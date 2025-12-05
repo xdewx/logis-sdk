@@ -16,6 +16,7 @@ from typing import (
     Union,
 )
 
+import humps
 from pydantic import BaseModel, ConfigDict, Field
 
 StringNumber: TypeAlias = str
@@ -53,9 +54,8 @@ DEFAULT_PYDANTIC_MODEL_CONFIG = ConfigDict(
     validate_by_alias=True,
     validate_by_name=True,
     coerce_numbers_to_str=True,
+    alias_generator=humps.camelize,
 )
-
-
 class CallableInput(BaseModel):
     args: Tuple = Field(default_factory=tuple)
     kwargs: Dict[str, Any] = Field(default_factory=dict)
