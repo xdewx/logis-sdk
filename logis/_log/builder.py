@@ -107,6 +107,7 @@ class LoggerBuilder:
         if isinstance(handler_type, logging.FileHandler) or issubclass(
             handler_type, logging.FileHandler
         ):
+            kwargs.setdefault("delay", True)
             kwargs.update(encoding=self._encoding, filename=filename)
         if handler_type is TimedRotatingFileHandler:
             handler = TimedRotatingFileHandler(

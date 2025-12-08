@@ -125,6 +125,7 @@ def handler_to_dict(handler: logging.Handler) -> Dict[str, Any]:
         handler_args["filename"] = handler.baseFilename
         handler_args["mode"] = handler.mode
         handler_args["encoding"] = handler.encoding
+        handler_args["delay"] = handler.delay
     elif isinstance(handler, logging.StreamHandler):
         try:
             fileno = handler.stream.fileno()

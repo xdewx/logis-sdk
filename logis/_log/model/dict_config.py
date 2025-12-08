@@ -37,6 +37,7 @@ class HandlerDictConfig(BaseModel):
     backup_count: int | None = Field(3, alias="backupCount")
     when: str | None = "d"
     encoding: str = "utf-8"
+    delay: bool = True
 
     def model_dump(self, by_alias=True, exclude_none=True, **kwargs):
         exclude = kwargs.pop("exclude", set())
@@ -47,7 +48,7 @@ class HandlerDictConfig(BaseModel):
             exclude.update({"max_bytes"})
         elif not issubclass(self.clazz, logging.FileHandler):
             exclude.update(
-                {"filename", "max_bytes", "backup_count", "when", "encoding"}
+                {"filename", "max_bytes", "backup_count", "when", "encoding", "delay"}
             )
         class_path = get_class_full_path(self.clazz)
         return super().model_dump(

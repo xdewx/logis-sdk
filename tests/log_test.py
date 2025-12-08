@@ -16,13 +16,14 @@ def do_log(log: logging.Logger):
     try:
         1 / 0
     except Exception as e:
-        log.exception("This is an exception message", e)
+        log.exception("This is an exception message: %s", e)
 
 
 LOGGER_NAME = "test_logger"
 
 demo_logger = (
     LoggerBuilder()
+    .dir("./logs")
     .name(LOGGER_NAME)
     .level(logging.INFO)
     .add_handler(
