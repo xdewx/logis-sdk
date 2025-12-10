@@ -1,13 +1,15 @@
 import logging
 from pathlib import Path
 from typing import List
+from warnings import deprecated
 
 import psutil
 
 
+@deprecated("请使用 find_all_process_on_port 替代")
 def find_process_on_port(port: int):
     """
-    deprecated: **请使用 find_all_process_on_port 替代**
+    查找占用指定端口的进程，如果有多个只返回第一个。
     """
     for proc in psutil.process_iter(["pid", "name", "cmdline"]):
         connections = proc.net_connections(kind="inet")
@@ -17,11 +19,10 @@ def find_process_on_port(port: int):
     return None
 
 
+@deprecated("请使用 kill_all_process_on_port 替代")
 def kill_process_on_port(port, max_try: int | None = 1) -> int | None:
     """
-    deprecated: **请使用 kill_all_process_on_port 替代**
-
-    强制释放占用指定端口的进程。
+    强制释放占用指定端口的进程，如果有多个进程只处理第一个。
 
     Args:
         port (int): 要释放的端口号
@@ -50,6 +51,9 @@ def kill_process_on_port(port, max_try: int | None = 1) -> int | None:
 
 
 def find_all_process_on_port(port: int) -> List[psutil.Process]:
+    """
+    查找占用指定端口的所有进程。
+    """
     procs = []
     for proc in psutil.process_iter(["pid", "name", "cmdline"]):
         connections = proc.net_connections(kind="inet")
@@ -61,7 +65,7 @@ def find_all_process_on_port(port: int) -> List[psutil.Process]:
 
 def kill_all_process_on_port(port, max_try: int | None = 1) -> int | None:
     """
-    强制释放占用指定端口的进程。
+    强制释放占用指定端口的所有进程。
 
     Args:
         port (int): 要释放的端口号
