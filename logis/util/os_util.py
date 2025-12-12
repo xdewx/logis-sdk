@@ -1,9 +1,9 @@
 import logging
 from pathlib import Path
 from typing import List
-from warnings import deprecated
 
 import psutil
+from deprecated import deprecated
 
 
 @deprecated("请使用 find_all_process_on_port 替代")
