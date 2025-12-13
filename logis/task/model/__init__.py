@@ -15,10 +15,10 @@ class TaskStatus(Enum):
 
     NOT_STARTED = "not_started"
     STARTED = "started"
+    PAUSED = "paused"
     FINISHED = "finished"
     CANCELLED = "cancelled"
     FAILED = "failed"
-
 
 class ITask(metaclass=ABCMeta):
     """
