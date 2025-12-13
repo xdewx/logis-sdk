@@ -44,4 +44,4 @@ pyecharts==2.0.9
 
 python-json-logger==4.0.0
 pyhumps==3.8.0
-Deprecated==2.0.1
+ipa-python-kit==0.0.3
