@@ -12,8 +12,12 @@ def find_process_on_port(port: int):
     查找占用指定端口的进程，如果有多个只返回第一个。
     """
     for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+        if not proc.pid:
+            continue
         connections = proc.net_connections(kind="inet")
         for conn in connections:
+            if not conn.laddr:
+                continue
             if conn.laddr.port == int(port):
                 return proc
     return None
@@ -56,8 +60,12 @@ def find_all_process_on_port(port: int) -> List[psutil.Process]:
     """
     procs = []
     for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+        if not proc.pid:
+            continue
         connections = proc.net_connections(kind="inet")
         for conn in connections:
+            if not conn.laddr:
+                continue
             if conn.laddr.port == int(port):
                 procs.append(proc)
     return procs
