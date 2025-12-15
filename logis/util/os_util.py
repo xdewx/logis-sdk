@@ -1,8 +1,10 @@
 import logging
+import time
 from pathlib import Path
 from typing import List
 
 import psutil
+from cv2 import log
 from ipa.decorator import deprecated
 
 
@@ -69,6 +71,31 @@ def find_all_process_on_port(port: int) -> List[psutil.Process]:
             if conn.laddr.port == int(port):
                 procs.append(proc)
     return procs
+
+
+def wait_port_idle(
+    port: int, check_interval: float = 1.0, timeout: float | None = None
+):
+    """
+    等待指定端口空闲，即没有进程占用该端口。
+
+    Args:
+        port (int): 要等待的端口号
+        check_interval (float, optional): 检查间隔，单位为秒。默认值为 1.0 秒。
+        timeout (float, optional): 最大等待时间，单位为秒。默认值为 None，代表无限等待。
+
+    Returns:
+        bool: 如果端口空闲则返回 True，否则返回 False。
+    """
+    start = time.time()
+    while True:
+        if timeout is not None and time.time() - start > timeout:
+            return False
+        ps = find_all_process_on_port(port)
+        if not ps:
+            return True
+        logging.info("there are %s process on port %s: %s", len(ps), port, ps)
+        time.sleep(check_interval)
 
 
 def kill_all_process_on_port(port, max_try: int | None = 1) -> int | None:
