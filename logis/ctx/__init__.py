@@ -72,6 +72,7 @@ class Context:
         清除上下文
         """
         if dc := cls.get_all():
+            dc.clear()
             del dc
         cls._context_vars_.set(None)
         # cls._thread_local.__dict__.clear()
