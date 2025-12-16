@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple, Union
 from pyecharts import options as opts
 
 
-class GridLayoutCalculator:
+class GridLayout:
     """
     智能网格布局计算器
     根据图表数量和布局要求，自动计算每个图表的GridOpts位置
@@ -94,7 +94,27 @@ class GridLayoutCalculator:
         """将小数转换为百分比字符串"""
         return f"{value * 100:.1f}%"
 
-    def calculate(self) -> List[opts.GridOpts]:
+    def get_all_center_radius(self):
+        """
+        根据行列自动计算中心点、半径的百分值
+        """
+        r, c = self.rows, self.cols
+
+        radius = 100 / max(r, c)
+        y_per = 100 / (r * 2)
+        y_centers = [(i + 1) * y_per for i in range(0, r * 2, 2)]
+        x_per = 100 / (c * 2)
+        x_centers = [(i + 1) * x_per for i in range(0, c * 2, 2)]
+
+        count = 0
+        for y_center in y_centers:
+            for x_center in x_centers:
+                yield dict(center=(x_center, y_center), radius=radius)
+                count += 1
+                if count >= self.total_items:
+                    return
+
+    def get_all_grid_opts(self) -> List[opts.GridOpts]:
         """
         计算所有图表的GridOpts配置
 
