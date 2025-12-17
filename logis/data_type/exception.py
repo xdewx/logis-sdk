@@ -1,6 +1,6 @@
-from typing import Any, Callable, TypeAlias
+from typing import Any, Callable
 
-ErrorHandler: TypeAlias = Callable[[Exception], Any]
+ErrorHandler = Callable[[Exception], Any]
 
 
 class MyBaseException(Exception):

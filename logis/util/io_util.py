@@ -6,7 +6,17 @@ import queue
 import threading
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Coroutine, Generic, List, Literal, Type
+from typing import (
+    Any,
+    Callable,
+    Coroutine,
+    Generic,
+    List,
+    Literal,
+    Optional,
+    Type,
+    Union,
+)
 
 from pydantic import BaseModel, ConfigDict
 
@@ -35,18 +45,18 @@ class WriteBufferConfig(BaseModel):
     # 缓存的最大时间间隔
     flush_interval: float = 10
 
-    queue_type: QueueType | None = None
+    queue_type: Optional[QueueType] = None
 
-    _queue: QueueType | None = None
+    _queue: Optional[QueueType] = None
 
-    handler: Callable[[List[T]], None] | None | Coroutine[Any, Any, None] = None
+    handler: Union[Callable[[List[T]], None], None, Coroutine[Any, Any, None]] = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def get_queue(self, mode: Literal["sync", "async"]) -> QueueType:
         if self._queue is None:
             if self.queue_type is None:
-                self.queue_type = queue.Queue[T] if mode == "sync" else asyncio.Queue[T]
+                self.queue_type = queue.Queue if mode == "sync" else asyncio.Queue
             self._queue = self.queue_type(maxsize=self.queue_size)
         return self._queue
 
@@ -62,8 +72,8 @@ class WriteBuffer(ABC, Generic[T]):
 
         self._is_running = False
         self._last_flush_time = time.time()
-        self._lock: threading.Lock | asyncio.Lock | None = None
-        self._flush_task: threading.Thread | None = None
+        self._lock: Union[threading.Lock, asyncio.Lock, None] = None
+        self._flush_task: Optional[threading.Thread] = None
 
     def need_flush(self) -> bool:
         """判断是否需要刷新（根据时间间隔和条目数）"""

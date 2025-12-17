@@ -1,6 +1,6 @@
 import logging
 from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
-from typing import Type
+from typing import List, Optional, Type
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -16,7 +16,7 @@ class LoggerDictConfig(BaseModel):
     name: str
     level: int = logging.INFO
     propagate: bool = False
-    handlers: list[str] = []
+    handlers: List[str] = []
 
 
 class HandlerDictConfig(BaseModel):
@@ -29,13 +29,13 @@ class HandlerDictConfig(BaseModel):
     name: str
     clazz: Type[logging.Handler]
     level: int = logging.INFO
-    formatter: str | None = None
-    filters: list[str] = []
+    formatter: Optional[str] = None
+    filters: List[str] = []
 
-    filename: str | None = None
-    max_bytes: int | None = Field(100 * 1024 * 1024, alias="maxBytes")
-    backup_count: int | None = Field(3, alias="backupCount")
-    when: str | None = "d"
+    filename: Optional[str] = None
+    max_bytes: Optional[int] = Field(100 * 1024 * 1024, alias="maxBytes")
+    backup_count: Optional[int] = Field(3, alias="backupCount")
+    when: Optional[str] = "d"
     encoding: str = "utf-8"
     delay: bool = True
 
@@ -51,6 +51,9 @@ class HandlerDictConfig(BaseModel):
                 {"filename", "max_bytes", "backup_count", "when", "encoding", "delay"}
             )
         class_path = get_class_full_path(self.clazz)
-        return super().model_dump(
-            by_alias=by_alias, exclude=exclude, exclude_none=exclude_none, **kwargs
-        ) | {"class": class_path}
+        return {
+            **super().model_dump(
+                by_alias=by_alias, exclude=exclude, exclude_none=exclude_none, **kwargs
+            ),
+            **{"class": class_path},
+        }

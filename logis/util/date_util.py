@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from typing import Union
 
 import pandas as pd
 from dateutil.parser import parse
@@ -48,7 +49,9 @@ def parse_datetime(date_str: str):
     return parse(date_str)
 
 
-def format_datetime(dt: datetime, fmt: DateFormat | str = DateFormat.ISO_DATETIME):
+def format_datetime(
+    dt: datetime, fmt: Union[DateFormat, str] = DateFormat.ISO_DATETIME
+):
     """
     将 datetime 对象转换为中文日期格式
     """

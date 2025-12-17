@@ -4,11 +4,12 @@ __doc__ = """
 
 
 from abc import ABC, abstractmethod
-from typing import List, TypeVar
+from typing import List, Optional, TypeVar
 
 from logis.util.io_util import AsyncWriteBuffer, WriteBuffer, WriteBufferConfig
 from logis.util.lambda_util import invoke
 
+T = TypeVar("T")
 
 class MetricModel(ABC):
     """
@@ -18,14 +19,14 @@ class MetricModel(ABC):
     @classmethod
     @abstractmethod
     def get_measurement(
-        cls, prefix: str | None = None, suffix: str | None = None, sep: str = ""
+        cls, prefix: Optional[str] = None, suffix: Optional[str] = None, sep: str = ""
     ) -> str:
         """
         获取指标名称
         """
         pass
 
-    def to_influxdb_point(self, measurement: str | None = None):
+    def to_influxdb_point(self, measurement: Optional[str] = None):
         """
         转换为InfluxDB点
         """
@@ -40,7 +41,7 @@ class IMetricCollector(ABC):
     指标收集器
     """
 
-    def __init__(self, write_buffer: WriteBuffer | None = None, **kwargs):
+    def __init__(self, write_buffer: Optional[WriteBuffer] = None, **kwargs):
         super().__init__(**kwargs)
         self._buffer = write_buffer or AsyncWriteBuffer(
             WriteBufferConfig(batch_size=100, flush_interval=10, handler=self.submit)
@@ -48,13 +49,13 @@ class IMetricCollector(ABC):
         invoke(self._buffer.start)
 
     @abstractmethod
-    def submit[A](self, metrics: List[A]):
+    def submit(self, metrics: List[T]):
         """
         提交指标
         """
         pass
 
-    def collect[A](self, metric: A):
+    def collect(self, metric: T):
         """
         缓冲指标
         """

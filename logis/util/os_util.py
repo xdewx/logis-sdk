@@ -1,10 +1,9 @@
 import logging
 import time
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Union
 
 import psutil
-from cv2 import log
 from ipa.decorator import deprecated
 
 
@@ -26,7 +25,7 @@ def find_process_on_port(port: int):
 
 
 @deprecated("请使用 kill_all_process_on_port 替代")
-def kill_process_on_port(port, max_try: int | None = 1) -> int | None:
+def kill_process_on_port(port, max_try: Optional[int] = 1) -> Optional[int]:
     """
     强制释放占用指定端口的进程，如果有多个进程只处理第一个。
 
@@ -37,7 +36,7 @@ def kill_process_on_port(port, max_try: int | None = 1) -> int | None:
     Returns:
         int | None: 成功释放进程的 PID，如果不存在对应进程则返回 None。
     """
-    pid: int | None = None
+    pid: Optional[int] = None
     try_count = 0
     while max_try is None or try_count < max_try:
         p = find_process_on_port(port)
@@ -74,7 +73,7 @@ def find_all_process_on_port(port: int) -> List[psutil.Process]:
 
 
 def wait_port_idle(
-    port: int, check_interval: float = 1.0, timeout: float | None = None
+    port: int, check_interval: float = 1.0, timeout: Optional[float] = None
 ):
     """
     等待指定端口空闲，即没有进程占用该端口。
@@ -98,7 +97,7 @@ def wait_port_idle(
         time.sleep(check_interval)
 
 
-def kill_all_process_on_port(port, max_try: int | None = 1) -> int | None:
+def kill_all_process_on_port(port, max_try: Optional[int] = 1) -> Optional[int]:
     """
     强制释放占用指定端口的所有进程。
 
@@ -111,7 +110,7 @@ def kill_all_process_on_port(port, max_try: int | None = 1) -> int | None:
     """
 
     def _kill(p: psutil.Process):
-        pid: int | None = None
+        pid: Optional[int] = None
         try_count = 0
         while max_try is None or try_count < max_try:
             if not p or not p.pid:
@@ -135,6 +134,6 @@ def kill_all_process_on_port(port, max_try: int | None = 1) -> int | None:
         _kill(p)
 
 
-def ensure_path(path: str | Path):
+def ensure_path(path: Union[str, Path]):
     return Path(path)
     # return path if isinstance(path, Path) else Path(path)

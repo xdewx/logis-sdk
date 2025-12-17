@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List, Union
 
 import i18n
 
@@ -15,7 +16,7 @@ if INNER_LOCALES_DIR.exists():
     i18n.load_path.append(str(INNER_LOCALES_DIR))
 
 
-def add_locale_dir(path: str | list[str]):
+def add_locale_dir(path: Union[str, List[str]]):
     """
     添加语言包目录
     Args:

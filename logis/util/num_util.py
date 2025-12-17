@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Any, Literal, TypeVar
 
 from logis.data_type.unitable import NumberUnit
 
@@ -49,7 +49,10 @@ def split_integer(
             yield value
 
 
-def get_numeric_value[V](some: V):
+V = TypeVar("V")
+
+
+def get_numeric_value(some: V):
     """
     获取输入对象的数值
     """

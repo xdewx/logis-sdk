@@ -17,7 +17,7 @@ class PathFindingAlgorithm(metaclass=ABCMeta):
     寻路算法
     """
 
-    type: PathFindingAlgorithmType | str
+    type: Union[PathFindingAlgorithmType, str]
 
     @abstractmethod
     def find_path(self, input: PathFindingInput, **kwargs) -> PathFindingOutput:

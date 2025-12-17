@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
+from typing import Union
 
 
 class IOrder(ABC):
@@ -11,14 +12,14 @@ class IOrder(ABC):
         """
         pass
 
-    def get_wave_id(self) -> str | int | None:
+    def get_wave_id(self) -> Union[str, int, None]:
         """
         波次ID
         """
         return None
 
     @abstractmethod
-    def set_wave_id(self, wave_id: str | int | None):
+    def set_wave_id(self, wave_id: Union[str, int, None]):
         """
         设置波次ID
         """
