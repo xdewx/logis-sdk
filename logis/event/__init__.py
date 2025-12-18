@@ -13,9 +13,9 @@ T = TypeVar("T")
 
 class EventContext(BaseModel, Generic[T]):
     # 事件所携带的数据
-    payload: T | None = None
+    payload: Optional[T] = None
     # 事件源ID
-    source_id: str | None = None
+    source_id: Optional[str] = None
     # 事件目标ID
     target_id: Optional[Any] = None
     # 事件名称
@@ -58,11 +58,11 @@ class EventBaseModel(BaseModel, Generic[T]):
     # 设计为x.y.z的形式
     event_type: str
 
-    value: T | None = None
+    value: Optional[T] = None
 
-    source_id: str | None = None
+    source_id: Optional[str] = None
 
     # 事件发生的时间
     event_time: float
 
-    created_at: datetime | None = None
+    created_at: Optional[datetime] = None

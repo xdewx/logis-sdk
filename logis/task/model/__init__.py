@@ -1,11 +1,11 @@
 from abc import ABCMeta, abstractmethod
 from enum import Enum
-from typing import Iterable, Literal, TypeAlias
+from typing import Iterable, Optional, Union
 
 from pydantic import BaseModel, Field
 
-TaskId: TypeAlias = str | int
-TaskPriority: TypeAlias = str | int
+TaskId = Union[str, int]
+TaskPriority = Union[str, int]
 
 
 class TaskStatus(Enum):
@@ -15,10 +15,10 @@ class TaskStatus(Enum):
 
     NOT_STARTED = "not_started"
     STARTED = "started"
+    PAUSED = "paused"
     FINISHED = "finished"
     CANCELLED = "cancelled"
     FAILED = "failed"
-
 
 class ITask(metaclass=ABCMeta):
     """
@@ -55,7 +55,7 @@ class ITask(metaclass=ABCMeta):
         return self.is_status_at(TaskStatus.FINISHED)
 
 
-TaskLike: TypeAlias = ITask | TaskId
+TaskLike = Union[ITask, TaskId]
 
 
 class Task(BaseModel, ITask):
@@ -63,28 +63,28 @@ class Task(BaseModel, ITask):
     任务基础结构
     """
 
-    id: TaskId | None = None
-    parent_id: TaskId | None = None
+    id: Optional[TaskId] = None
+    parent_id: Optional[TaskId] = None
     children_ids: Iterable[TaskId] = Field(default_factory=list)
 
-    name: str | None = None
-    type: str | None = None
-    priority: TaskPriority | None = None
+    name: Optional[str] = None
+    type: Optional[str] = None
+    priority: Optional[TaskPriority] = None
 
     repeat: int = 1
-    progress: float | int = 0
+    progress: Union[float, int] = 0
     tags: Iterable[str] = Field(default_factory=set)
 
-    created_at: int | None = None
-    updated_at: int | None = None
-    started_at: int | None = None
-    finished_at: int | None = None
-    cancelled_at: int | None = None
+    created_at: Optional[int] = None
+    updated_at: Optional[int] = None
+    started_at: Optional[int] = None
+    finished_at: Optional[int] = None
+    cancelled_at: Optional[int] = None
 
-    status: TaskStatus | None = None
-    stage: str | None = None
+    status: Optional[TaskStatus] = None
+    stage: Optional[str] = None
 
-    remark: str | None = None
+    remark: Optional[str] = None
 
     def get_task_id(self) -> TaskId:
         return self.id

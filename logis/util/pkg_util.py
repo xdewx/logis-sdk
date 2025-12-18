@@ -2,13 +2,13 @@ import inspect
 import logging
 from importlib import import_module
 from types import ModuleType
-from typing import Callable, List, Set, Tuple, Type
+from typing import Callable, List, Optional, Set, Tuple, Type, TypeVar
 
 import hmr
 from watchfiles import Change, PythonFilter, awatch
 
 
-def try_hot_reload(name, package: str | None = None):
+def try_hot_reload(name, package: Optional[str] = None):
     """
     热加载指定模块
     Args:
@@ -35,7 +35,10 @@ async def watch_python_dir(
         on_change(change)
 
 
-def collect_subclass_of[T](
+T = TypeVar("T")
+
+
+def collect_subclass_of(
     base_class: Type[T], _from: ModuleType, include_base_class: bool = False
 ):
     def predicate(m):

@@ -1,6 +1,7 @@
 import logging
+import time
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Union
 
 import psutil
 from ipa.decorator import deprecated
@@ -12,15 +13,19 @@ def find_process_on_port(port: int):
     查找占用指定端口的进程，如果有多个只返回第一个。
     """
     for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+        if not proc.pid:
+            continue
         connections = proc.net_connections(kind="inet")
         for conn in connections:
+            if not conn.laddr:
+                continue
             if conn.laddr.port == int(port):
                 return proc
     return None
 
 
 @deprecated("请使用 kill_all_process_on_port 替代")
-def kill_process_on_port(port, max_try: int | None = 1) -> int | None:
+def kill_process_on_port(port, max_try: Optional[int] = 1) -> Optional[int]:
     """
     强制释放占用指定端口的进程，如果有多个进程只处理第一个。
 
@@ -31,7 +36,7 @@ def kill_process_on_port(port, max_try: int | None = 1) -> int | None:
     Returns:
         int | None: 成功释放进程的 PID，如果不存在对应进程则返回 None。
     """
-    pid: int | None = None
+    pid: Optional[int] = None
     try_count = 0
     while max_try is None or try_count < max_try:
         p = find_process_on_port(port)
@@ -56,14 +61,43 @@ def find_all_process_on_port(port: int) -> List[psutil.Process]:
     """
     procs = []
     for proc in psutil.process_iter(["pid", "name", "cmdline"]):
+        if not proc.pid:
+            continue
         connections = proc.net_connections(kind="inet")
         for conn in connections:
+            if not conn.laddr:
+                continue
             if conn.laddr.port == int(port):
                 procs.append(proc)
     return procs
 
 
-def kill_all_process_on_port(port, max_try: int | None = 1) -> int | None:
+def wait_port_idle(
+    port: int, check_interval: float = 1.0, timeout: Optional[float] = None
+):
+    """
+    等待指定端口空闲，即没有进程占用该端口。
+
+    Args:
+        port (int): 要等待的端口号
+        check_interval (float, optional): 检查间隔，单位为秒。默认值为 1.0 秒。
+        timeout (float, optional): 最大等待时间，单位为秒。默认值为 None，代表无限等待。
+
+    Returns:
+        bool: 如果端口空闲则返回 True，否则返回 False。
+    """
+    start = time.time()
+    while True:
+        if timeout is not None and time.time() - start > timeout:
+            return False
+        ps = find_all_process_on_port(port)
+        if not ps:
+            return True
+        logging.info("there are %s process on port %s: %s", len(ps), port, ps)
+        time.sleep(check_interval)
+
+
+def kill_all_process_on_port(port, max_try: Optional[int] = 1) -> Optional[int]:
     """
     强制释放占用指定端口的所有进程。
 
@@ -76,7 +110,7 @@ def kill_all_process_on_port(port, max_try: int | None = 1) -> int | None:
     """
 
     def _kill(p: psutil.Process):
-        pid: int | None = None
+        pid: Optional[int] = None
         try_count = 0
         while max_try is None or try_count < max_try:
             if not p or not p.pid:
@@ -100,6 +134,6 @@ def kill_all_process_on_port(port, max_try: int | None = 1) -> int | None:
         _kill(p)
 
 
-def ensure_path(path: str | Path):
+def ensure_path(path: Union[str, Path]):
     return Path(path)
     # return path if isinstance(path, Path) else Path(path)

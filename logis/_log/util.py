@@ -13,7 +13,7 @@ from .fmt import LoggerFormat
 from .model import HandlerDictConfig, LoggerDictConfig
 
 
-def format_level(level: int | str) -> int:
+def format_level(level: Union[int, str]) -> int:
     """
     将日志级别统一调整为logging内置常量
     """
@@ -26,7 +26,7 @@ def format_level(level: int | str) -> int:
 def format_filename(
     filename: str,
     log_dir: Optional[Path] = None,
-    ensure_suffix: str | None = ".log",
+    ensure_suffix: Optional[str] = ".log",
 ) -> str:
     """
     格式化日志文件名，确保文件名以指定后缀结尾。
@@ -46,7 +46,7 @@ def format_filename(
 def format_filename_if_necessary(
     handler: logging.Handler,
     log_dir: Optional[Path] = None,
-    ensure_suffix: str | None = ".log",
+    ensure_suffix: Optional[str] = ".log",
 ) -> None:
     """
     如果给定的handler是文件处理器类型，则格式化其文件名。
@@ -179,7 +179,7 @@ class DictConfigBuilder:
     def build(self):
         return self.__dict_config__
 
-    def filter(self, f: logging.Filter, name: str | None = None):
+    def filter(self, f: logging.Filter, name: Optional[str] = None):
         """
         将 logging.Filter 实例转换为 logging.config.dictConfig 兼容的字典配置
 
@@ -194,7 +194,7 @@ class DictConfigBuilder:
         filter_dict.update({"()": get_class_full_path(f.__class__)})
         return self
 
-    def handler(self, handler: logging.Handler, name: str | None = None):
+    def handler(self, handler: logging.Handler, name: Optional[str] = None):
         """
         将 logging.Handler 实例转换为 logging.config.dictConfig 兼容的字典配置
 
@@ -228,7 +228,7 @@ class DictConfigBuilder:
         self.__handlers__[name].update(handler_dict)
         return self
 
-    def formatter(self, formatter: logging.Formatter, name: str | None = None):
+    def formatter(self, formatter: logging.Formatter, name: Optional[str] = None):
         """
         将 logging.Formatter 实例转换为 logging.config.dictConfig 兼容的字典配置
 

@@ -1,7 +1,7 @@
 import logging
 import time
 from abc import ABC
-from typing import Any
+from typing import Any, List, Optional, Union
 
 import simpy
 import simpy.resources
@@ -12,8 +12,8 @@ from simpy.events import URGENT
 def try_put(
     env: simpy.Environment,
     container: simpy.Container,
-    amount: int | float,
-    timeout: int | None = None,
+    amount: Union[int, float],
+    timeout: Optional[int] = None,
 ):
     x = container.put(amount)
     if timeout:
@@ -36,7 +36,9 @@ def get_free_capacity(container: simpy.Container):
     return container.capacity - container.level
 
 
-def resize_container(container: simpy.Container, capacity: int | float, is_delta=False):
+def resize_container(
+    container: simpy.Container, capacity: Union[int, float], is_delta=False
+):
     """
     调整容器容量
     Args:
@@ -71,7 +73,7 @@ def resource_to_dict(resource: Any):
 
 
 def schedule_event_at(
-    env: simpy.Environment, at: float | int, ev: simpy.Event | None = None
+    env: simpy.Environment, at: Union[float, int], ev: Optional[simpy.Event] = None
 ):
     """
     计划在指定时间触发事件
@@ -103,9 +105,9 @@ def interrupt_on_event(env: simpy.Environment, ev: simpy.Event):
 
 def interrupt_if_timeout(
     env: simpy.Environment,
-    timeout: float | None = None,
+    timeout: Optional[float] = None,
     check_interval: float = 10,
-    exit_signal: simpy.Event | None = None,
+    exit_signal: Optional[simpy.Event] = None,
 ):
     """
     根据仿真真实运行时间是否超时来中断仿真
@@ -134,9 +136,9 @@ def interrupt_if_timeout(
 
 def run_until(
     env: simpy.Environment,
-    exit_signal: simpy.Event | None = None,
-    max_sim_time: float | None = None,
-    extra_events: list[simpy.Event] | None = None,
+    exit_signal: Optional[simpy.Event] = None,
+    max_sim_time: Optional[float] = None,
+    extra_events: Optional[List[simpy.Event]] = None,
 ):
     events = []
     if exit_signal:

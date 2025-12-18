@@ -1,14 +1,16 @@
 __doc__ = "工具类"
 
 
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, TypeVar
 
 from pandas import isna
 
 from logis.data_type import ErrorHandler
 
+T = TypeVar("T")
 
-def first_not_none[T](*args: T) -> Optional[T]:
+
+def first_not_none(*args: T) -> Optional[T]:
     for item in args:
         if item is not None:
             return item
@@ -29,7 +31,7 @@ def set_attr_if(
     obj: Any,
     props: dict,
     cond: Callable[[str, Any], bool],
-    on_error: ErrorHandler | None = None,
+    on_error: Optional[ErrorHandler] = None,
     **kwargs,
 ):
     """

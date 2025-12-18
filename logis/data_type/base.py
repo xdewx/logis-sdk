@@ -11,7 +11,6 @@ from typing import (
     NewType,
     Optional,
     Tuple,
-    TypeAlias,
     TypeVar,
     Union,
 )
@@ -19,32 +18,32 @@ from typing import (
 import humps
 from pydantic import BaseModel, ConfigDict, Field
 
-StringNumber: TypeAlias = str
+StringNumber = str
 
-BaseNumberType: TypeAlias = Union[int, float]
-NumberType: TypeAlias = Union[Decimal, int, float, Fraction, Number]
+BaseNumberType = Union[int, float]
+NumberType = Union[Decimal, int, float, Fraction, Number]
 
-ComponentIntId: TypeAlias = int
+ComponentIntId = int
 
-ComponentStrId: TypeAlias = str
+ComponentStrId = str
 
-ComponentId: TypeAlias = Union[ComponentIntId, ComponentStrId]
+ComponentId = Union[ComponentIntId, ComponentStrId]
 
-TmpId: TypeAlias = Union[int, str]
+TmpId = Union[int, str]
 
 
 T = TypeVar("T")
-Predicate: TypeAlias = Callable[[T], bool]
+Predicate = Callable[[T], bool]
 
 Unit = NewType("Unit", str)
 
 # 倍率计算器，输入源单位、目标单位，输出倍率
-RatioComputer: TypeAlias = Callable[[Unit, Unit], Decimal]
+RatioComputer = Callable[[Unit, Unit], Decimal]
 
 EventType = NewType("EventType", str)
 TaskType = NewType("TaskType", str)
 
-TuplePoint: TypeAlias = Tuple[Optional[Number], Optional[Number], Optional[Number]]
+TuplePoint = Tuple[Optional[Number], Optional[Number], Optional[Number]]
 
 # 这里不要随便改，如果不满足自己的需求，可以新建配置
 DEFAULT_PYDANTIC_MODEL_CONFIG = ConfigDict(
@@ -55,6 +54,7 @@ DEFAULT_PYDANTIC_MODEL_CONFIG = ConfigDict(
     validate_by_name=True,
     coerce_numbers_to_str=True,
     alias_generator=humps.camelize,
+    populate_by_name=True,
 )
 class CallableInput(BaseModel):
     args: Tuple = Field(default_factory=tuple)
@@ -82,8 +82,8 @@ class Data(BaseModel, Generic[T]):
     model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
     type: str
     value: T
-    tags: List[str] | None = None
-    description: str | None = None
+    tags: Optional[List[str]] = None
+    description: Optional[str] = None
 
 
 from abc import ABCMeta

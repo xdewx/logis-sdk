@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, NewType, Optional, Tuple, Type, TypeAlias
+from typing import Any, Callable, Dict, List, NewType, Optional, Union
 
 from networkx import DiGraph, Graph
 from pydantic import BaseModel, Field
@@ -7,7 +7,7 @@ from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG, Point
 
 PathFindingAlgorithmType = NewType("PathFindingAlgorithmType", str)
 
-AlgorithmTypeResolver: TypeAlias = Callable[[Any], PathFindingAlgorithmType]
+AlgorithmTypeResolver = Callable[[Any], PathFindingAlgorithmType]
 
 # TODO: 完善名字、补充类型
 A_STAR_ALGORITHM = PathFindingAlgorithmType("a_star")
@@ -16,10 +16,10 @@ DIJKSTRA_ALGORITHM = PathFindingAlgorithmType("dijkstra")
 
 class PathFindingInput(BaseModel):
     # 算法名称，分流用
-    alg: PathFindingAlgorithmType | str | None = None
+    alg: Union[PathFindingAlgorithmType, str, None] = None
 
     # 图对象，可以是无向图或有向图
-    graph: Graph | DiGraph | None = None
+    graph: Union[Graph, DiGraph, None] = None
 
     # 起点
     start: Point

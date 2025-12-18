@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+from typing import Generic, List, Optional, TypeVar
 
 from pydantic import AliasChoices, BaseModel, Field
 
@@ -8,7 +8,7 @@ T = TypeVar("T")
 
 
 class Pager(BaseModel):
-    page_base: int | None = Field(
+    page_base: Optional[int] = Field(
         default=0, validation_alias=AliasChoices("page_base", "pageBase")
     )
     page_size: int = Field(
@@ -17,7 +17,7 @@ class Pager(BaseModel):
     page_at: int = Field(
         default=0, validation_alias=AliasChoices("page_at", "pageAt", "page")
     )
-    total: int | None = None
+    total: Optional[int] = None
 
     model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
 
@@ -31,10 +31,10 @@ class Pager(BaseModel):
 
 
 class PageResult(Pager, Generic[T]):
-    items: list[T]
+    items: List[T]
 
     @staticmethod
-    def of_page[T](page: Pager, items: list[T], total: int) -> "PageResult[T]":
+    def of_page(page: Pager, items: List[T], total: int) -> "PageResult[T]":
         return PageResult[T](
             items=items,
             total=total,
@@ -47,7 +47,7 @@ class PageResult(Pager, Generic[T]):
 
 
 class TableQuery(Pager):
-    database: str | None = None
+    database: Optional[str] = None
     table: str
 
     model_config = DEFAULT_PYDANTIC_MODEL_CONFIG

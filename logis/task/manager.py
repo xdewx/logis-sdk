@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
-from typing import Iterable, Iterator
+from typing import Iterable, Iterator, Optional
 
 from networkx import DiGraph, has_path
 
@@ -40,7 +40,7 @@ class AbstractTaskManager(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def add_task(self, task: TaskLike, parent: TaskLike | None = None, **attr):
+    def add_task(self, task: TaskLike, parent: Optional[TaskLike] = None, **attr):
         """
         添加任务
 
@@ -52,7 +52,7 @@ class AbstractTaskManager(metaclass=ABCMeta):
 
     @abstractmethod
     def add_task_if_absent(
-        self, task: TaskLike, parent: TaskLike | None = None, **attr
+        self, task: TaskLike, parent: Optional[TaskLike] = None, **attr
     ) -> bool:
         """
         如果任务不存在则添加,否则不添加
@@ -89,7 +89,7 @@ class AbstractTaskManager(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_task(self, task: TaskLike) -> ITask | None:
+    def get_task(self, task: TaskLike) -> Optional[ITask]:
         """
         根据任务ID获取任务本身
         """
@@ -178,7 +178,7 @@ class TaskGraph(AbstractTaskManager):
         for node_id in self.__graph__.nodes:
             yield node_id if only_id else self.get_task(node_id)
 
-    def get_task(self, task_id: TaskId) -> ITask | None:
+    def get_task(self, task_id: TaskId) -> Optional[ITask]:
         task = self.__id_task_map__.get(task_id)
         if task:
             return task
@@ -188,7 +188,7 @@ class TaskGraph(AbstractTaskManager):
     def find_by(self):
         raise NotImplementedError("TaskGraph.find_by not implemented")
 
-    def add_task(self, task: TaskLike, parent: TaskLike | None = None, **attr):
+    def add_task(self, task: TaskLike, parent: Optional[TaskLike] = None, **attr):
         task_id = self.parse_task_id(task)
         self.__id_task_map__[task_id] = task
         self.__graph__.add_node(task_id, **attr)
@@ -201,7 +201,7 @@ class TaskGraph(AbstractTaskManager):
             self.__graph__.add_edge(parent_id, task_id)
 
     def add_task_if_absent(
-        self, task: TaskLike, parent: TaskLike | None = None, **attr
+        self, task: TaskLike, parent: Optional[TaskLike] = None, **attr
     ) -> bool:
         task_id = self.parse_task_id(task)
         has = self.__graph__.has_node(task_id)

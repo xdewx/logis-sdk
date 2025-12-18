@@ -1,5 +1,5 @@
 import logging
-from typing import Generic, Literal
+from typing import Generic, Literal, Optional, Union
 
 import requests
 from pydantic import BaseModel
@@ -15,24 +15,24 @@ class ApiError(BaseModel):
 class ApiResponse(BaseModel, Generic[T]):
 
     success: bool
-    data: T | None = None
-    error: ApiError | str | None = None
-    message: str | None = None
-    extra: dict | None = None
+    data: Optional[T] = None
+    error: Union[ApiError, Optional[str]] = None
+    message: Optional[str] = None
+    extra: Optional[dict] = None
 
     model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
 
     @staticmethod
-    def positive[T](data: T, **kwargs):
+    def positive(data: T, **kwargs):
         return ApiResponse[T](success=True, data=data, **kwargs)
 
     @staticmethod
-    def negative(error: ApiError | str, **kwargs):
+    def negative(error: Union[ApiError, str], **kwargs):
         return ApiResponse[None](success=False, error=error, **kwargs)
 
     @staticmethod
     def from_http_response(
-        r: requests.Response, content_type: Literal["json", "text"] | None = None
+        r: requests.Response, content_type: Optional[Literal["json", "text"]] = None
     ):
         ct = content_type or r.headers.get("content-type") or ""
         try:

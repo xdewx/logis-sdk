@@ -3,7 +3,7 @@ from collections import defaultdict
 from contextvars import ContextVar
 from itertools import count
 from numbers import Number
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Optional
 
 
 class Context:
@@ -39,11 +39,11 @@ class Context:
         # setattr(cls._thread_local, key, value)
 
     @classmethod
-    def get[T](
+    def get(
         cls,
         key,
-        default: T | None = None,
-        default_factory: Callable[[], T] = None,
+        default: Optional[Any] = None,
+        default_factory: Callable[[], Any] = None,
         create=False,
     ):
         """
@@ -63,7 +63,7 @@ class Context:
         return result
 
     @classmethod
-    def get_all(cls) -> dict | None:
+    def get_all(cls) -> Optional[dict]:
         return cls._context_vars_.get()
 
     @classmethod
@@ -73,6 +73,7 @@ class Context:
         """
         if dc := cls.get_all():
             dc.clear()
+            del dc
         cls._context_vars_.set(None)
         # cls._thread_local.__dict__.clear()
 
@@ -120,7 +121,9 @@ class Context:
         return dx
 
     @classmethod
-    def duration(cls, key: str, now: float = 0, update_end_time=False) -> float | None:
+    def duration(
+        cls, key: str, now: float = 0, update_end_time=False
+    ) -> Optional[float]:
         """
         计算时长
         Args:
