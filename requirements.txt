@@ -1,54 +1,54 @@
-twine==4.0.2
+twine
 pyinstaller
-pydantic==2.10.6
-watchfiles==0.24.0
-aiohttp==3.10.11
-
-numpy==1.24.4
-pandas==1.5.3
-scipy==1.10.1
-openpyxl==3.1.2
-networkx==2.8.8
+pydantic
+watchfiles
+aiohttp
+platformdirs
+numpy
+pandas
+scipy
+openpyxl
+networkx
 pathfinding==1.0.17
 matplotlib
 simpy==4.1.1
-websockets==13.1
-python-socketio==5.11.2
-pyee==9.0.4
-aiocsv==1.3.1
-diagrams==0.24.1
+websockets
+python-socketio
+pyee
+aiocsv
+diagrams
 
-requests==2.31.0
-websocket-client==1.7.0
-openai==1.30.5
-zhipuai==2.1.4.20230814
+requests
+websocket-client
+openai
+zhipuai
 
 open_python
 
 sqlmodel
-tinydb==4.8.0
-influxdb-client==1.41.0
-influxdb3-python==0.16.0
+tinydb
+influxdb-client
+influxdb3-python
 
-python-dateutil==2.8.2
-Pint==0.20.1
-python-i18n==0.3.9
-pyhumps==3.8.0
+python-dateutil
+Pint
+python-i18n
+pyhumps
 
-pytest==8.3.5
-pytest-asyncio==0.21.1
+pytest
+pytest-asyncio
 
-colorlog==6.7.0
+colorlog
 psutil
 boltons
 more-itertools
 toolz
-tabulate==0.9.0
+tabulate
 faker
-python-json-logger==2.0.7
-prometheus-client==0.17.1
+python-json-logger
+prometheus-client
 
-pyecharts==2.0.5
+pyecharts
 
-python_hmr==0.3.0
+python_hmr
 ipa-python-kit==0.0.6
