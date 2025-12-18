@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 from fractions import Fraction
 from functools import reduce
-from typing import Any, Callable, Dict, List, NewType, Optional, Tuple, TypeAlias
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 
@@ -15,7 +15,7 @@ from .point import *
 class NumberUnit(metaclass=ABCMeta):
 
     quantity: NumberType
-    unit: str | Unit | None = None
+    unit: Union[str, Unit, None] = None
 
     # 自定义倍率转换器
     _unit_config_: Optional["UnitConfig"] = None
@@ -64,7 +64,7 @@ class NumberUnit(metaclass=ABCMeta):
         # TODO: 处理精度问题
         return self.quantity / other.quantity
 
-    def __mul__(self, times: int | float):
+    def __mul__(self, times: Union[int, float]):
         data = self.model_dump()
         data["quantity"] *= times
         return type(self).model_validate(data)
@@ -118,7 +118,7 @@ class NumberUnit(metaclass=ABCMeta):
         return cls(quantity=number_type(tmps[0]), unit=tmps[1])
 
     @classmethod
-    def of(cls, num: NumberType, unit: str | None = None):
+    def of(cls, num: NumberType, unit: Optional[str] = None):
         return cls(quantity=num, unit=unit)
 
     def increase(self, num: NumberType) -> None:
@@ -132,7 +132,7 @@ class NumberUnit(metaclass=ABCMeta):
 class QuantifiedValue(BaseModel, NumberUnit):
     model_config = MODEL_CONFIG
 
-    name: str | None = None
+    name: Optional[str] = None
 
 
 class Capacity(QuantifiedValue):
@@ -147,7 +147,7 @@ class Speed(QuantifiedValue):
     pass
 
 
-SpeedVector: TypeAlias = Tuple[Optional[Speed], Optional[Speed], Optional[Speed]]
+SpeedVector = Tuple[Optional[Speed], Optional[Speed], Optional[Speed]]
 
 
 class ThreeDimensionalVelocity(BaseModel):
@@ -157,17 +157,17 @@ class ThreeDimensionalVelocity(BaseModel):
 
     model_config = MODEL_CONFIG
 
-    x: Speed | None = None
-    y: Speed | None = None
-    z: Speed | None = None
+    x: Optional[Speed] = None
+    y: Optional[Speed] = None
+    z: Optional[Speed] = None
 
     @classmethod
     def of(
         cls,
-        x: NumberType | None = None,
-        y: NumberType | None = None,
-        z: NumberType | None = None,
-        unit: str | None = None,
+        x: Optional[NumberType] = None,
+        y: Optional[NumberType] = None,
+        z: Optional[NumberType] = None,
+        unit: Optional[str] = None,
     ):
         return cls(
             x=None if x is None else Speed.of(x, unit),
@@ -300,8 +300,12 @@ class UnitConfig(dict):
             self[alias] = self.get(unit)
         return self
 
-    def __or__(self, value):
-        return UnitConfig(super().__or__(value))
+    def __or__(self, value: Dict):
+
+        obj = dict(value)
+        obj.update(self)
+
+        return UnitConfig(obj)
 
 
 class UnitConfigBuilder:
@@ -349,7 +353,7 @@ DEFAULT_UNIT_CONFIG = TIME_UNIT_CONFIG | VOLUME_UNIT_CONFIG | LENGTH_UNIT_CONFIG
 
 def unify_quantified_value(
     self: QuantifiedValue,
-    target_unit: Unit | None = None,
+    target_unit: Optional[Unit] = None,
     unit_config: UnitConfig = DEFAULT_UNIT_CONFIG,
     modify_ref: bool = False,
 ):
@@ -366,14 +370,17 @@ def unify_quantified_value(
             self.unit = target_unit
             return self
         # 上面这种方式能尽可能避免属性丢失，但修改的是原始对象
-        dc = self.model_dump() | dict(quantity=self.quantity * ratio, unit=target_unit)
+        dc = {
+            **self.model_dump(),
+            **dict(quantity=self.quantity * ratio, unit=target_unit),
+        }
         return type(self)(**dc)
 
 
 def merge_quantified_value(
     items: List[QuantifiedValue],
-    unit_config: UnitConfig | None = DEFAULT_UNIT_CONFIG,
-    target_unit: Unit | None = None,
+    unit_config: Optional[UnitConfig] = DEFAULT_UNIT_CONFIG,
+    target_unit: Optional[Unit] = None,
 ):
     """
     将所有的物理量合并，这里是假定所有的物理量都是同类，例如：全是长度，而不是既有长度又有速度
@@ -397,9 +404,10 @@ def merge_quantified_value(
     ), unify_quantified_value(
         items[1], target_unit=target_unit, unit_config=unit_config
     )
-    dc = self.model_dump() | dict(
-        quantity=self.quantity + other.quantity, unit=target_unit
-    )
+    dc = {
+        **self.model_dump(),
+        **dict(quantity=self.quantity + other.quantity, unit=target_unit),
+    }
     return type(self)(**dc)
 
 

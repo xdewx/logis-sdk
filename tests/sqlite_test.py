@@ -1,6 +1,7 @@
 import time
 from ast import Dict
 from pathlib import Path
+from typing import Optional
 
 from sqlalchemy import create_engine
 from sqlalchemy.types import JSON
@@ -14,7 +15,7 @@ assert DATA_DIR.exists()
 
 class Event(SQLModel, table=True):
     __tablename__ = "event"
-    id: int | None = Field(
+    id: Optional[int] = Field(
         default=None, primary_key=True, sa_column_kwargs={"autoincrement": True}
     )
     time: float
@@ -23,8 +24,10 @@ class Event(SQLModel, table=True):
 
     model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
 
+from uuid import uuid4
 
-engine = create_engine(f"sqlite:///{DATA_DIR}/test.db", echo=True)
+db_file = f"sqlite:///{DATA_DIR}/test.db"
+engine = create_engine(db_file, echo=True)
 SQLModel.metadata.create_all(engine)
 
 

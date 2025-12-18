@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Tuple
 
 from pydantic import BaseModel, Field
 
@@ -15,6 +15,6 @@ class EchartsConfig(BaseModel):
         self.attrs.setdefault("class", []).extend(class_list)
         return self
 
-    def add_css_style(self, *pairs: tuple[str, Any]):
+    def add_css_style(self, *pairs: Tuple[str, Any]):
         self.attrs.setdefault("style", {}).update({k: v for k, v in pairs})
         return self

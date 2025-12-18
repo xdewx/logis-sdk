@@ -1,3 +1,4 @@
+import sys
 from typing import Callable, NewType
 
 from logis.alg.path_finding import Finder
@@ -10,7 +11,8 @@ from logis.data_type.point import Point
 
 
 def test_pathfinding_model():
-    assert isinstance(PathFindingAlgorithmType, NewType)
+    if sys.version_info >= (3, 13):
+        assert isinstance(PathFindingAlgorithmType, NewType)
     assert isinstance(Predicate, Callable)
 
     print("Pathfinding model test passed.")

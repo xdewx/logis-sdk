@@ -1,14 +1,14 @@
-from typing import Any, Dict, List, Literal, Tuple, TypeAlias
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from logis.data_type import Point
 
-Grid2: TypeAlias = List[List[Point]]
-Grid3: TypeAlias = List[Grid2]
+Grid2 = List[List[Point]]
+Grid3 = List[Grid2]
 
 
 def to_grid(
     points: List[Point], include_x=True, include_y=True, include_z=False, **kwargs
-) -> Grid3 | Grid2 | None:
+) -> Union[Grid3, Grid2, None]:
     """
     将一系列点转换为网格结构
     每个Point代表一个方块的中心点，方块大小一致但不一定是正立方体
@@ -89,6 +89,7 @@ def to_grid(
                 tmp = tmp[idx]
     return grid
 
+
 import networkx as nx
 from pyecharts import options as opts
 from pyecharts.charts import Graph, Sankey, Tree
@@ -96,12 +97,12 @@ from pyecharts.charts import Graph, Sankey, Tree
 
 def nx_digraph_to_graph(
     G: nx.DiGraph,
-    title: str | None = None,
+    title: Optional[str] = None,
     node_size: int = 30,
     node_size_key: str = None,
     layout: Literal["force", "circular"] = "force",
     graph_opts: Dict[str, Any] = {},
-    virtual_root_id: str | None = None,
+    virtual_root_id: Optional[str] = None,
     **kwargs,
 ) -> Graph:
     """
@@ -155,13 +156,13 @@ def nx_digraph_to_graph(
 
 def nx_digraph_to_tree(
     G: nx.DiGraph,
-    title: str | None = None,
+    title: Optional[str] = None,
     layout: str = "orthogonal",
     orient: str = "LR",
     name_key: str = "name",
     color_key: str = "color",
     default_name: str = "node",
-    virtual_root_id: str | None = None,
+    virtual_root_id: Optional[str] = None,
 ) -> Tree:
     """
     将树状结构的 networkx.DiGraph 转换为 Pyecharts Tree 图表
@@ -225,7 +226,7 @@ def nx_digraph_to_tree(
 
 def nx_digraph_to_sankey(
     G: nx.DiGraph,
-    title: str | None = None,
+    title: Optional[str] = None,
     level_key: str = None,
     **kwargs,
 ) -> Sankey:

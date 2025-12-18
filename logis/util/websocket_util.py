@@ -1,12 +1,21 @@
 import asyncio
+from typing import Union
 
 import fastapi
 import websockets
 from websockets.asyncio.client import connect
 
+try:
+    from websockets.server import ServerConnection
+except:
+    from websockets import ServerConnection
 
-async def send_text(conn: websockets.ServerConnection | fastapi.WebSocket, data: str):
-    if isinstance(conn, websockets.ServerConnection):
+
+WebSocketConnection = Union[ServerConnection, fastapi.WebSocket]
+
+
+async def send_text(conn: WebSocketConnection, data: str):
+    if isinstance(conn, ServerConnection):
         await conn.send(data)
     elif isinstance(conn, fastapi.WebSocket):
         await conn.send_text(data)
@@ -16,18 +25,18 @@ async def send_text(conn: websockets.ServerConnection | fastapi.WebSocket, data:
         )
 
 
-def get_close_code(conn: websockets.ServerConnection | fastapi.WebSocket):
-    if isinstance(conn, websockets.ServerConnection):
+def get_close_code(conn: WebSocketConnection):
+    if isinstance(conn, ServerConnection):
         return conn.close_code
     elif isinstance(conn, fastapi.WebSocket):
         return None
 
 
-def parse_client_info(connection: websockets.ServerConnection | fastapi.WebSocket):
+def parse_client_info(connection: WebSocketConnection):
     """
     从连接中解析客户端ip、port等信息
     """
-    if isinstance(connection, websockets.ServerConnection):
+    if isinstance(connection, ServerConnection):
         client_ip, client_port = connection.transport.get_extra_info("peername")
     elif isinstance(connection, fastapi.WebSocket):
         client_ip, client_port = connection.client.host, connection.client.port
@@ -36,11 +45,11 @@ def parse_client_info(connection: websockets.ServerConnection | fastapi.WebSocke
     return client_ip, client_port
 
 
-def get_write_buffer_size(connection: websockets.ServerConnection | fastapi.WebSocket):
+def get_write_buffer_size(connection: WebSocketConnection):
     """
     获取连接的写缓冲区大小
     """
-    if isinstance(connection, websockets.ServerConnection):
+    if isinstance(connection, ServerConnection):
         return connection.transport.get_write_buffer_size()
     else:
         raise NotImplementedError(
@@ -48,13 +57,11 @@ def get_write_buffer_size(connection: websockets.ServerConnection | fastapi.WebS
         )
 
 
-def get_write_buffer_limits(
-    connection: websockets.ServerConnection | fastapi.WebSocket,
-):
+def get_write_buffer_limits(connection: WebSocketConnection):
     """
     获取连接的写缓冲区可用大小
     """
-    if isinstance(connection, websockets.ServerConnection):
+    if isinstance(connection, ServerConnection):
         return connection.transport.get_write_buffer_limits()
     else:
         raise NotImplementedError(

@@ -4,6 +4,7 @@ import platform
 import re
 import subprocess
 from pathlib import Path
+from typing import Optional, Union
 
 import requests
 from influxdb_client_3 import Point as _Point
@@ -17,7 +18,7 @@ class Point(_Point):
     继承自 influxdb_client_3.Point，避免用法上的错误
     """
 
-    def tag(self, key: str, value: str | None):
+    def tag(self, key: str, value: Optional[str] = None):
         """
         避免value为None，确保value一定是字符串类型
         """
@@ -31,12 +32,12 @@ class InfluxQuery(BaseModel):
     query: str
     language: str = "sql"
     mode: str = "all"
-    database: str | None = None
+    database: Optional[str] = None
 
 
 class InfluxCommand:
 
-    def __init__(self, binary_dir: Path, version="v3", token: str | None = None):
+    def __init__(self, binary_dir: Path, version="v3", token: Optional[str] = None):
         self._binary_dir = binary_dir
         self.version = version
         self._token = token
@@ -53,9 +54,9 @@ class InfluxCommand:
 
     def serve(
         self,
-        data_dir: Path | str,
-        token_file: Path | None = None,
-        node_id: str | None = platform.node(),
+        data_dir: Union[Path, str],
+        token_file: Optional[Path] = None,
+        node_id: Optional[str] = platform.node(),
         object_store: str = "file",
         host: str = "127.0.0.1",
         port: int = 8181,
@@ -92,10 +93,10 @@ class InfluxCommand:
 
     def generate_admin_token(
         self,
-        name: str | None = None,
+        name: Optional[str] = None,
         offline: bool = True,
-        path: Path | None = None,
-        expiry: str | None = None,  # "100y",
+        path: Optional[Path] = None,
+        expiry: Optional[str] = None,  # "100y",
         creationflags=subprocess.CREATE_NO_WINDOW,
     ):
         if offline:
@@ -135,7 +136,7 @@ class InfluxCommand:
                 return line.split(prefix)[1].strip()
         return None
 
-    def execute(self, cmd: str, token: str | None = None, **kwargs):
+    def execute(self, cmd: str, token: Optional[str] = None, **kwargs):
         """
         执行 InfluxDB 命令。
         """
@@ -162,7 +163,7 @@ class InfluxCommand:
         return stdout
 
     def create_database(
-        self, database: str, token: str, retention_period: str | None = None
+        self, database: str, token: str, retention_period: Optional[str] = None
     ):
         """
         创建一个新的数据库。
@@ -190,7 +191,7 @@ class InfluxRestClient:
     """
 
     def __init__(self, base_url: str, token: str, version="v3", **kwargs):
-        self._url = f"{base_url.strip().rstrip("/")}/api/{version}"
+        self._url = base_url.strip().rstrip("/") + "/api/" + version
         self._token = token
 
     def _get_default_headers(self):
@@ -208,7 +209,7 @@ class InfluxRestClient:
             r.success = True
         return r
 
-    def delete_database(self, database: str, hard_delete_at: str | None = None):
+    def delete_database(self, database: str, hard_delete_at: Optional[str] = None):
         r = requests.delete(
             f"{self._url}/configure/database",
             params=dict(db=database, hard_delete_at=hard_delete_at),
@@ -220,7 +221,7 @@ class InfluxRestClient:
         self,
         database: str,
         table: str,
-        hard_delete_at: str | None = None,
+        hard_delete_at: Optional[str] = None,
         strict: bool = True,
     ):
         """

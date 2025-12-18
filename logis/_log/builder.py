@@ -3,7 +3,7 @@ import sys
 from logging import StreamHandler
 from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 from pathlib import Path
-from typing import Type, Union
+from typing import List, Optional, Type, Union
 from uuid import uuid4
 
 from platformdirs import user_data_dir
@@ -27,7 +27,7 @@ class LoggerBuilder:
 
         self._handlers = []
 
-    def _resolve_file_path(self, filename: str) -> Path | None:
+    def _resolve_file_path(self, filename: str) -> Optional[Path]:
         if not filename:
             return None
         return Path(format_filename(filename, self._log_dir))
@@ -46,7 +46,7 @@ class LoggerBuilder:
         self._propagate = propagate
         return self
 
-    def dir(self, path: str | Path) -> "LoggerBuilder":
+    def dir(self, path: Union[str, Path]) -> "LoggerBuilder":
         """
         设置日志目录
         """
@@ -94,10 +94,10 @@ class LoggerBuilder:
     def add_handler(
         self,
         handler_type: Union[Type[logging.Handler], logging.Handler],
-        level: int | None = None,
-        filename: str | None = None,
-        name: str | None = None,
-        filters: list[logging.Filter] | None = None,
+        level: Optional[int] = None,
+        filename: Optional[str] = None,
+        name: Optional[str] = None,
+        filters: Optional[List[logging.Filter]] = None,
         **kwargs,
     ) -> "LoggerBuilder":
         """

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import timedelta
-from typing import List
+from typing import List, Optional
 from uuid import uuid4
 
 import pandas
@@ -17,11 +17,11 @@ class WavePickingConfig(BaseModel):
     """
 
     # 批次大小
-    batch_size: int | None = None
+    batch_size: Optional[int] = None
     # 时间窗口
-    time_interval: timedelta | None = None
+    time_interval: Optional[timedelta] = None
     # 指定各个时间段
-    time_index: pandas.DatetimeIndex | None = None
+    time_index: Optional[pandas.DatetimeIndex] = None
 
     model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
 
@@ -35,7 +35,7 @@ class WavePickingStrategy(ABC):
     def split(self, orders: List[IOrder], config: WavePickingConfig) -> List[IOrder]:
         pass
 
-    def _generate_wave_id(self, waves: List[List[IOrder]]) -> str | int | None:
+    def _generate_wave_id(self, waves: List[List[IOrder]]) -> Optional[Union[str, int]]:
         """
         生成波次ID,默认是uuid4
         """

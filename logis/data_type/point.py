@@ -10,13 +10,14 @@ T = TypeVar("T", bound=Number)
 
 
 class GenericPoint(Generic[T]):
+
     def __init__(
         self,
-        x: T | None = None,
-        y: T | None = None,
-        z: T | None = None,
+        x: Optional[T] = None,
+        y: Optional[T] = None,
+        z: Optional[T] = None,
         *args,
-        precision: int | None = None,
+        precision: Optional[int] = None,
         **kwargs,
     ):
         """
@@ -35,7 +36,7 @@ class GenericPoint(Generic[T]):
 
     @classmethod
     def from_tuple(
-        cls, tp: Tuple[T], precision: int | None = None, **kwargs
+        cls, tp: Tuple[T], precision: Optional[int] = None, **kwargs
     ) -> "GenericPoint[T]":
         return cls(*tp, precision=precision, **kwargs)
 
@@ -107,8 +108,8 @@ class Point(GenericPoint[float]):
     @classmethod
     def of(
         cls,
-        x: Number | None = None,
-        y: Number | None = None,
+        x: Optional[Number] = None,
+        y: Optional[Number] = None,
         z: Optional[Number] = None,
         precision: int = 3,
         **kwargs,
@@ -124,7 +125,7 @@ class Point(GenericPoint[float]):
         TODO: 不应该自动转float、不应该自动保留两位小数
         """
         self._id = next(self.__counter)
-        self.unit: str | None = None
+        self.unit: Optional[str] = None
         self.x: Optional[Number] = None
         self.y: Optional[Number] = None
         self.z: Optional[Number] = None
