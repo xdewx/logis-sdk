@@ -134,6 +134,12 @@ def interrupt_if_timeout(
     return env.process(inner())
 
 
+def has_no_event_left(env: simpy.Environment):
+    """
+    判断指定环境中是否还有未处理的事件
+    """
+    return not env._queue and not env.active_process
+
 def run_until(
     env: simpy.Environment,
     exit_signal: Optional[simpy.Event] = None,
@@ -149,7 +155,15 @@ def run_until(
     if extra_events:
         events.extend(extra_events)
     until = env.any_of(events) if events else None
-    return env.run(until=until)
+    try:
+        return env.run(until=until)
+    except Exception as e:
+        if has_no_event_left(env):
+            logging.warning(
+                "error happens but there is no event left, will ignore: %s", e
+            )
+            return
+        raise e
 
 
 def stop_simulation(env: simpy.Environment):
