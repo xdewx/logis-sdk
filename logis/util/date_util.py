@@ -31,11 +31,12 @@ def parse_datetime(date_str: str):
     if not date_str:  # 处理空值
         return None
 
+    if isinstance(date_str, (pd.Timestamp)):
+        return date_str.to_pydatetime()
+    
     if isinstance(date_str, (datetime)):
         return date_str
 
-    if isinstance(date_str, (pd.Timestamp)):
-        return date_str.to_pydatetime()
 
     format = [
         "%Y年%m月%d日 %H:%M:%S",  # 年月日格式
