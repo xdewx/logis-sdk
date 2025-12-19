@@ -6,12 +6,29 @@ import websockets
 from websockets.asyncio.client import connect
 
 try:
+    from websockets.client import ClientConnection
     from websockets.server import ServerConnection
 except:
-    from websockets import ServerConnection
+    from websockets import ClientConnection, ServerConnection
 
 
-WebSocketConnection = Union[ServerConnection, fastapi.WebSocket]
+WebSocketConnection = Union[ServerConnection, fastapi.WebSocket, ClientConnection]
+
+
+def is_websocket_closed(conn: WebSocketConnection):
+    """
+    判断WebSocket连接是否已关闭
+    """
+    if isinstance(conn, fastapi.WebSocket):
+        from starlette.websockets import WebSocketState
+
+        return conn.client_state == WebSocketState.DISCONNECTED
+    if isinstance(conn, (ClientConnection)):
+        return conn.state == websockets.State.CLOSED
+    if isinstance(conn, ServerConnection):
+        return conn.state == websockets.State.CLOSED
+
+    raise ValueError(f"Unsupported WebSocket connection type: {type(conn)}")
 
 
 async def send_text(conn: WebSocketConnection, data: str):

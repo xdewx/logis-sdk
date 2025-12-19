@@ -182,9 +182,9 @@ class AsyncWriteBuffer(WriteBuffer[T]):
 
     def __init__(self, config, **kwargs):
         super().__init__(config, **kwargs)
+        self._loop = get_or_new_event_loop()
         self._queue = self._config.get_queue(mode="async")
         self._lock = asyncio.Lock()
-        self._loop = get_or_new_event_loop()
         atexit.register(self.__wait_stop)
 
     def __wait_stop(self):

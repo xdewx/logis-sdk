@@ -32,7 +32,17 @@ class WavePickingStrategy(ABC):
     """
 
     @abstractmethod
-    def split(self, orders: List[IOrder], config: WavePickingConfig) -> List[IOrder]:
+    def split(
+        self, orders: List[IOrder], config: WavePickingConfig
+    ) -> List[List[IOrder]]:
+        """
+        对订单列表进行波次划分
+        Args:
+            orders: 订单列表
+            config: 波次拣选配置
+        Returns:
+            波次列表
+        """
         pass
 
     def _generate_wave_id(self, waves: List[List[IOrder]]) -> Optional[Union[str, int]]:
