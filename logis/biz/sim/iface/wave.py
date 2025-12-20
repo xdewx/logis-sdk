@@ -11,9 +11,9 @@ from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG
 from .order import *
 
 
-class WavePickingConfig(BaseModel):
+class WaveGroupingConfig(BaseModel):
     """
-    波次拣选配置
+    波次划分配置
     """
 
     # 批次大小
@@ -26,14 +26,14 @@ class WavePickingConfig(BaseModel):
     model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
 
 
-class WavePickingStrategy(ABC):
+class WaveGroupingStrategy(ABC):
     """
-    分波次拣选策略
+    波次划分策略
     """
 
     @abstractmethod
-    def split(
-        self, orders: List[IOrder], config: WavePickingConfig
+    def group(
+        self, orders: List[IOrder], config: WaveGroupingConfig
     ) -> List[List[IOrder]]:
         """
         对订单列表进行波次划分
@@ -55,3 +55,59 @@ class WavePickingStrategy(ABC):
             wave_id = str(uuid4())
             for od in wave:
                 od.set_wave_id(wave_id)
+
+
+class TimeWindowWaveStrategy(WaveGroupingStrategy):
+    """
+    基于时间窗口的波次划分策略
+    """
+
+    def group(self, orders, config):
+        if not orders:
+            return []
+        orders = sorted(orders, key=lambda od: od.get_order_time())
+
+        min_time, left = orders[0].get_order_time(), orders[-1].get_order_time()
+        time_index = config.time_index or pandas.date_range(
+            min_time, left, freq=config.time_interval
+        )
+        waves: List[List[IOrder]] = []
+        count = 0
+        for i, left in enumerate(time_index):
+            right = time_index[i + 1] if i + 1 < len(time_index) else None
+            wave = []
+            for od in orders[count:]:
+                if od.get_order_time() >= left and (
+                    right is None or od.get_order_time() < right
+                ):
+                    wave.append(od)
+                else:
+                    break
+            if wave:
+                waves.append(wave)
+                count += len(wave)
+
+        self._generate_wave_id(waves)
+        return waves
+
+
+class WaveSizeStrategy(WaveGroupingStrategy):
+    """
+    基于波次大小的波次划分策略
+    """
+
+    def group(self, orders, config):
+        if not orders:
+            return []
+        orders = sorted(orders, key=lambda od: od.get_order_time())
+        waves: List[List[IOrder]] = []
+        wave = []
+        for od in orders:
+            if len(wave) >= config.batch_size:
+                waves.append(wave)
+                wave = []
+            wave.append(od)
+        if wave:
+            waves.append(wave)
+        self._generate_wave_id(waves)
+        return waves

@@ -3,4 +3,5 @@ __doc__ = """
 """
 
 from .order import *
+from .picking import *
 from .wave import *
