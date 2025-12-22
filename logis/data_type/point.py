@@ -130,14 +130,18 @@ class Point(GenericPoint[float]):
         self.y: Optional[Number] = None
         self.z: Optional[Number] = None
         if len(args) == 1:
-            self.x = round(float(args[0][0]), precision)
-            self.y = round(float(args[0][1]), precision)
+            self.x = (
+                round(float(args[0][0]), precision) if args[0][0] is not None else None
+            )
+            self.y = (
+                round(float(args[0][1]), precision) if args[0][1] is not None else None
+            )
             if len(args[0]) > 2 and (z := args[0][2]) is not None:
                 self.z = round(float(z), precision)
 
         elif len(args) >= 2:
-            self.x = round(float(args[0]), precision)
-            self.y = round(float(args[1]), precision)
+            self.x = round(float(args[0]), precision) if args[0] is not None else None
+            self.y = round(float(args[1]), precision) if args[1] is not None else None
             if len(args) > 2 and (z := args[2]) is not None:
                 self.z = round(float(z), precision)
 

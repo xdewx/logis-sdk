@@ -206,9 +206,9 @@ def get_time_3d(delta_distance: Point, v: ThreeDimensionalVelocity):
         delta_distance.unit,
     )
     return max(
-        0 if lx is None else get_time(Length(quantity=lx, unit=lunit), v.x),
-        0 if ly is None else get_time(Length(quantity=ly, unit=lunit), v.y),
-        0 if lz is None else get_time(Length(quantity=lz, unit=lunit), v.z),
+        0 if not lx else get_time(Length(quantity=lx, unit=lunit), v.x),
+        0 if not ly else get_time(Length(quantity=ly, unit=lunit), v.y),
+        0 if not lz else get_time(Length(quantity=lz, unit=lunit), v.z),
     )
 
 
