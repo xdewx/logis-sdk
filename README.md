@@ -35,4 +35,4 @@ class MyPathFindingAlgorithm(PathFindingAlgorithm):
 
 ## 贡献指南
 
-欢迎提交 Pull Request 或报告问题。
+参见 [CONTRIBUTING.md](./CONTRIBUTING.md)
