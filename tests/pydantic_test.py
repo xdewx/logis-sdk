@@ -95,7 +95,6 @@ def test_path():
     m = MyModel.model_validate(dict(path="."))
     assert m.path.exists()
 
-
 class TestModel(BaseModel):
     name: Optional[str] = Field(None, validation_alias=AliasChoices("名称"))
     age: Optional[int] = Field(None, validation_alias=AliasChoices("年龄", "age"))
@@ -110,10 +109,11 @@ def test_validation_alias_choices():
     assert m.age == 18
 
     form = dict(name="张三", 年龄="18")
-    m = TestModel.model_validate(form)
     if sys.version_info >= (3, 9):
+        m = TestModel.model_validate(form, by_alias=True, by_name=True)
         assert m.name == "张三"
     else:
+        m = TestModel.model_validate(form)
         assert m.name is None
 
     assert m.age == 18

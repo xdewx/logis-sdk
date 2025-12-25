@@ -1,6 +1,6 @@
 from itertools import count
 from numbers import Number
-from typing import Generic, Optional, Tuple, TypeVar
+from typing import Dict, Generic, Optional, Tuple, TypeVar
 
 from logis.data_type import Number, TuplePoint
 
@@ -10,6 +10,14 @@ T = TypeVar("T", bound=Number)
 
 
 class GenericPoint(Generic[T]):
+
+    @classmethod
+    def model_validate(cls, v: Dict[str, T]):
+        if v is None:
+            return None
+        if isinstance(v, dict):
+            return cls(**v)
+        raise ValueError("only dict type is supported")
 
     def __init__(
         self,
@@ -125,33 +133,31 @@ class Point(GenericPoint[float]):
         TODO: 不应该自动转float、不应该自动保留两位小数
         """
         self._id = next(self.__counter)
-        self.unit: Optional[str] = None
-        self.x: Optional[Number] = None
-        self.y: Optional[Number] = None
-        self.z: Optional[Number] = None
+        self.unit: Optional[str] = kwargs.get("unit", None)
+        x: Optional[Number] = kwargs.get("x", None)
+        y: Optional[Number] = kwargs.get("y", None)
+        z: Optional[Number] = kwargs.get("z", None)
         if len(args) == 1:
-            self.x = (
-                round(float(args[0][0]), precision) if args[0][0] is not None else None
-            )
-            self.y = (
-                round(float(args[0][1]), precision) if args[0][1] is not None else None
-            )
+            x = round(float(args[0][0]), precision) if args[0][0] is not None else None
+            y = round(float(args[0][1]), precision) if args[0][1] is not None else None
             if len(args[0]) > 2 and (z := args[0][2]) is not None:
-                self.z = round(float(z), precision)
+                z = round(float(z), precision)
 
         elif len(args) >= 2:
-            self.x = round(float(args[0]), precision) if args[0] is not None else None
-            self.y = round(float(args[1]), precision) if args[1] is not None else None
+            x = round(float(args[0]), precision) if args[0] is not None else None
+            y = round(float(args[1]), precision) if args[1] is not None else None
             if len(args) > 2 and (z := args[2]) is not None:
-                self.z = round(float(z), precision)
+                z = round(float(z), precision)
 
         # 调试过程中发现z有时候是None有时候是0，因此这里统一给了默认值
         # 实际上应该外层规范
-        self.x = self.x if self.x is not None else 0
-        self.y = self.y if self.y is not None else 0
-        self.z = self.z if self.z is not None else 0
+        x = x if x is not None else 0
+        y = y if y is not None else 0
+        z = z if z is not None else 0
 
-        super().__init__(self.x, self.y, self.z, precision=precision, **kwargs)
+        kwargs.update(x=x, y=y, z=z, precision=precision)
+
+        super().__init__(**kwargs)
 
     def __repr__(self):
         return f"Point({self.x}, {self.y}, {self.z})"
