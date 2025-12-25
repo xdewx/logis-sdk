@@ -49,6 +49,6 @@ python-json-logger
 prometheus-client
 
 pyecharts
-
+humanize
 python_hmr
 ipa-python-kit==0.0.6
