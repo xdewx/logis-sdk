@@ -1,11 +1,30 @@
+import pytest
 import simpy
 
 from logis.util.simpy_util import (
+    DeadlineEvent,
     interrupt_if_timeout,
     resize_container,
     run_until,
     stop_simulation,
 )
+
+
+def test_deadline_event():
+    env = simpy.Environment()
+    DeadlineEvent(env).schedule_at(15)
+
+    def sleep(n):
+        print(f"sleep {n} start at {env.now}")
+        yield env.timeout(n)
+        print(f"sleep {n} end at {env.now}")
+
+    env.process(sleep(3))
+
+    env.process(sleep(10))
+
+    with pytest.raises(simpy.Interrupt):
+        env.run()
 
 
 def test_resize_container():

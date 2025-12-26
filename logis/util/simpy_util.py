@@ -140,6 +140,35 @@ def has_no_event_left(env: simpy.Environment):
     """
     return not env._queue and not env.active_process
 
+
+class DeadlineEvent(simpy.Event):
+    """
+    截止事件，用于在指定时间触发事件
+    """
+
+    def interrupt(self, *args, **kwargs):
+        """
+        中断事件
+        """
+        raise simpy.Interrupt(f"deadline {self.at} reached, force exit")
+
+    def __init__(self, env: simpy.Environment):
+        super().__init__(env)
+        self.at: Union[float, int, None] = None
+        self.callbacks = [self.interrupt]
+
+    def schedule_at(self, at: Union[float, int]):
+        """
+        计划在指定时间触发事件
+        Args:
+            at (float | int): 触发时间
+        """
+        if self.at is not None:
+            raise ValueError("deadline event already scheduled")
+        self.at = at
+        return schedule_event_at(self.env, at, self)
+
+
 def run_until(
     env: simpy.Environment,
     exit_signal: Optional[simpy.Event] = None,
@@ -150,8 +179,10 @@ def run_until(
     if exit_signal:
         events.append(exit_signal)
     if max_sim_time is not None:
-        dt = max(0, max_sim_time - env.now)
-        events.append(env.timeout(dt))
+        # 不能使用timeout来实现,可能造成仿真时长被延长
+        # dt = max(0, max_sim_time - env.now)
+        # events.append(env.timeout(dt))
+        events.append(DeadlineEvent(env, max_sim_time))
     if extra_events:
         events.extend(extra_events)
     until = env.any_of(events) if events else None
