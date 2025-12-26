@@ -1,4 +1,10 @@
-from logis.data_type import SpatialProps
+from logis.data_type import ConfigItem, SpatialProps
+
+
+def test_config_item():
+    cfg = ConfigItem(label="层高", key="height", value=100, value_type="int")
+
+    assert cfg.value_type == "int"
 
 
 def test_spatial_props():
