@@ -1,4 +1,5 @@
 import logging
+import math
 import time
 from abc import ABC
 from typing import Any, List, Optional, Union
@@ -6,6 +7,7 @@ from typing import Any, List, Optional, Union
 import simpy
 import simpy.resources
 import simpy.resources.resource
+from simpy.core import EmptySchedule, StopSimulation
 from simpy.events import URGENT
 
 
@@ -141,20 +143,40 @@ def has_no_event_left(env: simpy.Environment):
     return not env._queue and not env.active_process
 
 
+class DeadlineException(StopSimulation):
+    """
+    截止事件异常
+    """
+
+    def __init__(self, cause):
+        super().__init__(cause)
+
+
 class DeadlineEvent(simpy.Event):
     """
-    截止事件，用于在指定时间触发事件
+    截止事件，用于在指定时间触发**DeadlineException**异常从而正常退出
+    如果仿真早于截止时间完成, 则此事件仍会执行
     """
 
     def interrupt(self, *args, **kwargs):
         """
         中断事件
         """
-        raise simpy.Interrupt(f"deadline {self.at} reached, force exit")
+        # 如果后续还有事件,忽略事件正常退出,此时时钟停止在deadline时间
+        raise DeadlineException(f"deadline {self.at} reached, force exit")
 
-    def __init__(self, env: simpy.Environment):
+    def __init__(
+        self,
+        env: simpy.Environment,
+        at: Union[float, int, None] = None,
+    ):
         super().__init__(env)
         self.at: Union[float, int, None] = None
+        self._ok = True
+        self._value = None
+        if at is not None:
+            self.schedule_at(at)
+        # self.callbacks = [StopSimulation.callback]
         self.callbacks = [self.interrupt]
 
     def schedule_at(self, at: Union[float, int]):
@@ -168,26 +190,52 @@ class DeadlineEvent(simpy.Event):
         self.at = at
         return schedule_event_at(self.env, at, self)
 
-
 def run_until(
     env: simpy.Environment,
     exit_signal: Optional[simpy.Event] = None,
     max_sim_time: Optional[float] = None,
     extra_events: Optional[List[simpy.Event]] = None,
 ):
+    """
+
+    运行仿真直到指定事件触发或仿真时间超过最大运行时间
+
+    TODO: 如果重复调用,可能添加多次until事件,如何规避?
+
+    Args:
+        env (simpy.Environment): 仿真环境
+        exit_signal (simpy.Event | None, optional): 外部信号，用于外部中断仿真. 默认不使用.
+        max_sim_time (float | None, optional): 最大运行时间. 默认不限时
+        extra_events (List[simpy.Event] | None, optional): 额外事件. 默认不使用.
+    """
+    if getattr(env, "__old_step__", None) is None:
+        env.__old_step__ = env.step
+
+    def _step():
+        next_time = env.peek()
+        if next_time is None or next_time == math.inf:
+            raise EmptySchedule from None
+        if next_time > env.__max_sim_time__:
+            raise DeadlineException(
+                f"next simulation time {next_time} will exceeds max_sim_time {max_sim_time}"
+            )
+        env.__old_step__()
+
     events = []
     if exit_signal:
         events.append(exit_signal)
     if max_sim_time is not None:
-        # 不能使用timeout来实现,可能造成仿真时长被延长
-        # dt = max(0, max_sim_time - env.now)
-        # events.append(env.timeout(dt))
-        events.append(DeadlineEvent(env, max_sim_time))
+        env.__max_sim_time__ = max_sim_time
+        env.step = _step
+    # 这种方式会将事件加入调度队列,还是会造成仿真延迟
+    #     # dt = max(0, max_sim_time - env.now)
+    #     # events.append(env.timeout(dt))
+    #     events.append(DeadlineEvent(env, max_sim_time))
     if extra_events:
         events.extend(extra_events)
     until = env.any_of(events) if events else None
     try:
-        return env.run(until=until)
+        env.run(until=until)
     except Exception as e:
         if has_no_event_left(env):
             logging.warning(
@@ -195,7 +243,6 @@ def run_until(
             )
             return
         raise e
-
 
 def stop_simulation(env: simpy.Environment):
     """
@@ -210,7 +257,7 @@ def stop_simulation(env: simpy.Environment):
         yield env.timeout(0)
         return size
 
-    env.process(clear_queue())
+    return env.process(clear_queue())
 
 
 class ISimLock(ABC):

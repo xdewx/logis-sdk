@@ -3,6 +3,7 @@ import simpy
 
 from logis.util.simpy_util import (
     DeadlineEvent,
+    DeadlineException,
     interrupt_if_timeout,
     resize_container,
     run_until,
@@ -10,21 +11,48 @@ from logis.util.simpy_util import (
 )
 
 
-def test_deadline_event():
+def sleep(env: simpy.Environment, n: int):
+    print(f"sleep {n} start at {env.now}")
+    yield env.timeout(n)
+    print(f"sleep {n} end at {env.now}")
+
+
+def test_until():
     env = simpy.Environment()
+    env.process(sleep(env, 5))
+    env.run(until=10)
+    assert env.now == 10
+
+
+def test_run_until():
+    env = simpy.Environment()
+
+    env.process(sleep(env, 10))
+    run_until(env, max_sim_time=15)
+    assert env.now == 10
+
+    env.process(sleep(env, 5))
+    run_until(env, max_sim_time=15)
+    assert env.now == 15
+
+    env.process(sleep(env, 5))
+    run_until(env, max_sim_time=18)
+    assert env.now == 15
+
+
+def test_deadline_event():
+
+    env = simpy.Environment()
+
     DeadlineEvent(env).schedule_at(15)
+    env.process(sleep(env, 10))
+    env.run()
+    assert env.now == 15
 
-    def sleep(n):
-        print(f"sleep {n} start at {env.now}")
-        yield env.timeout(n)
-        print(f"sleep {n} end at {env.now}")
-
-    env.process(sleep(3))
-
-    env.process(sleep(10))
-
-    with pytest.raises(simpy.Interrupt):
-        env.run()
+    DeadlineEvent(env).schedule_at(20)
+    env.process(sleep(env, 35))
+    env.run()
+    assert env.now == 20
 
 
 def test_resize_container():
@@ -76,9 +104,16 @@ def test_stop_simulation():
     env.process(sleep(10))
     env.process(trigger_exit_after(6))
     run_until(env, max_sim_time=5, exit_signal=exit_event)
-    assert env.now == 5
-    run_until(env, max_sim_time=10, exit_signal=exit_event)
+    assert env.now == 0
+
+    run_until(env, max_sim_time=10)
     assert env.now == 6
+
+    assert len(env._queue) > 0
+    run_until(env, max_sim_time=10)
+    assert env.now == 10
+
+    env.process(sleep(5))
     stop_simulation(env)
     env.run()
-    assert env.now == 6
+    assert env.now == 10
