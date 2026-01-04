@@ -37,15 +37,27 @@ class Storable(Protocol):
     """
 
     def pre_store(self, *args, **kwargs):
+        """
+        预存储，一般用来实现资源检查、校验
+        """
         pass
 
     def pre_retrieve(self, *args, **kwargs):
+        """
+        预取回，一般用来实现资源检查、校验
+        """
         pass
 
     def store(self, *args, **kwargs) -> StoreResult:
+        """
+        真正的存储操作
+        """
         pass
 
     def retrieve(self, *args, **kwargs) -> RetrieveResult:
+        """
+        真正的取回操作
+        """
         pass
 
 

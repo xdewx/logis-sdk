@@ -146,6 +146,7 @@ def nx_digraph_to_graph(
             **graph_opts,
         )
         .set_global_opts(
+            # datazoom_opts=opts.DataZoomOpts(orient="vertical"), # not work
             title_opts=opts.TitleOpts(title=title),
             tooltip_opts=opts.TooltipOpts(trigger="item"),  # 鼠标悬停显示信息
         )
@@ -204,6 +205,7 @@ def nx_digraph_to_tree(
         return node
 
     tree = Tree().set_global_opts(
+        # datazoom_opts=opts.DataZoomOpts(orient="vertical"),# not work
         title_opts=opts.TitleOpts(title=title),
         tooltip_opts=opts.TooltipOpts(trigger="item", formatter="{b}"),
     )
@@ -291,7 +293,10 @@ def nx_digraph_to_sankey(
             links=links,
             **kwargs,
         )
-        .set_global_opts(title_opts=opts.TitleOpts(title=title))
+        .set_global_opts(
+            title_opts=opts.TitleOpts(title=title),
+            # datazoom_opts=opts.DataZoomOpts(), # not work
+        )
     )
 
 
