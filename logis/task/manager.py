@@ -25,6 +25,25 @@ class AbstractTaskManager(metaclass=ABCMeta):
         """
         pass
 
+    def is_status_at(
+        self,
+        task: TaskLike,
+        status: TaskStatus,
+        infer: bool = True,
+        update: bool = True,
+    ) -> bool:
+        """
+        检查任务是否在指定状态
+        Args:
+            task (TaskLike): 任务对象
+            status (TaskStatus): 状态
+            infer (bool, optional): 是否根据子任务的状态推测本任务的状态，默认值为True
+            update (bool, optional): 是否在检测到任务状态符合要求时自动更新任务属性，默认值为True
+        Returns:
+            bool: 任务是否在指定状态
+        """
+        raise NotImplementedError()
+
     @abstractmethod
     def task_size(self) -> int:
         """
@@ -168,6 +187,7 @@ class TaskGraph(AbstractTaskManager):
         if isinstance(task, ITask):
             return task.get_task_id()
         raise ValueError(f"Unknown task type {type(task)}")
+
     def task_size(self) -> int:
         """
         获取任务数量
@@ -261,22 +281,28 @@ class TaskGraph(AbstractTaskManager):
         assert task, f"任务 {task_id} 不存在"
         task.update_status(status)
 
-    def is_task_finished(self, task: TaskLike, update: bool = True, infer=True):
+    def is_status_at(self, task, status, infer=True, update=True):
         task_id = self.parse_task_id(task)
         task: ITask = self.get_task(task_id)
 
-        finished = task.finished
-        if finished is True:
-            return finished
+        match = task.is_status_at(status)
+        if match is True:
+            return match
         if not infer:
-            return finished
+            return match
 
         children_ids = list(self.get_children_id(task_id, strict=True))
-        all_children_finished = (
+        all_children_match = (
             False
             if not children_ids
-            else all(self.is_task_finished(child_id) for child_id in children_ids)
+            else all(
+                self.is_status_at(child_id, status, infer=infer, update=update)
+                for child_id in children_ids
+            )
         )
-        if all_children_finished and update:
-            self.update_task_status(task_id, TaskStatus.FINISHED)
-        return all_children_finished
+        if all_children_match and update:
+            self.update_task_status(task_id, status)
+        return all_children_match
+
+    def is_task_finished(self, task: TaskLike, update: bool = True, infer=True):
+        return self.is_status_at(task, TaskStatus.FINISHED, infer=infer, update=update)
