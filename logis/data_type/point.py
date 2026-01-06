@@ -162,7 +162,7 @@ class Point(GenericPoint[float]):
     """
 
     __counter = count(0, step=1)
-    __global_precision__ = 6
+    __global_precision__ = 3
 
     @classmethod
     def try_parse(cls, dc: dict, **kwargs) -> "Point":
