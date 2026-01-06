@@ -2,7 +2,7 @@ from abc import ABC, ABCMeta
 from collections import defaultdict
 from typing import Dict, Generic, Protocol, TypeVar, Union, runtime_checkable
 
-from logis.data_type import NumberType, NumberUnit, SpatialProps, T
+from logis.data_type import NumberType, NumberUnit, SpatialProps
 from logis.util.num_util import get_numeric_value
 
 

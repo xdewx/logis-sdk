@@ -1,6 +1,29 @@
-from logis.util import set_attr_if, set_attr_if_has
+from logis.util import cast_if_not_none, round_if_not_none, set_attr_if, set_attr_if_has
 from logis.util.dict_util import remove_key_not_in
 from logis.util.num_util import split_integer
+
+
+def test_round_if_not_none():
+    assert round(3.745, 2) == 3.75
+    assert round(3.74512, 2) == 3.75
+    assert round(1216.745, 2) == 1216.74
+    assert round(1216.74512, 2) == 1216.75
+
+    assert round_if_not_none(1216.745, 2) == 1216.75
+    assert round_if_not_none(1216.74512, 2) == 1216.75
+    assert round_if_not_none(3.745, 2) == 3.75
+    assert round_if_not_none(3.74512, 2) == 3.75
+
+    assert round_if_not_none(3.74512, None) == 3.74512
+    assert round_if_not_none(None, 2) is None
+    assert round_if_not_none(None, None) is None
+
+
+def test_cast_if_not_none():
+    assert cast_if_not_none(3.14159, int) == 3
+    assert cast_if_not_none(3.14159, float) == 3.14159
+    assert cast_if_not_none(None, int) is None
+    assert cast_if_not_none(None, float) is None
 
 
 def test_split_integer():

@@ -15,14 +15,16 @@ from typing import (
     Literal,
     Optional,
     Type,
+    TypeVar,
     Union,
 )
 
 from pydantic import BaseModel, ConfigDict
 
-from logis.data_type import T
 from logis.iface import QueueType
 from logis.util.lambda_util import invoke
+
+T = TypeVar("T")
 
 
 def get_or_new_event_loop(auto_set: bool = True) -> asyncio.AbstractEventLoop:

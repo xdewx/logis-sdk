@@ -1,6 +1,6 @@
 from typing import Protocol, TypeVar, runtime_checkable
 
-from logis.data_type import T
+T = TypeVar("T")
 
 
 @runtime_checkable

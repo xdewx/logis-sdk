@@ -5,7 +5,7 @@ from typing import Any, Callable, Optional, TypeVar
 
 from pandas import isna
 
-from logis.data_type import ErrorHandler
+from ..data_type import ErrorHandler, cast_if_not_none, round_if_not_none
 
 T = TypeVar("T")
 
