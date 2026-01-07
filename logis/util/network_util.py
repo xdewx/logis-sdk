@@ -5,6 +5,8 @@ from logis.data_type import Point
 Grid2 = List[List[Point]]
 Grid3 = List[Grid2]
 
+from .dict_util import get_the_first_existent_key
+
 
 def to_grid(
     points: List[Point], include_x=True, include_y=True, include_z=False, **kwargs
@@ -133,7 +135,20 @@ def nx_digraph_to_graph(
 
     links = []
     for u, v, attrs in G.edges(data=True):
-        links.append(opts.GraphLink(source=str(u), target=str(v)))
+        _, label = get_the_first_existent_key(attrs, "label", "name", "id")
+        links.append(
+            opts.GraphLink(
+                source=str(u),
+                target=str(v),
+                label_opts=opts.LabelOpts(
+                    is_show=False, position="middle", formatter=label, font_size=15
+                ),
+                emphasis_label_opts=opts.LabelOpts(
+                    is_show=True,
+                ),
+                linestyle_opts=opts.LineStyleOpts(),
+            )
+        )
 
     graph = (
         Graph()
@@ -143,6 +158,7 @@ def nx_digraph_to_graph(
             links=links,
             layout=layout,
             is_draggable=True,
+            edge_symbol=graph_opts.pop("edge_symbol", ["circle", "arrow"]),
             **graph_opts,
         )
         .set_global_opts(
