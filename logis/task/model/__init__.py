@@ -20,6 +20,7 @@ class TaskStatus(Enum):
     CANCELLED = "cancelled"
     FAILED = "failed"
 
+
 class ITask(metaclass=ABCMeta):
     """
     任务基础抽象类
@@ -53,6 +54,17 @@ class ITask(metaclass=ABCMeta):
     @property
     def finished(self) -> bool:
         return self.is_status_at(TaskStatus.FINISHED)
+
+
+from logis.data_type import QuantifiedValue
+
+
+class QuantifiedTask(QuantifiedValue, ITask, metaclass=ABCMeta):
+    """
+    可量化的任务
+    """
+
+    pass
 
 
 TaskLike = Union[ITask, TaskId]

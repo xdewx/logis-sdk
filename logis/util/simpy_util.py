@@ -190,6 +190,7 @@ class DeadlineEvent(simpy.Event):
         self.at = at
         return schedule_event_at(self.env, at, self)
 
+
 def run_until(
     env: simpy.Environment,
     exit_signal: Optional[simpy.Event] = None,
@@ -238,11 +239,10 @@ def run_until(
         env.run(until=until)
     except Exception as e:
         if has_no_event_left(env):
-            logging.warning(
-                "error happens but there is no event left, will ignore: %s", e
-            )
+            logging.info("error happens but there is no event left, will ignore: %s", e)
             return
         raise e
+
 
 def stop_simulation(env: simpy.Environment):
     """

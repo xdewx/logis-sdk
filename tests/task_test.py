@@ -1,7 +1,29 @@
 import pytest
 from networkx import NetworkXError
 
-from logis.task import Task, TaskGraph, TaskStatus
+from logis.task import QuantifiedTask, Task, TaskGraph, TaskStatus
+from logis.task.model import TaskId, TaskPriority
+
+
+def test_quantified_task():
+    class MyTask(QuantifiedTask):
+        id: str
+        priority: TaskPriority = 0
+
+        def get_task_id(self) -> TaskId:
+            return self.id
+
+        def get_priority(self) -> TaskPriority:
+            return self.priority
+
+        def is_status_at(self, status):
+            return super().is_status_at(status)
+
+        def update_status(self, status: TaskStatus):
+            super().update_status(status)
+
+    task = MyTask(id="task1", quantity=10)
+    assert task.quantity == 10 and task.id == "task1"
 
 
 def test_task_graph():
