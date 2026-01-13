@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 from collections import defaultdict
 from fractions import Fraction
 from functools import reduce
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Self, Tuple, Union
 
 from pydantic import BaseModel
 
@@ -13,12 +13,19 @@ from .point import *
 
 
 class NumberUnit(metaclass=ABCMeta):
+    """
+    具有数量和单位的数值类型
+    """
 
-    quantity: NumberType
-    unit: Union[str, Unit, None] = None
+    quantity: NumberType = 0
+    unit: Optional[Unit] = None
 
     # 自定义倍率转换器
     _unit_config_: Optional["UnitConfig"] = None
+
+    def __init__(self, **kwargs):
+        self.quantity = kwargs.get("quantity", 0)
+        self.unit = kwargs.get("unit", None)
 
     @property
     def kind(self):
@@ -28,12 +35,12 @@ class NumberUnit(metaclass=ABCMeta):
         return self.__class__.__name__
 
     @abstractmethod
-    def model_dump(self) -> Dict[str, Any]:
+    def model_dump(self, *args, **kwargs) -> Dict[str, Any]:
         pass
 
     @classmethod
     @abstractmethod
-    def model_validate(cls, data: Dict[str, Any]) -> "NumberUnit":
+    def model_validate(cls, data: Dict[str, Any], **kwargs) -> Self:
         pass
 
     def __auto_validate__(self, other: "NumberUnit"):
@@ -47,24 +54,24 @@ class NumberUnit(metaclass=ABCMeta):
             )
         return other
 
-    def __sub__(self, other: "NumberUnit"):
+    def __sub__(self, other: "NumberUnit") -> Self:
         other = self.__auto_validate__(other)
         dc = self.model_dump()
         dc["quantity"] = self.quantity - other.quantity
         return type(self).model_validate(dc)
 
-    def __add__(self, other: "NumberUnit"):
+    def __add__(self, other: "NumberUnit") -> Self:
         other = self.__auto_validate__(other)
         dc = self.model_dump()
         dc["quantity"] += other.quantity
         return type(self)(**dc)
 
-    def __truediv__(self, other: "NumberUnit"):
+    def __truediv__(self, other: "NumberUnit") -> Self:
         other = self.__auto_validate__(other)
         # TODO: 处理精度问题
         return self.quantity / other.quantity
 
-    def __mul__(self, times: Union[int, float]):
+    def __mul__(self, times: Union[int, float]) -> Self:
         data = self.model_dump()
         data["quantity"] *= times
         return type(self).model_validate(data)
@@ -100,14 +107,14 @@ class NumberUnit(metaclass=ABCMeta):
         self.quantity = new_value
 
     @classmethod
-    def parse_tuple(cls, input: Tuple[NumberType, Unit]):
+    def parse_tuple(cls, input: Tuple[NumberType, Unit]) -> Self:
         """
         解析形如[1,"个"]的数据
         """
         return cls(quantity=input[0], unit=input[1])
 
     @classmethod
-    def parse_str(cls, input: str, delimiter="|", number_type=float):
+    def parse_str(cls, input: str, delimiter="|", number_type=float) -> Optional[Self]:
         """
         解析形如1|m/s的数据
         """
@@ -118,21 +125,26 @@ class NumberUnit(metaclass=ABCMeta):
         return cls(quantity=number_type(tmps[0]), unit=tmps[1])
 
     @classmethod
-    def of(cls, num: NumberType, unit: Optional[str] = None):
+    def of(cls, num: NumberType, unit: Optional[str] = None) -> Self:
         return cls(quantity=num, unit=unit)
 
-    def increase(self, num: NumberType) -> None:
+    def increase(self, num: NumberType):
         self.quantity += num
 
-    def decrease(self, num: NumberType) -> None:
+    def decrease(self, num: NumberType):
         self.quantity -= num
 
 
-# 量化值
 class QuantifiedValue(BaseModel, NumberUnit):
+    """
+    量化值，相比于接口NumberUnit，适合作为数据结构使用
+    """
     model_config = MODEL_CONFIG
 
     name: Optional[str] = None
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 class Capacity(QuantifiedValue):

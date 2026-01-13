@@ -4,6 +4,8 @@ from typing import Iterable, Optional, Union
 
 from pydantic import BaseModel, Field
 
+from logis.data_type import NumberType
+
 TaskId = Union[str, int]
 TaskPriority = Union[str, int]
 
@@ -56,15 +58,16 @@ class ITask(metaclass=ABCMeta):
         return self.is_status_at(TaskStatus.FINISHED)
 
 
-from logis.data_type import QuantifiedValue
+from logis.data_type import NumberUnit
 
 
-class QuantifiedTask(QuantifiedValue, ITask, metaclass=ABCMeta):
+class QuantifiedTask(NumberUnit, ITask):
     """
     可量化的任务
     """
 
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 TaskLike = Union[ITask, TaskId]

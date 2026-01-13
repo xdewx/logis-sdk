@@ -1,4 +1,4 @@
-from logis.data_type import ConfigItem, SpatialProps
+from logis.data_type import ConfigItem, QuantifiedValue, SpatialProps
 
 
 def test_config_item():
@@ -26,3 +26,14 @@ def test_spatial_props():
 
     props = SpatialProps.model_validate(dc)
     assert props.center_point.z == 9.0
+
+
+def test_quantified_value():
+    qv = QuantifiedValue.model_validate(dict(quantity=100, unit="m", name="高度"))
+    assert qv.quantity == 100
+    assert qv.unit == "m"
+
+    dv = qv - qv
+
+    assert isinstance(dv, QuantifiedValue)
+    assert dv.quantity == 0
