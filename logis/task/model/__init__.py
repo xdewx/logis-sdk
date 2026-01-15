@@ -1,6 +1,8 @@
 from abc import ABCMeta, abstractmethod
+from collections import Counter, defaultdict
 from enum import Enum
-from typing import Iterable, Optional, Union
+from numbers import Number
+from typing import Dict, Iterable, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -66,8 +68,40 @@ class QuantifiedTask(NumberUnit, ITask):
     可量化的任务
     """
 
+    progress: Union[Number] = 0
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.pipeline_progress: Dict[str, Number] = Counter()
+
+    def update_progress(
+        self,
+        progress: Union[NumberUnit, Number],
+        delta: bool = False,
+        pipeline_id: Optional[str] = None,
+    ):
+        """
+        更新进度
+
+        Args:
+
+        """
+        if isinstance(progress, NumberUnit):
+            assert (
+                progress.unit == self.unit
+            ), f"进度单位{progress.unit}与任务单位{self.unit}不一致，请在调用处处理"
+            progress = progress.quantity
+
+        if pipeline_id is not None:
+            if delta:
+                self.pipeline_progress[pipeline_id] += progress
+            else:
+                self.pipeline_progress[pipeline_id] = progress
+        else:
+            if delta:
+                self.progress += progress
+            else:
+                self.progress = progress
 
 
 TaskLike = Union[ITask, TaskId]

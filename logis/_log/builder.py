@@ -1,9 +1,10 @@
 import logging
 import sys
+from collections import defaultdict
 from logging import StreamHandler
 from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 from pathlib import Path
-from typing import List, Optional, Type, Union
+from typing import Dict, List, Optional, Type, Union
 from uuid import uuid4
 
 from platformdirs import user_data_dir
@@ -25,7 +26,7 @@ class LoggerBuilder:
             False
         )
 
-        self._handlers = []
+        self._handlers: Dict[str, logging.Handler] = defaultdict()
 
     def _resolve_file_path(self, filename: str) -> Optional[Path]:
         if not filename:
@@ -102,8 +103,27 @@ class LoggerBuilder:
     ) -> "LoggerBuilder":
         """
         添加日志处理器
+
+        Args:
+            handler_type: 日志处理器类型
+            level: 日志级别
+            filename: 日志文件名
+            name: 日志处理器名称,如果未提供,则使用文件名或随机UUID
+            filters: 日志过滤器列表
         """
         filename = self._resolve_file_path(filename)
+
+        is_handler_instance = isinstance(handler_type, logging.Handler)
+        default_handler_name = None
+        if is_handler_instance:
+            default_handler_name = handler_type.name
+        handler_name = str(name or default_handler_name or filename or uuid4())
+
+        if handler_name in self._handlers:
+            logging.warning(
+                "Handler with name %s already exists, will duplicate.", handler_name
+            )
+
         if isinstance(handler_type, logging.FileHandler) or issubclass(
             handler_type, logging.FileHandler
         ):
@@ -123,7 +143,7 @@ class LoggerBuilder:
             )
         elif handler_type is StreamHandler:
             handler = StreamHandler(stream=kwargs.get("stream", sys.stdout))
-        elif isinstance(handler_type, logging.Handler):
+        elif is_handler_instance:
             handler = handler_type
         elif issubclass(handler_type, logging.Handler):
             handler = handler_type(**kwargs)
@@ -135,16 +155,12 @@ class LoggerBuilder:
         level = level if level is not None else self._level
         handler.setLevel(format_level(level))
 
-        if name is not None:
-            handler.name = name
-
-        if handler.name is None:
-            handler.name = str(uuid4())
+        handler.name = handler_name
 
         for f in filters or []:
             handler.addFilter(f)
 
-        self._handlers.append(handler)
+        self._handlers[handler_name] = handler
         return self
 
     def build(self) -> logging.Logger:
@@ -154,7 +170,7 @@ class LoggerBuilder:
         if self._level is not None:
             logger.setLevel(self._level)
         logger.propagate = self._propagate
-        for handler in self._handlers or []:
+        for _, handler in self._handlers.items():
             if handler is None:
                 continue
             logger.addHandler(handler)
