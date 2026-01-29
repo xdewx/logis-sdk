@@ -29,6 +29,18 @@ class ITaskHandler(IHandler):
     任务处理接口
     """
 
+    def get_current_task_concurrency(self, *args, **kwargs):
+        """
+        获取当前正在处理的任务并发数
+        """
+        raise NotImplementedError("get_current_task_concurrency")
+
+    def exceed_the_maximum_task_concurrency(self, *args, **kwargs):
+        """
+        判断是否达到了任务并发上限
+        """
+        raise NotImplementedError("exceed_the_maximum_task_concurrency")
+
     def get_working_mode(self):
         """
         获取处理模式
