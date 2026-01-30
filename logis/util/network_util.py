@@ -180,6 +180,8 @@ def nx_digraph_to_tree(
     color_key: str = "color",
     default_name: str = "node",
     virtual_root_id: Optional[str] = None,
+    initial_tree_depth: int | None = None,
+    tooltip_opts=opts.TooltipOpts(trigger="item", formatter="{b}"),
 ) -> Tree:
     """
     将树状结构的 networkx.DiGraph 转换为 Pyecharts Tree 图表
@@ -212,6 +214,7 @@ def nx_digraph_to_tree(
     def build_node(current: Any) -> Dict[str, Any]:
         attrs = G.nodes.get(current, {})
         node = {
+            "nodeAttrs": attrs,
             "name": attrs.get(name_key, str(current) or default_name),
             "itemStyle": {"color": attrs[color_key]} if color_key in attrs else {},
         }
@@ -223,7 +226,7 @@ def nx_digraph_to_tree(
     tree = Tree().set_global_opts(
         # datazoom_opts=opts.DataZoomOpts(orient="vertical"),# not work
         title_opts=opts.TitleOpts(title=title),
-        tooltip_opts=opts.TooltipOpts(trigger="item", formatter="{b}"),
+        tooltip_opts=tooltip_opts,
     )
     for root in roots:
         tree_data = [build_node(root)]
@@ -237,6 +240,7 @@ def nx_digraph_to_tree(
                 vertical_align="middle",
                 horizontal_align="right",
             ),
+            initial_tree_depth=initial_tree_depth,
         )
 
     return tree
