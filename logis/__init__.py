@@ -1,1 +1,1 @@
-__version__ = "0.1.12"
+from .auto_generated_version import __version__

@@ -8,3 +8,5 @@ build
 data
 logs
 *.log.*
+
+auto_generated_version.py
