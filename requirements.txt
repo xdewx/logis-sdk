@@ -9,9 +9,9 @@ pandas
 scipy
 openpyxl
 networkx
-pathfinding==1.0.17
+pathfinding>=1.0.17
 matplotlib
-simpy==4.1.1
+simpy>=4.1.1
 websockets
 python-socketio
 pyee
@@ -51,4 +51,4 @@ prometheus-client
 pyecharts
 humanize
 python_hmr
-ipa-python-kit==0.0.6
+ipa-python-kit
