@@ -37,10 +37,23 @@ class InfluxQuery(BaseModel):
 
 class InfluxCommand:
 
-    def __init__(self, binary_dir: Path, version="v3", token: Optional[str] = None):
+    def __init__(
+        self,
+        binary_dir: Path,
+        version="v3",
+        token: Optional[str] = None,
+        host: str = "127.0.0.1",
+        port: int = 8181,
+    ):
         self._binary_dir = binary_dir
         self.version = version
         self._token = token
+        self.port = port
+        self.host = host
+
+    @property
+    def host_url(self):
+        return f"http://{self.host}:{self.port}"
 
     @property
     def token(self):
@@ -58,8 +71,6 @@ class InfluxCommand:
         token_file: Optional[Path] = None,
         node_id: Optional[str] = platform.node(),
         object_store: str = "file",
-        host: str = "127.0.0.1",
-        port: int = 8181,
         start_new_session: bool = False,
         creationflags=subprocess.CREATE_NO_WINDOW,
         **kwargs,
@@ -74,7 +85,7 @@ class InfluxCommand:
                     [
                         str(self.binary),
                         "serve",
-                        f"--http-bind={host}:{port}",
+                        f"--http-bind={self.host}:{self.port}",
                         f"--node-id={node_id}" if node_id else "",
                         f"--object-store={object_store}" if object_store else "",
                         f"--data-dir={data_dir}" if data_dir else "",
@@ -117,6 +128,7 @@ class InfluxCommand:
                         "--offline" if offline else "",
                         f"--expiry={expiry}" if expiry else "",
                         f"--output-file={path}" if offline else "",
+                        f"--host={self.host_url}",
                     ],
                 )
             ),
@@ -148,6 +160,7 @@ class InfluxCommand:
                         str(self.binary),
                         *cmd.split(" "),
                         f"--token={token}" if token else "",
+                        f"--host={self.host_url}",
                     ],
                 )
             ),
