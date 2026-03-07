@@ -32,11 +32,14 @@ def remove_key_not_in(dc: dict, keys: Iterable[Any], delete_value: bool = False)
     Args:
         delete_value: 是否同时del value
     """
+    keys_removed = []
     for key in list(dc.keys()):
         if key not in keys:
             v = dc.pop(key, None)
             if delete_value and v is not None:
                 del v
+                keys_removed.append(key)
+    return keys_removed
 
 
 def get_the_first_existent_key(obj: dict, *keys, default=None) -> Tuple[Any, Any]:
