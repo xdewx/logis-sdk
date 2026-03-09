@@ -191,11 +191,33 @@ class DeadlineEvent(simpy.Event):
         return schedule_event_at(self.env, at, self)
 
 
+def _max_run_time(env: simpy.Environment, v: Optional[float] = None):
+    key = "__max_run_time__"
+    if v is not None:
+        setattr(env, key, v)
+    return getattr(env, key, None)
+
+
+def _max_sim_time(env: simpy.Environment, v: Optional[float] = None):
+    key = "__max_sim_time__"
+    if v is not None:
+        setattr(env, key, v)
+    return getattr(env, key, None)
+
+
+def _started_at(env: simpy.Environment, v: Optional[float] = None):
+    key = "__started_at__"
+    if v is not None:
+        setattr(env, key, v)
+    return getattr(env, key, None)
+
+
 def run_until(
     env: simpy.Environment,
     exit_signal: Optional[simpy.Event] = None,
     max_sim_time: Optional[float] = None,
     extra_events: Optional[List[simpy.Event]] = None,
+    max_run_time: Optional[float] = None,
 ):
     """
 
@@ -212,22 +234,39 @@ def run_until(
     if getattr(env, "__old_step__", None) is None:
         env.__old_step__ = env.step
 
+    if _started_at(env) is None:
+        _started_at(env, time.time())
+    if max_sim_time is not None:
+        _max_sim_time(env, max_sim_time)
+    if max_run_time is not None:
+        _max_run_time(env, max_run_time)
+
+    started_at = _started_at(env)
+    max_run_time = _max_run_time(env)
+    max_sim_time = _max_sim_time(env)
+
     def _step():
         next_time = env.peek()
         if next_time is None or next_time == math.inf:
             raise EmptySchedule from None
-        if next_time > env.__max_sim_time__:
+        if max_sim_time is not None and next_time > max_sim_time:
             raise DeadlineException(
                 f"next simulation time {next_time} will exceeds max_sim_time {max_sim_time}"
+            )
+        if (
+            max_run_time is not None
+            and started_at is not None
+            and time.time() - started_at > max_run_time
+        ):
+            raise DeadlineException(
+                f"next simulation time {next_time} will exceeds max_run_time {max_run_time}"
             )
         env.__old_step__()
 
     events = []
     if exit_signal:
         events.append(exit_signal)
-    if max_sim_time is not None:
-        env.__max_sim_time__ = max_sim_time
-        env.step = _step
+
     # 这种方式会将事件加入调度队列,还是会造成仿真延迟
     #     # dt = max(0, max_sim_time - env.now)
     #     # events.append(env.timeout(dt))
@@ -236,6 +275,7 @@ def run_until(
         events.extend(extra_events)
     until = env.any_of(events) if events else None
     try:
+        env.step = _step
         env.run(until=until)
     except Exception as e:
         if has_no_event_left(env):
