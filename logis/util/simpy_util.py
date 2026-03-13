@@ -39,7 +39,10 @@ def get_free_capacity(container: simpy.Container):
 
 
 def resize_container(
-    container: simpy.Container, capacity: Union[int, float], is_delta=False
+    container: simpy.Container,
+    capacity: Union[int, float],
+    is_delta=False,
+    force: bool = False,
 ):
     """
     调整容器容量
@@ -47,12 +50,18 @@ def resize_container(
         container (simpy.Container): 容器
         capacity (int | float): 新容量
         is_delta (bool, optional): 是否是增量调整. 默认False
+        force (bool, optional): 是否强制调整. 默认False
     """
     old_capacity = container.capacity
     capacity = capacity + old_capacity if is_delta else capacity
+
+    if force:
+        container._capacity = capacity
+        return container.capacity
+
     dx = capacity - old_capacity
     if not dx:
-        return
+        return container.capacity
     # 如果是减容，先触发取操作
     if dx < 0:
         container._trigger_get(None)
@@ -63,6 +72,48 @@ def resize_container(
     if dx > 0:
         container._trigger_put(None)
 
+    return container.capacity
+
+
+def resize_container_level(
+    container: simpy.Container,
+    level: Union[int, float],
+    is_delta=False,
+    force: bool = False,
+):
+    """
+    调整容器库存
+    Args:
+        container (simpy.Container): 容器
+        level (int | float): 新库存
+        is_delta (bool, optional): 是否是增量调整. 默认False
+        force (bool, optional): 是否强制调整. 默认False
+    """
+    old_level = container.level
+    level = level + old_level if is_delta else level
+
+    if force:
+        container._level = level
+        return container.level
+
+    dx = level - old_level
+    if not dx:
+        return container.level
+    # 如果是缩小库存
+    if dx < 0:
+        container._trigger_put(None)
+        assert container.level >= abs(
+            dx
+        ), f"容器当前库存{container.level}无法缩减{dx}至{level}"
+    else:
+        container._trigger_get(None)
+        assert (
+            level <= container.capacity
+        ), f"容器当前库存{container.level}无法增加{dx}至{level}，因为最大容量为{container.capacity}"
+    container._level = level
+
+    return container.level
+
 
 def resource_to_dict(resource: Any):
     if isinstance(resource, simpy.Container):
@@ -71,7 +122,7 @@ def resource_to_dict(resource: Any):
         return dict(level=resource.count, capacity=resource.capacity)
     if isinstance(resource, simpy.Store):
         return dict(level=len(resource.items), capacity=resource.capacity)
-    print("unexpected type:" + resource)
+    logging.error("unexpected type:" + resource)
 
 
 def schedule_event_at(
