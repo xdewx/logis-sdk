@@ -269,6 +269,7 @@ def run_until(
     max_sim_time: Optional[float] = None,
     extra_events: Optional[List[simpy.Event]] = None,
     max_run_time: Optional[float] = None,
+    **kwargs,
 ):
     """
 
@@ -282,6 +283,7 @@ def run_until(
         max_sim_time (float | None, optional): 最大运行时间. 默认不限时
         extra_events (List[simpy.Event] | None, optional): 额外事件. 默认不使用.
     """
+    log: logging.Logger = kwargs.get("log", logging)
     if getattr(env, "__old_step__", None) is None:
         env.__old_step__ = env.step
 
@@ -328,9 +330,11 @@ def run_until(
     try:
         env.step = _step
         env.run(until=until)
+        if exit_signal and exit_signal.triggered:
+            log.info("exit signal triggered, simulation over at time %s", env.now)
     except Exception as e:
         if has_no_event_left(env):
-            logging.info("error happens but there is no event left, will ignore: %s", e)
+            log.info("error happens but there is no event left, will ignore: %s", e)
             return
         raise e
 
