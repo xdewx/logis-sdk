@@ -8,6 +8,26 @@ import hmr
 from watchfiles import Change, PythonFilter, awatch
 
 
+def try_import(path: str):
+    """
+    支持以x.y.z的方式导入模块或模块内的属性
+    Args:
+        path: 模块路径或属性路径
+    Returns:
+        导入的模块或属性, 如果导入失败则返回None
+    """
+    try:
+        return import_module(path)
+    except ModuleNotFoundError:
+        tmps = path.split(".")
+        assert len(tmps) > 1, f"unexpected path: {path}"
+        module = import_module(".".join(tmps[0:-1]))
+        return getattr(module, tmps[-1])
+    except Exception as e:
+        logging.warning("failed to import %s: %s", path, e)
+        return None
+
+
 def try_hot_reload(name, package: Optional[str] = None):
     """
     热加载指定模块

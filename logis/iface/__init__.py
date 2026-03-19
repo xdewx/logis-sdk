@@ -23,3 +23,4 @@ class Shape(metaclass=ABCMeta):
 from ._event import *
 from ._queue import *
 from .container import *
+from .registry import *
