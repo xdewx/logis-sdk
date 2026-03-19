@@ -1,4 +1,5 @@
-from typing import List, Optional
+import enum
+from typing import List, Literal, Optional, TypeAlias
 
 from pydantic import BaseModel, Field
 
@@ -29,3 +30,43 @@ class ComponentConfig(BaseModel):
     """
 
     entity_list: List[ComponentConfigItem] = Field(default_factory=list)
+
+
+class BlueprintKind(enum.Enum):
+    """
+    蓝图的类型，如果不够用，可以修改此类或者继承并添加新的类型
+    """
+
+    SOURCE = "source"
+    ENTER = "enter"
+    EXIT = "exit"
+    SINK = "sink"
+    ASSEMBLER = "assembler"
+    DELAY = "delay"
+    EVENT = "event"
+    GOODS_TO_PERSON = "goods_to_person"
+    PRODUCER = "producer"
+    WORK_STATION = "work_station"
+
+    RESOURCE_POOL = "resource_pool"
+    TRANSPORT = "transport"
+
+    RACK_SYSTEM = "rack_system"
+    RACK = "rack"
+    AGV_RACK = "agv_rack"
+    PALLET_RACK = "pallet_rack"
+    PICKING_RACK = "picking_rack"
+    ASRS = "asrs"
+    REPOSITORY = "repository"
+
+    CONVEYOR_BELT = "conveyor_belt"
+    TURNING_STATION = "turning_station"
+    PATH = "path"
+    GRID = "grid"
+    POINT_NODE = "point_node"
+    RECTANGULAR_NODE = "rectangular_node"
+
+    AGENT = "agent"
+    AGV = "agv"
+    STOCK = "stock"
+    FORKLIFT = "forklift"

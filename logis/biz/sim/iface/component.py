@@ -1,10 +1,10 @@
-from abc import ABCMeta
+from abc import ABC
 from typing import Protocol, Type, runtime_checkable
 
 from ..data_type import ComponentConfigItem
 
 
-class IComponent(metaclass=ABCMeta):
+class IComponent(ABC):
     """
     类型标识
     """
