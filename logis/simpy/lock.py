@@ -1,20 +1,30 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 
 import simpy
 import simpy.resources.resource
+from ipa.decorator import deprecated
 
 
 class ISimLock(ABC):
 
-    def __init__(self, env: simpy.Environment):
-        self._occupied_ = simpy.Resource(env, capacity=1)
-        self._lock_ = False
+    @property
+    @abstractmethod
+    def env(self) -> simpy.Environment:
+        pass
+
+    def __init__(self, **kwargs):
+        self._occupied_ = simpy.Resource(self.env, capacity=1)
 
     @property
+    @deprecated("use is_locked instead")
     def is_occupied(self):
         """
         判断锁是否被占用
         """
+        return self.is_locked
+
+    @property
+    def is_locked(self):
         return self._occupied_.count > 0
 
     def lock(self):
