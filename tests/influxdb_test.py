@@ -10,7 +10,7 @@ from influxdb_client_3 import InfluxDBClient3, Point
 from logis.metric.influxdb import InfluxCommand, InfluxRestClient
 
 database = "test"
-test_url = f"http://localhost:8181"
+test_url = f"http://localhost:48181"
 admin_token_file = Path(__file__)
 token = "apiv3_9RtOrHrNRybmP8s-VnjxFU5nb89Ly_Xu5iWDN4vFUnPlK4-M0gbE0ODsLh4OGYvUyBGHsBwOm1RpDqQ-ZUqsyg"
 
@@ -72,7 +72,7 @@ def test_serve():
 
 def test_rest_client():
     tmp_db = "xxxxxx"
-    client = InfluxRestClient("http://127.0.0.1:8181", token=token)
+    client = InfluxRestClient("http://127.0.0.1:48181", token=token)
     x = client.create_database(tmp_db)
     assert x.success or x.error.code == 409, x
     x = client.delete_database(tmp_db)

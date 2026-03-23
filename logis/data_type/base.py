@@ -1,3 +1,4 @@
+import sys
 from decimal import Decimal
 from fractions import Fraction
 from numbers import Number
@@ -29,7 +30,12 @@ ComponentStrId = str
 
 ComponentId = Union[ComponentIntId, ComponentStrId]
 
-TmpId = Union[int, str]
+if sys.version_info >= (3, 9):
+    from typing_extensions import TypeAlias
+
+    TmpId: TypeAlias = Union[int, str]
+else:
+    TmpId = Union[int, str]
 
 
 T = TypeVar("T")

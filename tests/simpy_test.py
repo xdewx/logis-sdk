@@ -1,7 +1,7 @@
 import pytest
 import simpy
 
-from logis.util.simpy_util import (
+from logis.simpy import (
     DeadlineEvent,
     DeadlineException,
     interrupt_if_timeout,

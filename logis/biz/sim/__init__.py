@@ -10,4 +10,5 @@ def test():
     print("This is a test function in the sim module.")
 
 
+from .data_type import *
 from .iface import *
