@@ -23,4 +23,4 @@ class ComponentLoader(Protocol):
     """
 
     def load(self, item: ComponentConfigItem) -> Type[IComponent]:
-        pass
+        raise NotImplementedError()
