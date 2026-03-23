@@ -254,6 +254,10 @@ def run_until(
         if next_time is None or next_time == math.inf:
             raise EmptySchedule from None
         if max_sim_time is not None and next_time > max_sim_time:
+            log.warning(
+                "simulation run time exceeds max_sim_time %s, will force exit",
+                max_sim_time,
+            )
             raise DeadlineException(
                 f"next simulation time {next_time} will exceeds max_sim_time {max_sim_time}"
             )
@@ -262,6 +266,10 @@ def run_until(
             and started_at is not None
             and time.time() - started_at > max_run_time
         ):
+            log.warning(
+                "simulation run time exceeds max_run_time %s, will force exit",
+                max_run_time,
+            )
             raise DeadlineException(
                 f"next simulation time {next_time} will exceeds max_run_time {max_run_time}"
             )
