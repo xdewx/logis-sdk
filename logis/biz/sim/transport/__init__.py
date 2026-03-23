@@ -30,8 +30,8 @@ class ITransport(ISimProxy):
         return True
 
     @classmethod
-    def with_properties(cls, p: TransportProperties):
-        inst = cls()
+    def with_properties(cls, p: TransportProperties, **kwargs):
+        inst = cls(**kwargs)
         inst.props = p
         return inst
 

@@ -150,7 +150,7 @@ class IStorage(Storable):
         # 这里以一个不可能达到的数值表示共享
         self.__occupied__ = simpy.Resource(self.env, 1 if exclusive else 10**12)
         p = self.props
-        self.__container__ = QuantifiedContainer(p.capacity)
+        self.__container__ = QuantifiedContainer(p.capacity, env=self.env)
 
     @property
     def level(self):

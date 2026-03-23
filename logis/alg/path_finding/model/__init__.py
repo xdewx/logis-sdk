@@ -1,17 +1,15 @@
-from typing import Any, Callable, Dict, List, NewType, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from networkx import DiGraph, Graph
 from pydantic import BaseModel, Field
 
-from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG, Point
+from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG, Point, Predicate
 
-PathFindingAlgorithmType = NewType("PathFindingAlgorithmType", str)
+from ..base import Path, PathFindingAlgorithmType
 
-AlgorithmTypeResolver = Callable[[Any], PathFindingAlgorithmType]
 
-# TODO: 完善名字、补充类型
-A_STAR_ALGORITHM = PathFindingAlgorithmType("a_star")
-DIJKSTRA_ALGORITHM = PathFindingAlgorithmType("dijkstra")
+class PathFindingConfig(BaseModel):
+    obstacle_filter: Optional[Predicate[Any]] = None
 
 
 class PathFindingInput(BaseModel):
@@ -26,11 +24,18 @@ class PathFindingInput(BaseModel):
     # 终点
     end: Point
 
+    # 点到点的距离矩阵
+    # TODO: 从graph中获取
+    distance_matrix: Dict[Point, List[Tuple[Point, float]]] = Field(
+        default_factory=dict
+    )
     # 排除的点或障碍点
     excluded_vertices: List[Point] = []
 
-    model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
+    # 启发式距离计算方法
+    heuristic_func: Callable[[Point, Point], float] = None
 
+    model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
 
 class PathFindingOutput(BaseModel):
     """
@@ -40,6 +45,12 @@ class PathFindingOutput(BaseModel):
 
     # 是否成功
     success: bool
+
+    # 具体路径的速度
+    speeds: Optional[List[float]] = None
+
+    # 可能存在多条路径
+    paths: Optional[List[Path]] = None
 
     # 具体路径
     path: Optional[List[Point]] = None
