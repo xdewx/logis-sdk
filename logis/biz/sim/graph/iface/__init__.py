@@ -40,6 +40,13 @@ class ISimPathGraph(IPathGraph[DirEdge, Point]):
     def lock_node(self, lock_id: str, node: Point):
         self._lock_nodes_map[lock_id].add(node)
 
+    def unlock_node(self, lock_id: str, node: Point):
+        if node in self._lock_nodes_map[lock_id]:
+            self._lock_nodes_map[lock_id].remove(node)
+
+    def unlock_nodes_by_lock_id(self, lock_id: str):
+        self._lock_nodes_map[lock_id].clear()
+
     def get_locked_by_other(self, my_lock_id: str):
         return set().union(
             *[nodes for id, nodes in self._lock_nodes_map.items() if id != my_lock_id]

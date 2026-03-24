@@ -255,7 +255,7 @@ def run_until(
             raise EmptySchedule from None
         if max_sim_time is not None and next_time > max_sim_time:
             log.warning(
-                "simulation run time exceeds max_sim_time %s, will force exit",
+                "仿真时长已超限制：%s，即将停止仿真",
                 max_sim_time,
             )
             raise DeadlineException(
@@ -267,7 +267,7 @@ def run_until(
             and time.time() - started_at > max_run_time
         ):
             log.warning(
-                "simulation run time exceeds max_run_time %s, will force exit",
+                "运行时长已超限制：%s，即将停止仿真",
                 max_run_time,
             )
             raise DeadlineException(
@@ -290,7 +290,7 @@ def run_until(
         env.step = _step
         env.run(until=until)
         if exit_signal and exit_signal.triggered:
-            log.info("exit signal triggered, simulation over at time %s", env.now)
+            log.info("%s收到终止仿真信号，仿真退出", env.now)
     except Exception as e:
         if has_no_event_left(env):
             log.info("error happens but there is no event left, will ignore: %s", e)

@@ -159,8 +159,8 @@ class Context(BaseContext):
         return "\n".join((cls.get_sim_context(sim_id=sim_id).errors) or [])
 
     @classmethod
-    def graph(cls, v=None) -> Optional[IPathGraph]:
-        key = "__graph__"
+    def path_graph(cls, v=None) -> Optional[IPathGraph]:
+        key = "__path_graph__"
         if v is not None:
             cls.set(key, v)
         return cls.get(key)
