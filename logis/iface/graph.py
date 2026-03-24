@@ -32,17 +32,15 @@ class IPathGraph(ABC, Generic[E, V]):
     路径关系图
     """
 
-    @property
     @abstractmethod
-    def edges(self) -> List[E]:
+    def edges(self, *args, **kwargs) -> List[E]:
         """
         所有的边
         """
         pass
 
-    @property
     @abstractmethod
-    def nodes(self) -> List[V]:
+    def nodes(self, *args, **kwargs) -> List[V]:
         """
         所有的节点
         """
