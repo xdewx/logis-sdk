@@ -13,6 +13,13 @@ class IRackSelectionStrategy(ABC):
     """
 
     @abstractmethod
+    def get_all_racks(self, *args, **kwargs) -> List[RackClass]:
+        """
+        获取所有可操作的货架
+        """
+        pass
+
+    @abstractmethod
     def select_racks(
         self, operation: OperationType, stocks: List[IStock], **kwargs
     ) -> List[RackClass]:
@@ -26,6 +33,13 @@ class ICellSelectionStrategy(ABC):
     """
     储位选择策略，从若干储位中筛选出符合操作需求的储位
     """
+
+    @abstractmethod
+    def get_all_cells(self, *args, **kwargs) -> List[CellClass]:
+        """
+        获取所有可操作的储位
+        """
+        pass
 
     @abstractmethod
     def select_cells(

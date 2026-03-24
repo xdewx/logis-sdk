@@ -10,7 +10,7 @@ class IComponent(ABC):
     """
 
     def __init__(self, *args, **kwargs):
-        self.create_edit_id: str = None
+        pass
 
     def is_valid(self):
         return True
