@@ -49,7 +49,3 @@ class IResourceManager(ABC):
 
 class IStorageManager(ABC):
     pass
-
-
-class IGraph(ABC):
-    pass

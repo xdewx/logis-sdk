@@ -1,8 +1,9 @@
 from logis.data_type import Point
+from logis.iface import IEdge
 from logis.math import euclid_distance, manhattan_distance
 
 
-class DirEdge:
+class DirEdge(IEdge):
     """
     有向图的连边
 
@@ -11,11 +12,17 @@ class DirEdge:
 
     def __init__(self, starter: Point, ender: Point, speed: float = -1, **kwargs):
         self.starter = starter
-        self.ender = ender  ## starter/ender are supposed to be tuple vertices
+        self.ender = ender
         # TODO:之前一直用的是欧几里得距离，在仓储场景下，好像曼哈顿距离更合适
         # self.length = manhattan_distance(starter, ender)
         self.length = euclid_distance(starter, ender)
         self.speed = speed
+
+    def get_weight(self, *args, **kwargs) -> float:
+        return self.length
+
+    def is_directed(self) -> bool:
+        return True
 
     def __str__(self):
         return f"e({self.starter}-{self.ender})"

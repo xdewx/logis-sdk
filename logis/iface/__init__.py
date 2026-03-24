@@ -23,5 +23,6 @@ class Shape(metaclass=ABCMeta):
 from ._event import *
 from ._queue import *
 from .container import *
+from .graph import *
 from .manage import *
 from .registry import *

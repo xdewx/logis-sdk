@@ -14,6 +14,7 @@ from logis.biz.sim import *
 from logis.biz.sim.command.model import SetupArgs
 from logis.biz.sim.const import SQLITE_EXT
 from logis.biz.sim.data_type import SimContext
+from logis.biz.sim.graph import IPathGraph
 
 # TODO: metric是否有必要放到sdk中
 from logis.biz.sim.metric import ProductionLineMetric
@@ -158,7 +159,7 @@ class Context(BaseContext):
         return "\n".join((cls.get_sim_context(sim_id=sim_id).errors) or [])
 
     @classmethod
-    def graph(cls, v=None) -> Optional[IGraph]:
+    def graph(cls, v=None) -> Optional[IPathGraph]:
         key = "__graph__"
         if v is not None:
             cls.set(key, v)
