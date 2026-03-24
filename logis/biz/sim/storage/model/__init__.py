@@ -9,7 +9,6 @@ from logis.biz.sim.stock import QuantifiedStock
 from logis.data_type import (
     DEFAULT_PYDANTIC_MODEL_CONFIG,
     Capacity,
-    Length,
     QuantifiedValue,
     SpatialProps,
     Time,
