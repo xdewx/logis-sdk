@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Literal, NewType, Union
+from typing import Literal, NewType, TypeAlias, Union
 
 default_model_name = "default"
 
@@ -80,6 +80,9 @@ NumberAscend = StorageLocationAssignmentStrategy("按储位编号从小到大")
 RackSelectionStrategy = NewType("RackSelectionStrategy", str)
 JobQuantityAscend = RackSelectionStrategy("按作业数量少的货架优先")
 DistanceAscend = RackSelectionStrategy("按距离近的货架优先")
+
+AgentIdleStrategyOption: TypeAlias = Literal["返回到归属地位置", "停留在原地", "自定义"]
+GoHomeStrategyFrequency: TypeAlias = Literal["每次", "如果无其他任务"]
 
 
 TaskType = NewType("TaskType", str)

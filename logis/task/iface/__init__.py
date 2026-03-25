@@ -53,7 +53,7 @@ class ITaskHandler(IHandler):
         """
         raise NotImplementedError("get_task_manifest")
 
-    def is_task_all_done(self, **kwargs):
+    def is_task_all_done(self, **kwargs) -> bool:
         """
         任务是否全部完成
         """

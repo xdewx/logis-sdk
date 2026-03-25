@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from typing import List, Optional, TypeVar
 
+from logis.biz.sim.task.model import TaskManifest
 from logis.iface import IControl
 from logis.task import ITaskHandler
 
@@ -13,6 +14,12 @@ class IBlueprint(ISimProxy, ITaskHandler, IComponent, IControl):
     """
     所有蓝图组件的抽象基类
     """
+
+    @abstractmethod
+    def get_task_manifest[T](self) -> Optional[TaskManifest[T]]:
+        """
+        获取任务清单
+        """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
