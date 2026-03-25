@@ -28,7 +28,7 @@ class IRackSelectionStrategy(ABC):
         operation: OperationType,
         stock: IStock,
         rack_group: Optional[RackGroupClass] = None,
-        **kwargs
+        **kwargs,
     ) -> List[IRack]:
         """
         从所有可操作的货架中筛选出符合操作需求的货架
@@ -60,7 +60,7 @@ class DefaultRackSelectionStrategy(IRackSelectionStrategy):
         stock: IStock,
         rack_group: Optional[RackGroupClass] = None,
         strategy: Optional[StorageSelectionStrategy] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         默认货架选择策略
@@ -101,9 +101,9 @@ class ICellSelectionStrategy(ABC):
     def select_cells(
         self,
         operation: OperationType,
-        stocks: List[IStock],
+        stock: IStock,
         rack: Optional[RackClass] = None,
-        **kwargs
+        **kwargs,
     ) -> List[CellClass]:
         """
         从所有可操作的储位中筛选出符合操作需求的储位
@@ -115,3 +115,57 @@ class ICellSelectionStrategy(ABC):
             符合操作需求的储位列表
         """
         pass
+
+
+class DefaultCellSelectionStrategy(ICellSelectionStrategy):
+    """
+    默认储位选择策略
+    """
+
+    def select_cells(
+        self,
+        operation: OperationType,
+        stock: IStock,
+        rack: Optional[RackClass] = None,
+        strategy: Optional[StorageSelectionStrategy] = None,
+        **kwargs,
+    ) -> List[CellClass]:
+        rack = rack or self.rack
+        assert rack is not None, "未传入货架，无法选择储位"
+        cells = [
+            cell for cell in rack.cells if cell.is_able_to(operation, stock, **kwargs)
+        ]
+        if not cells:
+            return cells
+        if StorageSelectionStrategy.NumberAscend.matches(strategy):
+            if OperationType.Store.matches(operation):
+                cells.sort(
+                    key=lambda x: (
+                        1 if x.is_still_universal else 0,
+                        -x.target_quantity.capacity + x.target_quantity.level,
+                        x.id,
+                    )
+                )
+            else:
+                cells.sort(key=lambda x: (-x.target_quantity.level, x.id))
+        elif StorageSelectionStrategy.DistanceAscend.matches(strategy):
+            if OperationType.Store.matches(operation):
+                cells.sort(
+                    key=lambda x: (
+                        0 if x.is_still_universal else 1,
+                        x.target_quantity.capacity - x.target_quantity.level,
+                        x.id,
+                    ),
+                    reverse=True,
+                )
+            else:
+                cells.sort(
+                    key=lambda x: (
+                        x.target_quantity.level,
+                        x.id,
+                    ),
+                    reverse=True,
+                )
+        else:
+            raise NotImplementedError(f"尚未支持的储位选择策略:{strategy}")
+        return cells

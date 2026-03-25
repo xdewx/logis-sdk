@@ -141,6 +141,21 @@ class ICell(IStorage):
     储位
     """
 
+    @property
+    @abstractmethod
+    def id(self):
+        pass
+
+    @property
+    @abstractmethod
+    def is_still_universal(self) -> bool:
+        pass
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.current_quantity: Optional[simpy.Container] = None
+        self.target_quantity: Optional[simpy.Container] = None
+
     @abstractmethod
     def is_able_to(
         self, operation: OperationType, stock: IStock, strict: bool = False, **kwargs
@@ -170,7 +185,7 @@ class IRack(IStorage):
 
     @property
     @abstractmethod
-    def cells(self) -> List[CellClass]:
+    def cells(self) -> List[ICell]:
         """
         获取本货架下的所有储位
         """
