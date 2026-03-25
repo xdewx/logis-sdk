@@ -1,6 +1,6 @@
 from abc import ABCMeta
 from numbers import Number
-from typing import Optional
+from typing import Optional, Tuple
 
 from logis.biz.sim.data_type import LocationType
 from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG, NumberUnit, QuantifiedValue
@@ -27,6 +27,13 @@ class QuantifiedStock(QuantifiedValue):
     @property
     def unique_id(self):
         return self.sku or self.code or self.name
+
+    @property
+    def storage_key(self) -> Tuple[str, str]:
+        """
+        用于存储索引的key，格式为(name, unit)，
+        """
+        return (self.name, self.unit)
 
 
 # TODO: 考虑组合实现和QuantifiedStock同源
@@ -77,6 +84,13 @@ class IStock(NumberUnit, metaclass=ABCMeta):
     @final_target_location.setter
     def final_target_location(self, loc: LocationType):
         raise NotImplementedError()
+
+    @property
+    def storage_key(self) -> Tuple[str, str]:
+        """
+        用于存储索引的key，格式为(name, unit)，
+        """
+        return (self.name, self.unit)
 
 
 class StockTask(ITask, IStock):

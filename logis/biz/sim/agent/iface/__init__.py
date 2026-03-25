@@ -32,6 +32,7 @@ class IAgent(ITransport, IBlueprint):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.origin_location: Optional[Point] = None
+        self.current_location: Optional[Point] = None
 
     @property
     @abstractmethod

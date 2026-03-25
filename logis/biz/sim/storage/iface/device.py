@@ -3,10 +3,14 @@ from abc import abstractmethod
 from typing import TypeVar
 
 import simpy
+from ipa.decorator import deprecated
 
-from logis.biz.sim.stock.model import QuantifiedStock
+from logis.biz.sim.const import OperationType
+from logis.biz.sim.stock.model import IStock, QuantifiedStock
+from logis.data_type.point import Point
 from logis.data_type.unitable import unify_quantified_value
 from logis.iface import Storable
+from logis.math import euclid_distance
 
 from .base import *
 from .container import *
@@ -50,6 +54,32 @@ class IStorage(Storable):
         self.__occupied__ = simpy.Resource(self.env, 1 if exclusive else 10**12)
         p = self.props
         self.__container__ = QuantifiedContainer(p.capacity, env=self.env)
+        self.center_point: Optional[Point] = None
+        self.current_jobs: int = 0
+
+    def decrease_jobs(self, *args, **kwargs):
+        """
+        减少作业数
+        """
+        self.current_jobs -= 1
+
+    def increase_jobs(self, *args, **kwargs):
+        """
+        增加作业数
+        """
+        self.current_jobs += 1
+
+    @deprecated("use agent.distance_to instead")
+    def distance_to(self, **kwargs) -> float:
+        """
+        获取到货物源头的距离
+        TODO：其实这里按理说应该包括取货距离和送货距离，且放在这里似乎也不太合适
+        """
+        from logis.biz.sim.agent import IAgent
+
+        # TODO: 考虑过stock不再继承IAgent，所以这里也要考虑改变
+        x: IAgent = kwargs.get("agent", None) or kwargs.get("stock", None)
+        return euclid_distance(self.center_point, x.current_location)
 
     @property
     def level(self):
@@ -111,7 +141,20 @@ class ICell(IStorage):
     储位
     """
 
-    pass
+    @abstractmethod
+    def is_able_to(
+        self, operation: OperationType, stock: IStock, strict: bool = False, **kwargs
+    ) -> bool:
+        """
+        判断是否可操作
+        Args:
+            operation: 操作类型
+            stock: 货物
+            strict: 是否严格判断，即完全能满足所有货物的需求
+        Returns:
+            是否可操作
+        """
+        pass
 
 
 CellClass = TypeVar("CellClass", bound=ICell)
@@ -122,7 +165,30 @@ class IRack(IStorage):
     货架
     """
 
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    @property
+    @abstractmethod
+    def cells(self) -> List[CellClass]:
+        """
+        获取本货架下的所有储位
+        """
+        pass
+
+    @abstractmethod
+    def is_able_to(
+        self, operation: OperationType, stock: IStock, strict: bool = False, **kwargs
+    ) -> bool:
+        """
+        判断是否能完成某个操作
+        Args:
+            operation: 操作类型
+            stock: 货物
+            strict: 是否严格判断，即完全能满足所有货物的需求
+        Returns:
+            是否能完成操作
+        """
 
 
 RackClass = TypeVar("RackClass", bound=IRack)
@@ -133,7 +199,13 @@ class IRackGroup(IStorage):
     货架组
     """
 
-    pass
+    @property
+    @abstractmethod
+    def racks(self) -> List[IRack]:
+        """
+        获取本货架组下的所有货架
+        """
+        pass
 
 
 RackGroupClass = TypeVar("RackGroupClass", bound=IRackGroup)

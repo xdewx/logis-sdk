@@ -73,13 +73,42 @@ class OperationType(Enum):
         return self == operation or self.value == operation
 
 
-StorageLocationAssignmentStrategy = NewType("StorageLocationAssignmentStrategy", str)
-NumberDescend = StorageLocationAssignmentStrategy("按储位编号从大到小")
-NumberAscend = StorageLocationAssignmentStrategy("按储位编号从小到大")
+LegencyStorageSelectionStrategyName: TypeAlias = Literal[
+    "按储位编号从大到小",
+    "按储位编号从小到大",
+    "按作业数量少的货架优先",
+    "按距离近的货架优先",
+]
 
-RackSelectionStrategy = NewType("RackSelectionStrategy", str)
-JobQuantityAscend = RackSelectionStrategy("按作业数量少的货架优先")
-DistanceAscend = RackSelectionStrategy("按距离近的货架优先")
+
+class StorageSelectionStrategy(Enum):
+    """
+    存储选择策略枚举，此枚举试图统一并兼容历史逻辑
+    """
+
+    BusyLevelAscend = "按作业数量少的优先"
+    DistanceAscend = "按距离近的优先"
+    NumberAscend = "按编号从小到大"
+    NumberDescend = "按编号从大到小"
+    Custom = "自定义"
+
+    def matches(
+        self,
+        strategy: Union[
+            "StorageSelectionStrategy", LegencyStorageSelectionStrategyName
+        ],
+    ):
+        # 下面有一些历史兼容逻辑
+        if strategy == "按储位编号从大到小":
+            return self == StorageSelectionStrategy.NumberDescend
+        if strategy == "按储位编号从小到大":
+            return self == StorageSelectionStrategy.NumberAscend
+        if strategy == "按作业数量少的货架优先":
+            return self == StorageSelectionStrategy.BusyLevelAscend
+        if strategy == "按距离近的货架优先":
+            return self == StorageSelectionStrategy.DistanceAscend
+        return self == strategy or self.value == strategy
+
 
 AgentIdleStrategyOption: TypeAlias = Literal["返回到归属地位置", "停留在原地", "自定义"]
 GoHomeStrategyFrequency: TypeAlias = Literal["每次", "如果无其他任务"]
