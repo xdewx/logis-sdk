@@ -18,38 +18,37 @@ from typing import (
 
 import humps
 from pydantic import BaseModel, ConfigDict, Field
+from typing_extensions import TypeAlias
 
-StringNumber = str
+StringNumber: TypeAlias = str
 
-BaseNumberType = Union[int, float]
-NumberType = Union[Decimal, int, float, Fraction, Number]
+BaseNumberType: TypeAlias = Union[int, float]
+NumberType: TypeAlias = Union[Decimal, int, float, Fraction]
 
-ComponentIntId = int
+ComponentIntId: TypeAlias = int
 
-ComponentStrId = str
+ComponentStrId: TypeAlias = str
 
-ComponentId = Union[ComponentIntId, ComponentStrId]
+ComponentId: TypeAlias = Union[ComponentIntId, ComponentStrId]
 
 if sys.version_info >= (3, 9):
-    from typing_extensions import TypeAlias
-
     TmpId: TypeAlias = Union[int, str]
 else:
     TmpId = Union[int, str]
 
 
 T = TypeVar("T")
-Predicate = Callable[[T], bool]
+Predicate: TypeAlias = Callable[[T], bool]
 
 Unit = NewType("Unit", str)
 
 # 倍率计算器，输入源单位、目标单位，输出倍率
-RatioComputer = Callable[[Unit, Unit], Decimal]
+RatioComputer: TypeAlias = Callable[[Unit, Unit], Decimal]
 
 EventType = NewType("EventType", str)
 TaskType = NewType("TaskType", str)
 
-TuplePoint = Tuple[Optional[Number], Optional[Number], Optional[Number]]
+TuplePoint: TypeAlias = Tuple[Optional[Number], Optional[Number], Optional[Number]]
 
 # 这里不要随便改，如果不满足自己的需求，可以新建配置
 DEFAULT_PYDANTIC_MODEL_CONFIG = ConfigDict(

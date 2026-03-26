@@ -171,6 +171,10 @@ class ICell(IStorage):
         """
         pass
 
+    @property
+    def rack(self) -> Optional["IRack"]:
+        raise NotImplementedError("rack not implemented")
+
 
 CellClass = TypeVar("CellClass", bound=ICell)
 
@@ -204,6 +208,11 @@ class IRack(IStorage):
         Returns:
             是否能完成操作
         """
+        pass
+
+    @property
+    def rack_group(self) -> Optional["IRackGroup"]:
+        raise NotImplementedError("rack_group not implemented")
 
 
 RackClass = TypeVar("RackClass", bound=IRack)
