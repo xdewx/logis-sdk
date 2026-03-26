@@ -2,7 +2,7 @@ __doc__ = """
 字典工具类
 """
 
-from typing import Any, Callable, Dict, Iterable, Tuple, Union
+from typing import Any, Dict, Iterable, Optional, Tuple, TypeVar, Union
 
 cn_en_dict = dict(
     半径="radius",
@@ -42,17 +42,23 @@ def remove_key_not_in(dc: dict, keys: Iterable[Any], delete_value: bool = False)
     return keys_removed
 
 
-def get_the_first_existent_key(obj: dict, *keys, default=None) -> Tuple[Any, Any]:
+K = TypeVar("K")
+V = TypeVar("V")
+
+
+def get_the_first_existent_key(
+    obj: Dict[K, V], *keys: K, default: Optional[V] = None
+) -> Tuple[Optional[K], Optional[V]]:
     """
     获取第一个存在的key的值
 
     Args:
-        obj (dict): 输入的字典，键名可能是中文或其他形式。
-        keys (Iterable[Any]): 要查找的键名列表。
-        default (Any, optional): 如果没有找到任何键，返回的默认值。默认值为None。
+        obj (Dict[K,V]):  输入的字典，键名可能是中文或其他形式。
+        keys (Iterable[K]): 要查找的键名列表。
+        default (V, optional): 如果没有找到任何键，返回的默认值。默认值为None。
 
     Returns:
-        (Tuple[Any, Any]): 第一个存在的键值对，键为存在的键名，值为对应的值。如果没有找到任何键，返回(None, default)。
+        (Tuple[K, V]): 第一个存在的键值对，键为存在的键名，值为对应的值。如果没有找到任何键，返回(None, default)。
     """
     for key in keys:
         if key in obj:

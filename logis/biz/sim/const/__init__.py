@@ -110,6 +110,7 @@ class StorageSelectionStrategy(Enum):
         return self == strategy or self.value == strategy
 
 
+AgentSelectionStrategyName: TypeAlias = Literal["距离近优先", "空闲优先", "自定义"]
 AgentIdleStrategyOption: TypeAlias = Literal["返回到归属地位置", "停留在原地", "自定义"]
 GoHomeStrategyFrequency: TypeAlias = Literal["每次", "如果无其他任务"]
 

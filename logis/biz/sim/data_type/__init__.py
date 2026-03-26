@@ -15,6 +15,7 @@ from logis.util.websocket_util import (
     is_websocket_closed,
 )
 
+from .agent import *
 from .component import *
 
 T = TypeVar("T")

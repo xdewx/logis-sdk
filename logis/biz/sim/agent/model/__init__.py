@@ -1,16 +1,18 @@
-from typing import Generic, Iterable, Iterator, Optional, TypeVar, Union
+from typing import Generic, Iterable, Iterator, Optional, TypeAlias, TypeVar, Union
 
 from pydantic import BaseModel
 
+from logis.biz.sim import AgentId
 from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG
 
+from ..iface import AgentClass
+
 TaskType = TypeVar("TaskType")
-AgentType = TypeVar("AgentType")
 
 
-class AgentManifest(BaseModel, Generic[AgentType, TaskType]):
-    agent: Optional[AgentType] = None
-    agent_id: Optional[Union[int, str]] = None
+class AgentManifest(BaseModel, Generic[AgentClass, TaskType]):
+    agent: Optional[AgentClass] = None
+    agent_id: Optional[AgentId] = None
 
     tasks: Union[Iterable[TaskType], Iterator[TaskType]] = []
 
