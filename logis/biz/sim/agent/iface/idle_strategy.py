@@ -5,23 +5,24 @@ import simpy
 
 from logis.biz.sim.const import GoHomeStrategyFrequency
 from logis.biz.sim.graph import IPathGraph
+from logis.biz.sim.iface import IExpose
 from logis.data_type.base import Predicate
 
 from .base import *
 
 
-class AgentIdleStrategy(ABC):
+class AgentIdleStrategy(IExpose):
     """
     智能体空闲策略
     """
 
-    def __init__(self, agent: Optional[AgentClass] = None) -> None:
+    def __init__(self, agent: Optional[AgentClass] = None, **kwargs) -> None:
         """
         初始化智能体空闲策略
         Args:
             agent: 智能体,是否要传取决于此策略是否仅针对此智能体
         """
-        super().__init__()
+        super().__init__(**kwargs)
         self.agent = agent
 
     def is_idle(self, agent: Optional[AgentClass] = None, **kwargs) -> bool:

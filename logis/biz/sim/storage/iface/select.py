@@ -2,12 +2,13 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Union
 
 from logis.biz.sim.const import OperationType, StorageSelectionStrategy
+from logis.biz.sim.iface import IExpose
 from logis.biz.sim.stock.model import IStock
 
 from .device import CellClass, IRack, RackClass, RackGroupClass
 
 
-class IRackSelectionStrategy(ABC):
+class IRackSelectionStrategy(IExpose):
     """
     货架选择策略，从若干货架中筛选出符合操作需求的货架
     """
@@ -20,6 +21,7 @@ class IRackSelectionStrategy(ABC):
         Args:
             rack_group: 货架组，如果此策略仅针对特定货架组则建议传，否则忽略即可
         """
+        super().__init__(**kwargs)
         self.rack_group = rack_group
 
     @abstractmethod
@@ -84,7 +86,7 @@ class DefaultRackSelectionStrategy(IRackSelectionStrategy):
         return racks
 
 
-class ICellSelectionStrategy(ABC):
+class ICellSelectionStrategy(IExpose):
     """
     储位选择策略，从若干储位中筛选出符合操作需求的储位
     """
@@ -95,6 +97,7 @@ class ICellSelectionStrategy(ABC):
         Args:
             rack: 货架，如果此策略仅针对特定货架则建议传，否则忽略即可
         """
+        super().__init__(**kwargs)
         self.rack = rack
 
     @abstractmethod

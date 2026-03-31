@@ -25,11 +25,16 @@ class WaveGroupingConfig(BaseModel):
 
     model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
 
+from .base import IExpose
 
-class WaveGroupingStrategy(ABC):
+
+class WaveGroupingStrategy(IExpose):
     """
     波次划分策略
     """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @abstractmethod
     def group(

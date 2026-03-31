@@ -30,13 +30,19 @@ class OrderPickingConfig(BaseModel):
     model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
 
 
-class OrderPickingStrategy(ABC):
+from .base import IExpose
+
+
+class OrderPickingStrategy(IExpose):
     """
     订单拣选策略
     1. 合并size均为1时，退化为按单拣选
     2. 合并size均>1时，即是合并拣选
     3. 合并size>=1时，即是混合拣选
     """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @abstractmethod
     def on_merge(self, *orders: Tuple[IOrder], **kwargs):

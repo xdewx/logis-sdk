@@ -39,6 +39,21 @@ class Context(BaseContext):
     APP_CONFIG: IAppConfig
 
     @classmethod
+    def id_instance_map(cls):
+        return cls.json_parser().id_instance_map
+
+    @classmethod
+    def get_blueprint_by_name(cls, name: str) -> Optional["BlueprintClass"]:
+        for _, inst in cls.id_instance_map().items():
+            if inst.name == name:
+                return inst
+        return None
+
+    @classmethod
+    def get_blueprint_by_id(cls, id: str) -> Optional["BlueprintClass"]:
+        return cls.id_instance_map().get(id, None)
+
+    @classmethod
     def data_dir(cls, sim_id: Optional[str] = None) -> Path:
         """
         获取当前仿真案例所对应的数据目录

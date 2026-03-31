@@ -1,17 +1,20 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
+from logis.biz.sim.ctx import Context
+from logis.biz.sim.iface import IExpose
+
 from .base import IAgent
 from .pool import IAgentPool
 
 
-class IAgentSelectionStrategy(ABC):
+class IAgentSelectionStrategy(IExpose):
     """
     智能体选择策略
     """
 
-    def __init__(self, agent_pool: Optional[IAgentPool] = None) -> None:
-        super().__init__()
+    def __init__(self, agent_pool: Optional[IAgentPool] = None, **kwargs) -> None:
+        super().__init__(**kwargs)
         self.agent_pool = agent_pool
 
     @abstractmethod

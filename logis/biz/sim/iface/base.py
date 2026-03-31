@@ -1,9 +1,23 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Literal, Optional
+from typing import TYPE_CHECKING, Any, Dict, Literal, Optional
 
 from networkx import DiGraph
 
 from logis.data_type import UnitConfig
+
+from .blueprint import IBlueprint
+
+if TYPE_CHECKING:
+    from logis.biz.sim.ctx import Context
+
+
+class IExpose(ABC):
+    """
+    用于通过SDK向外暴露参数
+    """
+
+    def __init__(self, ctx: "Context", **kwargs) -> None:
+        self.ctx = ctx
 
 
 class IDataReport(ABC):
@@ -15,7 +29,13 @@ class IJsonParser(ABC):
         super().__init__(*args, **kwargs)
         self.logic_graph: Optional[DiGraph] = None
         self._produce_recipe_graph: Optional[DiGraph] = None
-        self.object_map: Optional[Dict[str, Any]] = None
+        # TODO：考虑使用id_instance_map来代替
+        self.object_map: Optional[Dict[str, IBlueprint]] = None
+
+    @property
+    def id_instance_map(self) -> Dict[str, "IBlueprint"]:
+        assert self.object_map, "请先解析JSON文件"
+        return self.object_map
 
 
 class IResultGenerator(ABC):
