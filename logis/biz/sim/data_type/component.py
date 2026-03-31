@@ -37,6 +37,7 @@ class BlueprintKind(enum.Enum):
     蓝图的类型，如果不够用，可以修改此类或者继承并添加新的类型
     """
 
+    DUMMY = "dummy"
     SOURCE = "source"
     ENTER = "enter"
     EXIT = "exit"
@@ -47,7 +48,8 @@ class BlueprintKind(enum.Enum):
     GOODS_TO_PERSON = "goods_to_person"
     PRODUCER = "producer"
     WORK_STATION = "work_station"
-
+    # 最初是资源池、货架组、后来发现二者可以统称为资源集，TODO：后续考虑完全统一
+    RESOURCE_SET = "resource_set"
     RESOURCE_POOL = "resource_pool"
     TRANSPORT = "transport"
 
