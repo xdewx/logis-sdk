@@ -21,8 +21,8 @@ def try_import(path: str):
     except ModuleNotFoundError:
         tmps = path.split(".")
         assert len(tmps) > 1, f"unexpected path: {path}"
-        module = import_module(".".join(tmps[0:-1]))
-        return getattr(module, tmps[-1])
+        module = try_import(".".join(tmps[0:-1]))
+        return getattr(module, tmps[-1], None)
     except Exception as e:
         logging.warning("failed to import %s: %s", path, e)
         return None
