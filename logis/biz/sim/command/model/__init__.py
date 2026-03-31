@@ -7,6 +7,8 @@ from logis.data_type.base import DEFAULT_PYDANTIC_MODEL_CONFIG
 
 
 class SetupArgs(BaseModel):
+    # 是否开启硬编码测试
+    enable_hardcode_test: bool = False
 
     # 是否将其他智能体视为障碍物
     agent_as_obstacle: Optional[bool] = None
