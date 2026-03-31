@@ -58,13 +58,37 @@ async def watch_python_dir(
 T = TypeVar("T")
 
 
+def is_subclass_of(
+    child: Type[T], parent: Type[T], include_parent: bool = True
+) -> bool:
+    """
+    判断child是否是parent的子类
+    Args:
+        child: 子类
+        parent: 父类
+        include_parent: 父类本身是否视为子类
+    Returns:
+        是否是子类
+    """
+    if (not include_parent) and (child is parent):
+        return False
+    return inspect.isclass(child) and issubclass(child, parent)
+
 def collect_subclass_of(
-    base_class: Type[T], _from: ModuleType, include_base_class: bool = False
+    parent: Type[T], _from: ModuleType, include_parent: bool = False
 ):
-    def predicate(m):
-        if not include_base_class and m is base_class:
-            return False
-        return inspect.isclass(m) and issubclass(m, base_class)
+    """
+    收集所有子类
+    Args:
+        parent: 父类
+        _from: 模块
+        include_parent: 父类本身是否视为子类
+    Returns:
+        所有子类的(名称,类,全路径)元组
+    """
+
+    def predicate(child):
+        return is_subclass_of(child=child, parent=parent, include_parent=include_parent)
 
     name_class_map: List[Tuple[str, T]] = inspect.getmembers(_from, predicate=predicate)
     return name_class_map
