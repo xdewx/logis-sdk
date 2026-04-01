@@ -3,12 +3,19 @@ from typing import Any, Generator, Optional, TypeVar, Union
 
 import simpy
 
-from logis.biz.sim import AgentId, IBlueprint
+from logis.biz.sim import AgentId, IBlueprint, LocationType
 from logis.biz.sim.transport import ITransport
 from logis.data_type import Point, Speed
 
 
 class IAgent(ITransport, IBlueprint):
+
+    @abstractmethod
+    def resolve_center_point(self) -> Optional[Point]:
+        """
+        获取智能体的中心点
+        """
+        pass
 
     @property
     @abstractmethod
@@ -34,7 +41,8 @@ class IAgent(ITransport, IBlueprint):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.origin_location: Optional[Point] = None
-        self.current_location: Optional[Point] = None
+        # TODO: 这里主要是因为Stock是个特例，后续考虑分离
+        self.current_location: Optional[LocationType] = None
 
     @property
     @abstractmethod

@@ -79,7 +79,7 @@ class IStorage(Storable):
 
         # TODO: 考虑过stock不再继承IAgent，所以这里也要考虑改变
         x: IAgent = kwargs.get("agent", None) or kwargs.get("stock", None)
-        return euclid_distance(self.center_point, x.current_location)
+        return euclid_distance(self.center_point, x.resolve_center_point())
 
     @property
     def level(self):
