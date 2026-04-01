@@ -40,5 +40,10 @@ class IBlueprint(ISimProxy, ITaskHandler, IComponent, IControl):
         """
         pass
 
+    def is_kind_of(self, kind: BlueprintKind) -> bool:
+        """
+        判断是否是某种蓝图
+        """
+        return kind in (self.kinds() or [])
 
 BlueprintClass = TypeVar("BlueprintClass", bound=IBlueprint)

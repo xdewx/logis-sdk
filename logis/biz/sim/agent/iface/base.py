@@ -4,11 +4,20 @@ from typing import Any, Generator, Optional, TypeVar, Union
 import simpy
 
 from logis.biz.sim import AgentId, IBlueprint, LocationType
+from logis.biz.sim.component import IGrid
+from logis.biz.sim.graph import ISimPathGraph
 from logis.biz.sim.transport import ITransport
 from logis.data_type import Point, Speed
 
 
 class IAgent(ITransport, IBlueprint):
+
+    @abstractmethod
+    def resolve_binding_graph(self, *args, **kwargs) -> Union["IGrid", "ISimPathGraph"]:
+        """
+        获取智能体绑定的地图
+        """
+        pass
 
     @abstractmethod
     def resolve_center_point(self) -> Optional[Point]:
