@@ -37,6 +37,7 @@ def try_hot_reload(name, package: Optional[str] = None):
     """
     try:
         hmlib = import_module(name=name, package=package)
+        assert hmlib, f"failed to import module: {package}.{name}"
         logging.info("shall reload: %s", hmlib)
         hmr.reload(hmlib)
     except Exception as e:
