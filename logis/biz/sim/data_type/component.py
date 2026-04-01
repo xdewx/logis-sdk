@@ -37,6 +37,7 @@ class BlueprintKind(enum.Enum):
     蓝图的类型，如果不够用，可以修改此类或者继承并添加新的类型
     """
 
+    CODE = "code"
     DUMMY = "dummy"
     SOURCE = "source"
     ENTER = "enter"
