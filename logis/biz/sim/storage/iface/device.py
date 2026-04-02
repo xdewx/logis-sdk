@@ -43,17 +43,23 @@ class IStorage(Storable):
         pass
 
     def __init__(
-        self, props: StorageProperties, exclusive: bool = True, *args, **kwargs
+        self,
+        props: Optional[StorageProperties] = None,
+        exclusive: bool = True,
+        **kwargs
     ):
         """
         Args:
+            props: 存储设备的属性
             exclusive: 是否独占，适用于储位、货架、货架组等
         """
         self.props = props
         # 这里以一个不可能达到的数值表示共享
         self.__occupied__ = simpy.Resource(self.env, 1 if exclusive else 10**12)
-        p = self.props
-        self.__container__ = QuantifiedContainer(p.capacity, env=self.env)
+        if props:
+            self.__container__ = QuantifiedContainer(props.capacity, env=self.env)
+        else:
+            self.__container__ = None
         self.center_point: Optional[Point] = None
         self.current_jobs: int = 0
 
