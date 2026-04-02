@@ -34,6 +34,7 @@ class IAgentSelectionStrategy(IExpose):
         assert agent_pool, "未指定资源池，无法释放资源"
         agent_pool.before_release_resource(resource=agent, **kwargs)
         e = agent_pool.do_release_resource(resource=agent)
+        # TODO: 这里是否不等待就可以
         yield e
         agent_pool.after_resource_released(resource=agent, **kwargs)
         return True
