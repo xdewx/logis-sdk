@@ -85,3 +85,8 @@ class ISimPathGraph(IPathGraph[DirEdge, Point]):
     def remove_edges(self, *edges: DirEdge):
         for edge in edges:
             self._graph_.remove_edge(edge.starter, edge.ender)
+
+    def remove_edges_if_exists(self, *edges: DirEdge):
+        for edge in edges:
+            if edge.starter in self._graph_ and edge.ender in self._graph_:
+                self._graph_.remove_edge(edge.starter, edge.ender)
