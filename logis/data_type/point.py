@@ -151,6 +151,7 @@ class GenericPoint(Generic[Num]):
             and is_acceptable(self.y, value.y)
             and is_acceptable(self.z, value.z)
             and self.precision == value.precision
+            and self.unit == value.unit
         )
 
 
@@ -243,7 +244,9 @@ class Point(GenericPoint[float]):
             return v
             # return str(Decimal(v).quantize(Decimal(f"0.{'0'*self.precision}")))
 
-        return hash((s(self.x), s(self.y), s(self.z)))
+        # if self._id is not None:
+        #     return hash((self.__class__.__name__, self._id))
+        return hash((s(self.x), s(self.y), s(self.z), self.precision, self.unit))
 
     def __lt__(self, other):
         """
