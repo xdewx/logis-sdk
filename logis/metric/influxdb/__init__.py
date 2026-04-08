@@ -12,6 +12,8 @@ from pydantic import BaseModel
 
 from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG, ApiResponse
 
+if getattr(subprocess, "CREATE_NO_WINDOW", None) is None:
+    subprocess.CREATE_NO_WINDOW = 0x0
 
 class Point(_Point):
     """
