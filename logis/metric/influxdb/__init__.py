@@ -212,6 +212,17 @@ class InfluxRestClient:
     def _get_default_headers(self):
         return dict(Authorization=f"Bearer {self._token}")
 
+    def show_databases(self):
+        r = requests.get(
+            f"{self._url}/configure/database",
+            params=dict(format="json"),
+            headers=self._get_default_headers(),
+        )
+        r = ApiResponse.from_http_response(r, content_type="json")
+        for item in r.data or []:
+            item["name"] = item.pop("iox::database")
+        return r
+
     def create_database(self, database: str, strict: bool = True):
         r = requests.post(
             f"{self._url}/configure/database",
