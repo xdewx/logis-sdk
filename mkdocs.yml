@@ -1,0 +1,89 @@
+site_name: Logis SDK 文档
+site_description: Logis SDK 官方文档
+repo_url: https://github.com/xdewx/logis-sdk
+theme:
+  name: material
+  language: zh
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer # 页脚导航
+    - navigation.indexes # 索引页支持
+    - search.suggest
+    - search.highlight
+    - toc.fold
+    - toc.integrate
+    - content.code.copy # 代码块复制按钮
+    # - content.action.edit # 编辑按钮（配合 repo_url）
+    - content.action.view # 查看源码按钮
+    - content.tooltips # 提示框
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: 切换到深色模式
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch
+        name: 切换到浅色模式
+
+plugins:
+  - search
+  - macros:
+      module_name: macro
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [.] # 关键：让工具找到你的 logis包
+          options:
+            show_root_toc_entry: false # 全局关闭根节点toc，避免重复
+            show_source: true
+            show_bases: false
+            show_docstring_attributes: true
+            docstring_style: google
+            show_if_no_docstring: true # 显示无文档字符串的成员
+            show_signature_annotations: true # 显示类型注解
+            separate_signature: true # 签名单独显示
+
+markdown_extensions:
+  # 提示框扩展（必需）
+  - admonition
+
+  # 可选：增强提示框样式
+  - pymdownx.details # 可折叠提示框
+  - pymdownx.superfences # 代码块支持
+  - pymdownx.inlinehilite # 行内代码高亮
+
+  # 其他常用扩展
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.snippets # 文件包含
+  - attr_list # 属性列表
+  - md_in_html # HTML 中嵌套 Markdown
+  - tables # 表格
+  - toc:
+      permalink: true # 标题锚点
+
+extra:
+  module_name: logis
+  toc:
+    collapse: true # 全局折叠TOC
+    depth: 2
+
+nav:
+  - 首页: index.md
+  - 使用指南:
+      - 基础示例: quickstart.md
+  - 基础接口:
+      - 日志: logging.md
+      - 任务: task.md
+      - 指标: metric.md
+      - 数据结构: type.md
+  - 仿真大师接口: sim.md
