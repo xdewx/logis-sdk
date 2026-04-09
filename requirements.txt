@@ -51,4 +51,4 @@ prometheus-client
 pyecharts
 humanize
 python_hmr
-ipa-python-kit
+ipa-python-kit -i https://pypi.org/simple/
