@@ -1,6 +1,5 @@
 # Logis SDK 文档
 
-
 这是[络捷斯特](http://www.metaverse-scm.cn/)的`Python SDK`的官方文档。
 
 !!! note "络捷斯特简介"
@@ -9,7 +8,7 @@
 ## 安装
 
 ```bash
-pip install logis-sdk=={{ sdk_version() }} -i https://pypi.org/simple/
+pip install {{ sdk_install_name() }} -i https://pypi.org/simple/
 ```
 
 ## 项目简介
