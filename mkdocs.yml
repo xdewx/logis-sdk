@@ -7,14 +7,17 @@ theme:
   features:
     - navigation.tabs
     - navigation.sections
-    - navigation.expand
-    - navigation.top
+    # - navigation.expand # 展开导航
+    - navigation.top # 顶部导航
     - navigation.footer # 页脚导航
     - navigation.indexes # 索引页支持
+    - navigation.tracking # 跟随导航
+    # - navigation.instant # 无刷新导航
     - search.suggest
     - search.highlight
     - toc.fold
-    - toc.integrate
+    # - toc.integrate # 整合TOC
+    - toc.follow # 跟随TOC
     - content.code.copy # 代码块复制按钮
     # - content.action.edit # 编辑按钮（配合 repo_url）
     - content.action.view # 查看源码按钮
@@ -80,10 +83,21 @@ extra:
 nav:
   - 首页: index.md
   - 使用指南:
-      - 基础示例: quickstart.md
-  - 基础接口:
+    - 快速开始:
+      - 查看版本号: quickstart/version.md
+    - 高级用法:
+      - 自定义策略: advanced/strategy.md
+  - 接口文档:
+    - 通用模块:
+      - 数据结构: type.md
       - 日志: logging.md
       - 任务: task.md
       - 指标: metric.md
-      - 数据结构: type.md
-  - 仿真大师接口: sim.md
+    - 仿真大师模块:
+      - 数据结构: sim/type.md
+      - 搬运: sim/transport.md
+      - 存储: sim/storage.md
+      - 智能体: sim/agent.md
+
+extra_javascript:
+  - assets/hook.js
