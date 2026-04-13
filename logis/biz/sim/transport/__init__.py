@@ -15,15 +15,16 @@ from typing import (
 
 from pydantic import BaseModel, Field
 
-from logis.biz.sim import ISimProxy
+from logis.biz.sim.agent import IAgent
 from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG, Point, get_time, get_time_3d
 
+from .iface import *
 from .model import TransportProperties
 
 
-class ITransport(ISimProxy):
+class ITransportDevice(IAgent):
     """
-    搬运设备，同时具备移动属性
+    搬运设备（智能体的一种），同时具备移动属性
     """
 
     def is_valid(self) -> bool:
@@ -66,7 +67,7 @@ class ITransport(ISimProxy):
         """
         寻找路径
         """
-        yield self.env.timeout(0)
+        raise NotImplementedError("find_path method not implemented")
 
 
 class ObstacleDetectorConfig(BaseModel):
@@ -101,6 +102,7 @@ class ObstacleDetector(Protocol):
 class ManagedMovable(metaclass=ABCMeta):
     """
     按照外部manager规划路线进行移动
+    FIXME: 此方式暂未完全实现
     """
 
     SIGNAL_RESTORE = "restore"
