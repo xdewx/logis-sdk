@@ -73,3 +73,5 @@ class BlueprintKind(enum.Enum):
     AGV = "agv"
     STOCK = "stock"
     FORKLIFT = "forklift"
+
+    SHAPE = "shape"

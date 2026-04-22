@@ -16,13 +16,13 @@ from logis.biz.sim.const import (
     GoHomeStrategyFrequency,
 )
 from logis.biz.sim.iface.blueprint import IBlueprint
-from logis.biz.sim.storage import ICell, IRackGroup, IRackSelectionStrategy
+from logis.biz.sim.storage import IRackSelectionStrategy
 from logis.data_type import Speed, Time
-from logis.iface import Shape
 from logis.util import none_if_in
 from logis.util.dict_util import get_the_first_existent_key
 
 if TYPE_CHECKING:
+    from logis.biz.sim import Location
     from logis.biz.sim.stock import IStock
 
 
@@ -91,19 +91,29 @@ class ITransportBlueprint(IBlueprint):
 
     @property
     @abstractmethod
-    def pickup_location(self) -> Union["IRackGroup", "ICell", Shape, None]:
+    def pickup_location(self) -> Optional["Location"]:
         """
         取料位置
         """
-        pass
+        from logis.biz.sim import ILocationGetter
+
+        inst = self.context.resolve_code_strategy(
+            self.pickup_location_id, ILocationGetter, ctx=self.context
+        )
+        return inst.get() if inst else None
 
     @property
     @abstractmethod
-    def destination(self) -> Union["IRackGroup", "ICell", Shape, None]:
+    def destination(self) -> Optional["Location"]:
         """
         目的地
         """
-        pass
+        from logis.biz.sim import ILocationGetter
+
+        inst = self.context.resolve_code_strategy(
+            self.destination_id, ILocationGetter, ctx=self.context
+        )
+        return inst.get() if inst else None
 
     def get_pickup_strategy(self, **kwargs) -> Optional["IRackSelectionStrategy"]:
         """

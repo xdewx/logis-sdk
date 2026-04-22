@@ -120,3 +120,12 @@ class ICodeBlueprint(IBlueprint):
             NotImplementedError: 如果不支持实例化策略
         """
         raise NotImplementedError("instantiate_strategy 未实现")
+
+
+from logis.iface import Shape
+
+
+class IShapeBlueprint(IBlueprint, Shape):
+    """
+    形状蓝图组件的抽象基类,例如点节点、举行节点
+    """
