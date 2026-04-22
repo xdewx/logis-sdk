@@ -4,6 +4,11 @@ from typing import TYPE_CHECKING, Any, Generator, List, Optional, Tuple, Union
 import simpy
 from ipa.decorator import deprecated
 
+from logis.biz.sim.agent import (
+    AgentIdleStrategy,
+    IAgentPool,
+    IAgentSelectionStrategy,
+)
 from logis.biz.sim.component import ComponentForm as Entity
 from logis.biz.sim.const import (
     AgentIdleStrategyOption,
@@ -11,19 +16,14 @@ from logis.biz.sim.const import (
     GoHomeStrategyFrequency,
 )
 from logis.biz.sim.iface.blueprint import IBlueprint
+from logis.biz.sim.storage import ICell, IRackGroup, IRackSelectionStrategy
 from logis.data_type import Speed, Time
 from logis.iface import Shape
 from logis.util import none_if_in
 from logis.util.dict_util import get_the_first_existent_key
 
 if TYPE_CHECKING:
-    from logis.biz.sim.agent import (
-        AgentIdleStrategy,
-        IAgentPool,
-        IAgentSelectionStrategy,
-    )
     from logis.biz.sim.stock import IStock
-    from logis.biz.sim.storage import ICell, IRackGroup, IRackSelectionStrategy
 
 
 class ITransportBlueprint(IBlueprint):
@@ -51,10 +51,12 @@ class ITransportBlueprint(IBlueprint):
             "目的地选择策略"
         )
         """目的地选择策略"""
+        self.__destination_strategy__: Optional[IRackSelectionStrategy] = None
         self.retrieval_location_selection_strategy: Optional[str] = (
             entity.properties.get("取料位置选择策略")
         )
         """取料位置选择策略"""
+        self.__pickup_strategy__: Optional[IRackSelectionStrategy] = None
 
         self.transport_resource_id: str = none_if_in(
             entity.properties.get("选择搬运资源"), "-1", "null"
@@ -66,6 +68,7 @@ class ITransportBlueprint(IBlueprint):
         )
         self.agent_selection_strategy_name: Optional[AgentSelectionStrategyName] = v
         """搬运资源选择策略"""
+        self.__agent_selection_strategy__: Optional[IAgentSelectionStrategy] = None
 
         self.loading_time = Time.parse_str(entity.properties.get("装载时间", "0|秒"))
         """装载时间"""
@@ -84,6 +87,7 @@ class ITransportBlueprint(IBlueprint):
         self.go_home_frequency: GoHomeStrategyFrequency = (
             release_config[1].split(":")[1] if len(release_config) > 1 else ""
         )
+        self.__agent_idle_strategy__: Optional[AgentIdleStrategy] = None
 
     @property
     @abstractmethod
@@ -105,24 +109,34 @@ class ITransportBlueprint(IBlueprint):
         """
         取料位置选择策略
         """
-        raise NotImplementedError("get_pickup_strategy not implemented")
+        if not self.__pickup_strategy__:
+            self.__pickup_strategy__ = self.context.resolve_code_strategy(
+                self.retrieval_location_selection_strategy,
+                IRackSelectionStrategy,
+                ctx=self.context,
+            )
+        return self.__pickup_strategy__
 
     def get_destination_strategy(self, **kwargs) -> Optional["IRackSelectionStrategy"]:
         """
         目的地选择策略
         """
-        raise NotImplementedError("get_destination_strategy not implemented")
+        if not self.__destination_strategy__:
+            self.__destination_strategy__ = self.context.resolve_code_strategy(
+                self.destination_selection_strategy,
+                IRackSelectionStrategy,
+                ctx=self.context,
+            )
+        return self.__destination_strategy__
 
-    @deprecated("use get_destination_strategy or get_pickup_strategy instead")
+    @deprecated("use get_destination_strategy instead")
     def get_rack_selection_strategy(
         self, **kwargs
     ) -> Optional["IRackSelectionStrategy"]:
         """
-        货架选择策略
-
-        TODO: 与取料位置选择策略、目的地选择策略合并
+        货架选择策略（原目的地选择策略）
         """
-        raise NotImplementedError("get_rack_selection_strategy not implemented")
+        return self.get_destination_strategy(**kwargs)
 
     def get_path_finding_strategy(self, **kwargs):
         """
@@ -136,13 +150,43 @@ class ITransportBlueprint(IBlueprint):
         """
         智能体选择策略
         """
-        raise NotImplementedError("get_agent_selection_strategy not implemented")
+        if not self.__agent_selection_strategy__:
+            self.__agent_selection_strategy__ = self.context.resolve_code_strategy(
+                self.agent_selection_strategy_name,
+                IAgentSelectionStrategy,
+                ctx=self.context,
+                agent_pool=self.transport_resource,
+            )
+
+        if self.__agent_selection_strategy__ is None:
+            from logis.biz.sim.agent import DefaultAgentSelectionStrategy
+
+            self.__agent_selection_strategy__ = DefaultAgentSelectionStrategy(
+                ctx=self.context, agent_pool=self.transport_resource
+            )
+        return self.__agent_selection_strategy__
 
     def get_agent_idle_strategy(self, **kwargs) -> Optional["AgentIdleStrategy"]:
         """
         智能体空闲策略
         """
-        raise NotImplementedError("get_agent_idle_strategy not implemented")
+        if self.__agent_idle_strategy__ is not None:
+            return self.__agent_idle_strategy__
+        if self.after_release_resource == "返回到归属地位置":
+            from logis.biz.sim.agent import GoHomeStrategy
+
+            self.__agent_idle_strategy__ = GoHomeStrategy(
+                frequency=self.go_home_frequency, env=self.env, ctx=self.context
+            )
+        elif self.after_release_resource == "停留在原地":
+            self.__agent_idle_strategy__ = None
+        else:
+            self.__agent_idle_strategy__ = self.context.resolve_code_strategy(
+                self.after_release_resource,
+                AgentIdleStrategy,
+                ctx=self.context,
+            )
+        return self.__agent_idle_strategy__
 
     @property
     @abstractmethod
