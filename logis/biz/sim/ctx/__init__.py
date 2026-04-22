@@ -54,6 +54,40 @@ class Context(BaseContext):
         return cls.id_instance_map().get(id, None)
 
     @classmethod
+    def resolve_code_strategy(
+        cls, code_id: str, strategy_type: Type[C], index=-1, **kwargs
+    ) -> Optional[C]:
+        """
+        解析代码块中的策略
+
+        Args:
+            code_id: 代码块id
+            strategy_type: 策略类型
+            index: 策略索引
+            kwargs: 其他参数
+
+        Returns:
+            Optional[C]: 策略实例，如果成功解析策略，否则返回None
+
+        Raises:
+            Exception: 如果无法实例化策略，会抛出异常
+
+        """
+
+        bp = cls.get_blueprint_by_id(code_id)
+        if not bp:
+            return None
+
+        if isinstance(bp, ICodeBlueprint):
+            return bp.instantiate_strategy(
+                strategy_type=strategy_type, index=index, **kwargs
+            )
+
+        cls.logger().warning(f"不支持实例化策略{code_id} {strategy_type}")
+
+        return None
+
+    @classmethod
     def data_dir(cls, sim_id: Optional[str] = None) -> Path:
         """
         获取当前仿真案例所对应的数据目录

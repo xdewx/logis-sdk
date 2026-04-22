@@ -41,15 +41,18 @@ class ITransportBlueprint(IBlueprint):
             "null",
         )
         self.destination_id: str = none_if_in(
-            entity.properties.get("目的地"), "-1", "null"
+            entity.properties.get("选择目的地") or entity.properties.get("目的地"),
+            "-1",
+            "null",
         )
         assert self.destination_id, f"{self.name}未设置目的地"
 
-        self.destination_selection_strategy = entity.properties.get("目的地选择策略")
+        self.destination_selection_strategy: Optional[str] = entity.properties.get(
+            "目的地选择策略"
+        )
         """目的地选择策略"""
-        # 资源相关
-        self.retrieval_location_selection_strategy = entity.properties.get(
-            "取料位置选择策略"
+        self.retrieval_location_selection_strategy: Optional[str] = (
+            entity.properties.get("取料位置选择策略")
         )
         """取料位置选择策略"""
 
