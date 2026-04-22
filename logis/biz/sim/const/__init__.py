@@ -70,6 +70,15 @@ class OperationType(Enum):
     Store = "store"
 
     def matches(self, operation: Union[str, "OperationType"]):
+        """
+        判断是否匹配操作类型，此方法以非严格模式简化判断、兼容历史逻辑
+
+        Args:
+            operation: 操作类型
+
+        Returns:
+            是否匹配
+        """
         return self == operation or self.value == operation
 
 

@@ -1,6 +1,6 @@
 import logging
 from abc import abstractmethod
-from typing import TypeVar
+from typing import TYPE_CHECKING, Any, Generator, Tuple, TypeVar
 
 import simpy
 from ipa.decorator import deprecated
@@ -17,6 +17,10 @@ from .container import *
 from .retrieve import *
 from .store import *
 
+if TYPE_CHECKING:
+    from logis.biz.sim.agent import IAgent
+
+    from .select import *
 
 class IStorage(Storable):
     """
@@ -241,6 +245,77 @@ class IRackGroup(IStorage):
         获取本货架组下的所有货架
         """
         pass
+
+    def handle_operation(
+        self,
+        operation: Union[str, OperationType],
+        stock: IStock,
+        strategy: Optional[str] = None,
+        agent: Optional["IAgent"] = None,
+        force_assign_location: bool = False,
+        block: bool = False,
+        rack_selection_strategy: Optional["IRackSelectionStrategy"] = None,
+        cell_selection_strategy: Optional["ICellSelectionStrategy"] = None,
+        **kwargs,
+    ) -> Generator[simpy.Event, Any, Tuple[List["IStock"], Optional["IStock"]]]:
+        """
+        完成指定操作
+
+        Args:
+            operation: 操作类型
+            stock: 货物
+            strategy: 操作策略,此字段已废弃，仅保留兼容性
+            agent: 所使用的智能体，可选
+            force_assign_location: 是否强制分配位置
+            block: 是否等待存取完成
+            rack_selection_strategy: 货架选择策略
+            cell_selection_strategy: 储位选择策略
+
+        Returns:
+            (List["IStock"], Optional["IStock"]): (成功操作的货物列表, 失败的货物)
+        """
+        raise NotImplementedError("handle_operation not implemented")
+
+    def handle_operation_until(
+        self,
+        operation: OperationType,
+        stock: "IStock",
+        try_interval=5,
+        max_try: Optional[int] = 1,
+        stop_event: Optional[simpy.Event] = None,
+        **kwargs,
+    ):
+        """
+        内部调用handle_operation，直到成功或超过最大尝试次数
+
+        Args:
+            operation: 操作类型
+            stock: 货物
+            try_interval: 尝试间隔，单位秒
+            max_try: 最大尝试次数,默认1次
+            stop_event: 停止事件，触发后停止尝试
+            **kwargs: 其他参数，传递给handle_operation
+
+        """
+        try_forever = max_try is None
+        result = []
+        try_count = 0
+        while True:
+            if stop_event and stop_event.triggered:
+                break
+            if not try_forever and try_count >= max_try:
+                break
+            stocks, stock_left = yield from self.handle_operation(
+                operation, stock, **kwargs
+            )
+            result.extend(stocks)
+            stock = stock_left
+            if not try_forever or not stock_left:
+                break
+            try_count += 1
+            if try_forever or try_count < max_try:
+                yield self.env.timeout(try_interval)
+        return result, stock
 
 
 RackGroupClass = TypeVar("RackGroupClass", bound=IRackGroup)
