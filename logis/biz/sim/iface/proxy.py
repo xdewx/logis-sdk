@@ -124,6 +124,7 @@ class ISimProxy(ABC):
     def collect_metric(self, metric: MetricModelType):
         """
         收集指标数据（子类需实现）
+
         Args:
             metric: 指标模型
         """

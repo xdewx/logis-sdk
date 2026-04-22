@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List, Optional, TypeVar
+from typing import TYPE_CHECKING, List, Optional, TypeVar
 
 from logis.biz.sim.task.model import TaskManifest
 from logis.iface import IControl
@@ -9,6 +9,10 @@ from ..data_type.component import BlueprintKind
 from .component import IComponent
 from .proxy import ISimProxy
 
+if TYPE_CHECKING:
+    from logis.biz.sim.graph import ISimPathGraph
+    from logis.biz.sim.order import IOrder
+    from logis.biz.sim.task.model import IStock
 
 class IBlueprint(ISimProxy, ITaskHandler, IComponent, IControl):
     """
@@ -24,19 +28,26 @@ class IBlueprint(ISimProxy, ITaskHandler, IComponent, IControl):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.name: Optional[str] = None
+        """蓝图实例的名称"""
         self.create_edit_id: Optional[str] = None
+        """蓝图实例的ID"""
         self.type_id: Optional[str] = None
+        """蓝图的类型ID"""
         self.type_name: Optional[str] = None
+        """蓝图的类型名称"""
 
     @classmethod
     def verbose_name(cls, *args, **kwargs):
+        """
+        蓝图的详细名称
+        """
         return cls.__name__
 
     @staticmethod
     @abstractmethod
     def kinds(*args, **kwargs) -> List[BlueprintKind]:
         """
-        之所以有这个，是因为历史逻辑依靠此标志来分组
+        获取蓝图的种类，之所以有这个，是因为历史逻辑依靠此标志来分组
         """
         pass
 
@@ -46,4 +57,40 @@ class IBlueprint(ISimProxy, ITaskHandler, IComponent, IControl):
         """
         return kind in (self.kinds() or [])
 
+    def handle(self, try_interval: float = 10, max_concurrency: int = 10, **kwargs):
+        """
+        循环处理任务队列中的任务直到队列为空
+        1. 任务之间是串行还是并行由max_concurrency决定
+        2. 任务执行结束后异步触发on_task_succeeded
+
+        Args:
+            try_interval (float, optional): 尝试处理任务的时间间隔，单位秒。默认值为10。
+            max_concurrency (int, optional): 最大并发处理任务数量。默认值为10。
+        """
+        raise NotImplementedError("ITaskHandler.handle尚未实现")
+
+    def handle_stock_task(
+        self, stock: "IStock", order: Optional["IOrder"] = None, **kwargs
+    ):
+        """
+        处理单个货物任务
+
+        默认情况下，此方法会在handle方法中作为处理单元被循环调用
+        """
+        raise NotImplementedError("handle_stock_task 未实现")
+
+    def build_graph(self, graph: "ISimPathGraph"):
+        """
+        构建蓝图的图结构
+
+        此方法会在各蓝图初始化时被调用，用于构建全局的路径图。
+
+        Args:
+            graph (ISimPathGraph): 路径、布局连接图
+        """
+
+
 BlueprintClass = TypeVar("BlueprintClass", bound=IBlueprint)
+"""
+蓝图类类型
+"""

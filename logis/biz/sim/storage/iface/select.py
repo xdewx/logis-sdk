@@ -18,6 +18,7 @@ class IRackSelectionStrategy(IExpose):
     ) -> None:
         """
         初始化货架选择策略
+
         Args:
             rack_group: 货架组，如果此策略仅针对特定货架组则建议传，否则忽略即可
         """
@@ -34,10 +35,12 @@ class IRackSelectionStrategy(IExpose):
     ) -> List[IRack]:
         """
         从所有可操作的货架中筛选出符合操作需求的货架
+
         Args:
             operation: 操作类型
             stocks: 货物列表
             rack_group: 货架组，如果不传则使用初始化时传的货架组
+
         Returns:
             符合操作需求的货架列表
         """
@@ -66,11 +69,13 @@ class DefaultRackSelectionStrategy(IRackSelectionStrategy):
     ):
         """
         默认货架选择策略
+
         Args:
             operation: 操作类型
             stock: 货物
             rack_group: 货架组，如果不传则使用初始化时传的货架组
             strategy: 此方式实际上不是规范的策略模式，仅仅是为了少写代码
+
         Returns:
             符合操作需求的货架列表
         """
@@ -94,6 +99,7 @@ class ICellSelectionStrategy(IExpose):
     def __init__(self, rack: Optional[RackClass] = None, **kwargs) -> None:
         """
         初始化储位选择策略
+
         Args:
             rack: 货架，如果此策略仅针对特定货架则建议传，否则忽略即可
         """
@@ -110,10 +116,12 @@ class ICellSelectionStrategy(IExpose):
     ) -> List[CellClass]:
         """
         从所有可操作的储位中筛选出符合操作需求的储位
+
         Args:
             operation: 操作类型
             stocks: 货物列表
             rack: 货架，如果不传则使用初始化时传的货架
+
         Returns:
             符合操作需求的储位列表
         """

@@ -16,10 +16,12 @@ class AbstractTaskManager(metaclass=ABCMeta):
     def is_task_finished(self, task: TaskLike, update: bool = True, infer=True) -> bool:
         """
         检查任务是否已完成
+
         Args:
             task (TaskLike): 任务对象
             update (bool, optional): 是否在检测到任务已完成时自动更新任务属性
             infer (bool, optional): 是否根据子任务的状态推测本任务的状态
+
         Returns:
             bool: 任务是否已完成
         """
@@ -34,11 +36,13 @@ class AbstractTaskManager(metaclass=ABCMeta):
     ) -> bool:
         """
         检查任务是否在指定状态
+
         Args:
             task (TaskLike): 任务对象
             status (TaskStatus): 状态
             infer (bool, optional): 是否根据子任务的状态推测本任务的状态，默认值为True
             update (bool, optional): 是否在检测到任务状态符合要求时自动更新任务属性，默认值为True
+
         Returns:
             bool: 任务是否在指定状态
         """
@@ -163,6 +167,7 @@ class AbstractTaskManager(metaclass=ABCMeta):
     def update_task_status(self, task: TaskId, status: TaskStatus):
         """
         更新任务状态
+
         Args:
             task (TaskId): 任务ID
             status (TaskStatus): 任务状态

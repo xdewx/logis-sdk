@@ -23,6 +23,7 @@ class IComponent(ABC):
     def previous_nodes(self, direct: bool = True, **kwargs) -> Iterable[Self]:
         """
         获取上游节点
+
         Args:
             direct (bool, optional): 是否只获取直接上游节点。默认值为True。
         """
@@ -31,6 +32,7 @@ class IComponent(ABC):
     def next_nodes(self, direct: bool = True, **kwargs) -> Iterable[Self]:
         """
         获取下游节点
+
         Args:
             direct (bool, optional): 是否只获取直接下游节点。默认值为True。
         """
@@ -46,8 +48,10 @@ class ComponentLoader(Protocol):
     def load(self, item: ComponentConfigItem) -> Type[IComponent]:
         """
         加载组件
+
         Args:
             item (ComponentConfigItem): 组件配置项
+
         Returns:
             Type[IComponent]: 组件类
         """

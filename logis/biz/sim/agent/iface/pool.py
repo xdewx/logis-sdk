@@ -19,17 +19,25 @@ T = TypeVar("T")
 
 class IAgentPool(ABC):
     """
+    智能体资源池
+
     TODO: 继承自ITaskHandler
     """
 
     @property
     def get_queue(self):
+        """
+        获取智能体的请求队列
+        """
         if self.use_simpy_store:
             return self.__store__.get_queue
         return []
 
     @property
     def put_queue(self):
+        """
+        释放智能体的请求队列
+        """
         if self.use_simpy_store:
             return self.__store__.put_queue
         return []
@@ -37,13 +45,18 @@ class IAgentPool(ABC):
     @property
     @abstractmethod
     def env(self) -> simpy.Environment:
+        """
+        仿真环境实例
+        """
         pass
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__()
         self.capacity: Optional[int] = None
+        """资源池容量"""
 
         self.use_simpy_store: bool = False
+        """是否使用simpy.Store来模拟资源池"""
         self.__store__: Optional[simpy.Store] = None
         self.__lock__ = simpy.Resource(self.env, 1)
         # 所有资源
@@ -124,6 +137,9 @@ class IAgentPool(ABC):
 
     @property
     def id_resource_map(self):
+        """
+        获取智能体id到智能体的映射
+        """
         return self._all_resources
 
     def add_agent(self, agent: IAgent):
@@ -178,13 +194,20 @@ class IAgentPool(ABC):
     @abstractmethod
     def request_resource(
         self,
-        *args,
         strategy: Optional[AgentSelectionStrategyName] = None,
         fast_fail: bool = False,
         **kwargs,
     ) -> Generator[simpy.Event, Any, Optional[IAgent]]:
         """
         申请资源
+
+        Args:
+            strategy: 智能体选择策略
+            fast_fail: 是否快速失败，如果为True，当资源池中没有可用资源时，直接返回None
+            kwargs: 其他参数
+
+        Returns:
+            智能体事件生成器
         """
 
     @abstractmethod
@@ -205,6 +228,10 @@ class IAgentPool(ABC):
     def release_resource(self, resource: AgentClass, *args, **kwargs):
         """
         释放资源
+
+        Args:
+            resource: 要释放的资源
+            kwargs: 其他参数
         """
 
     def after_resource_released(self, **kwargs):
@@ -221,10 +248,12 @@ class IAgentPool(ABC):
     ]:
         """
         输入任务分配智能体
+
         Args:
             task_type: 任务类型
             task_keys: 任务key列表
             kwargs: 其他参数
+
         Returns:
             智能体id到智能体manifest的映射
         """

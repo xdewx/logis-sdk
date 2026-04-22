@@ -57,9 +57,11 @@ class OrderPickingStrategy(IExpose):
     ) -> List[IOrder]:
         """
         订单合并逻辑
+
         Args:
             orders: 待合并的订单列表
             config: 订单拣选配置
+
         Returns:
             合并后的订单列表
         """

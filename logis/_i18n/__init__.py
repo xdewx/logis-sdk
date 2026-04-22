@@ -19,6 +19,7 @@ if INNER_LOCALES_DIR.exists():
 def add_locale_dir(path: Union[str, List[str]]):
     """
     添加语言包目录
+
     Args:
         path: 语言包目录
     """

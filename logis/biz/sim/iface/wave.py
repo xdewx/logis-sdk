@@ -42,9 +42,11 @@ class WaveGroupingStrategy(IExpose):
     ) -> List[List[IOrder]]:
         """
         对订单列表进行波次划分
+
         Args:
             orders: 订单列表
             config: 波次拣选配置
+
         Returns:
             波次列表
         """

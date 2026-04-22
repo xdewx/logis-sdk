@@ -49,6 +49,7 @@ class IStorage(Storable):
         **kwargs
     ):
         """
+
         Args:
             props: 存储设备的属性
             exclusive: 是否独占，适用于储位、货架、货架组等
@@ -168,10 +169,12 @@ class ICell(IStorage):
     ) -> bool:
         """
         判断是否可操作
+
         Args:
             operation: 操作类型
             stock: 货物
             strict: 是否严格判断，即完全能满足所有货物的需求
+
         Returns:
             是否可操作
         """
@@ -207,10 +210,12 @@ class IRack(IStorage):
     ) -> bool:
         """
         判断是否能完成某个操作
+
         Args:
             operation: 操作类型
             stock: 货物
             strict: 是否严格判断，即完全能满足所有货物的需求
+
         Returns:
             是否能完成操作
         """

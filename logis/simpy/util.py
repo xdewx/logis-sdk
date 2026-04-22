@@ -26,8 +26,10 @@ def try_put(
 def get_free_capacity(container: simpy.Container):
     """
     获取容器的空闲容量
+
     Args:
         container (simpy.Container): 容器
+
     Returns:
         int | float: 空闲容量
     """
@@ -45,6 +47,7 @@ def resize_container(
 ):
     """
     调整容器容量
+
     Args:
         container (simpy.Container): 容器
         capacity (int | float): 新容量
@@ -82,6 +85,7 @@ def resize_container_level(
 ):
     """
     调整容器库存
+
     Args:
         container (simpy.Container): 容器
         level (int | float): 新库存
@@ -129,6 +133,7 @@ def schedule_event_at(
 ):
     """
     计划在指定时间触发事件
+
     Args:
         env (simpy.Environment): 仿真环境
         at (float | int): 触发时间
@@ -147,6 +152,7 @@ def schedule_event_at(
 def interrupt_on_event(env: simpy.Environment, ev: simpy.Event):
     """
     当事件触发时中断仿真
+
     Args:
         env (simpy.Environment): 仿真环境
         ev (simpy.Event): 事件

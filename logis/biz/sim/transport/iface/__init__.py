@@ -15,12 +15,13 @@ from logis.util import none_if_in
 from logis.util.dict_util import get_the_first_existent_key
 
 if TYPE_CHECKING:
+    from logis.biz.sim.agent import IAgentPool
     from logis.biz.sim.storage import ICell, IRackGroup
 
 
 class ITransportBlueprint(IBlueprint):
     """
-    搬运蓝图
+    搬运蓝图基类
     """
 
     def __init__(self, entity: Entity, *args, **kwargs):
@@ -41,14 +42,19 @@ class ITransportBlueprint(IBlueprint):
         self.retrieval_location_selection_strategy = entity.properties.get(
             "取料位置选择策略"
         )
+        """取料位置选择策略"""
+
         _, v = get_the_first_existent_key(
             entity.properties, "搬运资源选择策略", "选择搬运资源策略"
         )
         self.agent_selection_strategy_name: Optional[AgentSelectionStrategyName] = v
+        """搬运资源选择策略"""
 
         # 时间相关
         self.loading_time = Time.parse_str(entity.properties.get("装载时间", "0|秒"))
+        """装载时间"""
         self.unloading_time = Time.parse_str(entity.properties.get("卸载时间", "0|秒"))
+        """卸载时间"""
         self._moving_speed = none_if_in(
             entity.properties.get("移动速度"), "DefaultValue"
         )
@@ -62,6 +68,7 @@ class ITransportBlueprint(IBlueprint):
         self.go_home_frequency: GoHomeStrategyFrequency = (
             release_config[1].split(":")[1] if len(release_config) > 1 else ""
         )
+
     @property
     @abstractmethod
     def pickup_location(self) -> Union["IRackGroup", "ICell", Shape, None]:
@@ -107,3 +114,7 @@ class ITransportBlueprint(IBlueprint):
         智能体空闲策略
         """
         raise NotImplementedError("get_agent_idle_strategy not implemented")
+
+    @property
+    def transport_resource(self) -> Optional["IAgentPool"]:
+        pass

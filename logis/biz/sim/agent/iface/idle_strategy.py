@@ -19,6 +19,7 @@ class AgentIdleStrategy(IExpose):
     def __init__(self, agent: Optional[AgentClass] = None, **kwargs) -> None:
         """
         初始化智能体空闲策略
+
         Args:
             agent: 智能体,是否要传取决于此策略是否仅针对此智能体
         """
@@ -28,6 +29,9 @@ class AgentIdleStrategy(IExpose):
     def is_idle(self, agent: Optional[AgentClass] = None, **kwargs) -> bool:
         """
         判断智能体是否空闲
+
+        Args:
+            agent: 如果不传则使用初始化时传的智能体，否则使用传参的智能体
         """
         raise NotImplementedError("is_idle方法尚未实现")
 
@@ -40,6 +44,7 @@ class AgentIdleStrategy(IExpose):
     ) -> Generator[simpy.Event, Any, None]:
         """
         智能体做完任务之后的回调逻辑
+
         Args:
             agent: 如果不传则使用初始化时传的智能体，否则使用传参的智能体
             is_idle: 判断智能体是否空闲的方法，如果不传则使用is_idle方法，否则使用传参的方法判断

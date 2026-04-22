@@ -36,6 +36,7 @@ class DeadlineEvent(simpy.Event):
     def schedule_at(self, at: Union[float, int]):
         """
         计划在指定时间触发事件
+
         Args:
             at (float | int): 触发时间
         """

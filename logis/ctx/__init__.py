@@ -47,6 +47,7 @@ class Context:
         create=False,
     ):
         """
+        获取上下文中的值
         Args:
             key: 键
             default: 默认值,已废弃,请使用default_factory
@@ -81,10 +82,12 @@ class Context:
     def count(cls, name: str, value: Number, override=False) -> Number:
         """
         计数
+
         Args:
             name: 待统计量
             value: 值
             override: 是否直接覆盖旧值
+
         Returns:
             Number: 最新值
         """
@@ -126,6 +129,7 @@ class Context:
     ) -> Optional[float]:
         """
         计算时长
+
         Args:
             key: 时长键
             now: 当前时间
@@ -153,6 +157,7 @@ class Context:
             id: 计数器ID
             start: 初始值
             step: 步长
+
         Returns:
             count: 计数器的迭代器
         """
