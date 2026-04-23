@@ -117,17 +117,30 @@ class ITransportBlueprint(IBlueprint):
         )
         return inst.get() if inst else None
 
-    def get_pickup_strategy(self, **kwargs) -> Optional["IRackSelectionStrategy"]:
+    def get_pickup_strategy(self, **kwargs):
         """
         取料位置选择策略
+        如果没有设置取料位置选择策略，尝试从前一个蓝图块获取
         """
-        if not self.__pickup_strategy__:
-            self.__pickup_strategy__ = self.context.resolve_code_strategy(
-                self.retrieval_location_selection_strategy,
-                IRackSelectionStrategy,
-                ctx=self.context,
-            )
-        return self.__pickup_strategy__
+        from logis.biz.sim import BlueprintKind
+
+        strategy = self.retrieval_location_selection_strategy
+
+        # 如果没有取料位置选择策略，尝试从前一个蓝图块获取
+        if strategy is None:
+            for node in self.previous_nodes(direct=True):
+                if node.is_kind_of(BlueprintKind.ENTER):
+                    # Enter节点可能有相关的策略
+                    strategy = node.selection_policy
+                    if strategy:
+                        break
+                elif node.is_kind_of(BlueprintKind.SOURCE):
+                    # Source节点可能有相关的策略
+                    strategy = node.generate_strategy
+                    if strategy:
+                        break
+
+        return strategy
 
     def get_destination_strategy(self, **kwargs) -> Optional["IRackSelectionStrategy"]:
         """
