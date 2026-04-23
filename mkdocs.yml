@@ -85,7 +85,9 @@ nav:
   - 使用指南:
     - 快速开始:
       - 查看版本号: quickstart/version.md
+      - 使用日志: quickstart/logging.md
     - 高级用法:
+      - 开发者必读: advanced/dev.md
       - 自定义策略: advanced/strategy.md
   - 接口文档:
     - 通用模块:
