@@ -78,10 +78,10 @@ class GoHomeStrategy(AgentIdleStrategy):
         """
         agent = agent or self.agent
         is_idle = is_idle or self.is_idle
-
-        if (
-            self.frequency == "如果无其他任务" and is_idle(agent, **kwargs)
-        ) or self.frequency == "每次":
+        if self.frequency == "如果无其他任务":
+            if is_idle(agent, **kwargs):
+                yield from agent.move(target=agent.origin_location, **kwargs)
+        elif self.frequency == "每次":
             yield from agent.move(target=agent.origin_location, **kwargs)
         else:
             raise NotImplementedError(f"频率{self.frequency}尚未支持")
