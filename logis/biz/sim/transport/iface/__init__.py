@@ -19,6 +19,7 @@ from logis.biz.sim.const import (
 from logis.biz.sim.iface.blueprint import IBlueprint
 from logis.biz.sim.storage import IRackSelectionStrategy
 from logis.data_type import Speed, Time
+from logis.task import ITask
 from logis.util import none_if_in
 from logis.util.dict_util import get_the_first_existent_key
 
@@ -247,3 +248,29 @@ class ITransportBlueprint(IBlueprint):
             Tuple[List["Stock"], Optional["Stock"]]: 成功的货物列表、未分配的货物
         """
         raise NotImplementedError("assign_target_location not implemented")
+
+    def transport_item(
+        self,
+        object: Union[List["IStock"], "IStock"],
+        task_type: str,
+        order: Optional["ITask"] = None,
+        agent: Optional["IAgent"] = None,
+        **kwargs,
+    ) -> Generator[simpy.Event, Any, Optional["IStock"]]:
+        """
+        单次运输货物
+
+        Args:
+            object: 待运输目标
+            task_type: 任务类型
+            order: 对应的订单,如果所有货物属于同一个订单，否则应从货物中获取order_id
+            agent: 所使用的智能体，如果不传，则应在此方法内部分配、释放智能体
+
+        Returns:
+            Optional["IStock"]: 运输成功返回运输的货物，否则返回None
+
+        Yields:
+            simpy.Event: 运输事件
+        """
+
+        raise NotImplementedError("transport_item not implemented")
