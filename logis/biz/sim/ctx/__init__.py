@@ -208,7 +208,7 @@ class Context(BaseContext):
         return "\n".join((cls.get_sim_context(sim_id=sim_id).errors) or [])
 
     @classmethod
-    def path_graph(cls, v=None) -> Optional[IPathGraph]:
+    def path_graph(cls, v=None) -> Optional["ISimPathGraph"]:
         key = "__path_graph__"
         if v is not None:
             cls.set(key, v)

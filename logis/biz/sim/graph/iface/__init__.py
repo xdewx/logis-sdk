@@ -27,6 +27,7 @@ class ISimPathGraph(IPathGraph[DirEdge, Point]):
         self._graph_ = DiGraph()
         self._lock_nodes_map: Dict[str, Set[Point]] = defaultdict(lambda: set())
         self._path_lock = simpy.Resource(self.env)
+        self.__index_point_map__: Dict[str, Point] = {}
 
     def request_path_lock(self):
         return self._path_lock.request()
@@ -90,3 +91,18 @@ class ISimPathGraph(IPathGraph[DirEdge, Point]):
         for edge in edges:
             if edge.starter in self._graph_ and edge.ender in self._graph_:
                 self._graph_.remove_edge(edge.starter, edge.ender)
+
+    def get_index_point_map(self, init: bool = False, **kwargs):
+        """
+        获取索引点映射
+
+        Args:
+            init: 是否强制重新初始化映射，默认False
+
+        Returns:
+            Dict[str, Point]
+        """
+        return self.__index_point_map__
+
+    def get_point_by_index(self, index: str):
+        return self.__index_point_map__.get(index)
