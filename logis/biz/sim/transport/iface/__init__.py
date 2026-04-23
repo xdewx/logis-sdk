@@ -6,6 +6,7 @@ from ipa.decorator import deprecated
 
 from logis.biz.sim.agent import (
     AgentIdleStrategy,
+    IAgent,
     IAgentPool,
     IAgentSelectionStrategy,
 )
@@ -175,6 +176,25 @@ class ITransportBlueprint(IBlueprint):
                 ctx=self.context, agent_pool=self.transport_resource
             )
         return self.__agent_selection_strategy__
+
+    def can_return_original_place(self, agent: Union["IAgent"], **kwargs):
+        """
+        检查指定智能体是否可以返回原始位置
+
+        Args:
+            agent: 智能体
+
+        Returns:
+            bool: 是否可以返回原始位置
+        """
+        if not agent.is_task_all_done():
+            return False
+
+        if self.go_home_frequency == "如果无其他任务":
+            # FIXME: 此处判断逻辑待完善
+            return self.get_task_manifest().no_stock_task_left()
+
+        return True
 
     def get_agent_idle_strategy(self, **kwargs) -> Optional["AgentIdleStrategy"]:
         """
