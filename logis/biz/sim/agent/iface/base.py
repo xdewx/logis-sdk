@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Generator, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generator, Optional, TypeVar, Union
 
 import simpy
 
@@ -8,6 +8,8 @@ from logis.biz.sim.component import IGrid
 from logis.biz.sim.graph import ISimPathGraph
 from logis.data_type import Point, Speed
 
+if TYPE_CHECKING:
+    from logis.alg.path_finding import PathFindingAlgorithm
 
 class IAgent(IBlueprint):
     """
@@ -52,8 +54,12 @@ class IAgent(IBlueprint):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.origin_location: Optional[Point] = None
+        """初始位置"""
         # TODO: 这里主要是因为Stock是个特例，后续考虑分离
         self.current_location: Optional[LocationType] = None
+        """当前位置"""
+        self.path_finding_strategy: Optional["PathFindingAlgorithm"] = None
+        """寻路策略"""
 
     @property
     @abstractmethod

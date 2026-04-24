@@ -1,15 +1,18 @@
 from abc import abstractmethod
 from collections import defaultdict
-from typing import Dict, List, Optional, Set
+from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple
 
 import simpy
 from networkx import DiGraph
 
+from logis.alg.path_finding import PathFindingAlgorithm, PathFindingOutput
 from logis.data_type import Point
 from logis.iface.graph import IPathGraph
 
 from ..model import DirEdge
 
+if TYPE_CHECKING:
+    from logis.biz.sim.transport import ObstacleDetectorConfig
 
 class ISimPathGraph(IPathGraph[DirEdge, Point]):
     """
@@ -106,3 +109,44 @@ class ISimPathGraph(IPathGraph[DirEdge, Point]):
 
     def get_point_by_index(self, index: str):
         return self.__index_point_map__.get(index)
+
+    def realtime_obstacles(
+        self, my_lock_id: str, config: "ObstacleDetectorConfig", **kwargs
+    ) -> Tuple[List[Point], List[Point]]:
+        """
+        实时获取障碍物
+
+        Args:
+            my_lock_id: 获取方的锁ID
+            config: 障碍物检测配置
+            **kwargs: 其他参数
+
+        Returns:
+            Tuple[List[Point], List[Point]]: (智能体障碍物点列表, 所有障碍物点列表)
+        """
+        raise NotImplementedError("realtime_obstacles not implemented")
+
+    @abstractmethod
+    def find_path(
+        self,
+        src: Point,
+        dest: Point,
+        alg: PathFindingAlgorithm,
+        excluded_vertices: List[Point] = [],
+        **kwargs,
+    ) -> PathFindingOutput:
+        """
+        路径规划
+
+        TODO: 后续把图作为参数传入算法，而不是把算法作为参数传入图
+
+        Args:
+            src: 起始点
+            dest: 目的地
+            alg: 路径规划算法，默认AStar算法
+            excluded_vertices: 排除的顶点，默认空列表
+            **kwargs: 其他参数
+
+        Returns:
+            PathFindingOutput: 路径规划结果
+        """

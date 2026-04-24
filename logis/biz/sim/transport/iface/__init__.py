@@ -4,6 +4,11 @@ from typing import TYPE_CHECKING, Any, Generator, List, Optional, Tuple, Union
 import simpy
 from ipa.decorator import deprecated
 
+from logis.alg.path_finding import (
+    PathFindingAlgorithm,
+    default_algorithm_matcher,
+    find_algorithm,
+)
 from logis.biz.sim.agent import (
     AgentIdleStrategy,
     IAgent,
@@ -91,6 +96,10 @@ class ITransportBlueprint(IBlueprint):
         )
         self.__agent_idle_strategy__: Optional[AgentIdleStrategy] = None
 
+        self.pathfinding_alg_name: str = entity.properties.get("寻路算法", "A*")
+        """寻路算法名，默认A*算法"""
+        self.__path_finding_strategy__: Optional[PathFindingAlgorithm] = None
+
     @property
     @abstractmethod
     def pickup_location(self) -> Optional["Location"]:
@@ -170,11 +179,29 @@ class ITransportBlueprint(IBlueprint):
         """
         return self.get_destination_strategy(**kwargs)
 
-    def get_path_finding_strategy(self, **kwargs):
+    def get_path_finding_strategy(self, **kwargs) -> Union[PathFindingAlgorithm, None]:
         """
         路径规划策略
         """
-        raise NotImplementedError("get_path_finding_strategy not implemented")
+        if self.__path_finding_strategy__:
+            return self.__path_finding_strategy__
+
+        from logis.alg.path_finding import AStarPathFinding
+
+        alg_class = find_algorithm(
+            default_algorithm_matcher,
+            alg_name=self.pathfinding_alg_name.lower() or "a_star",
+            space=dict(a_star=AStarPathFinding) | {"a*": AStarPathFinding},
+        )
+
+        if alg_class:
+            self.__path_finding_strategy__ = alg_class()
+        else:
+            self.__path_finding_strategy__ = self.context.resolve_code_strategy(
+                self.pathfinding_alg_name, PathFindingAlgorithm, ctx=self.context
+            )
+
+        return self.__path_finding_strategy__
 
     def get_agent_selection_strategy(
         self, **kwargs
