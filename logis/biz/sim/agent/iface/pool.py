@@ -19,7 +19,14 @@ T = TypeVar("T")
 
 class IAgentPool(ABC):
     """
-    智能体资源池
+    智能体资源池，生命周期钩子如下：
+    1. 初始化资源池
+    2. 在申请资源之前
+    3. 申请资源
+    4. 在资源申请到之后
+    5. 在资源释放之前
+    6. 释放资源
+    7. 在资源释放之后
 
     TODO: 继承自ITaskHandler
     """
@@ -73,24 +80,50 @@ class IAgentPool(ABC):
     def set_locked(self, resource: AgentClass, **kwargs):
         """
         标记资源为已被锁定
+
+        Args:
+            resource: 待标记的资源
+            kwargs: 其他参数
+
+        Returns:
+            bool: 是否成功标记资源为已被锁定
         """
         self._locked_resources[resource.id] = resource
+
+        return True
 
     def unset_locked(self, resource: AgentClass, **kwargs):
         """
         取消标记资源为未被锁定
+
+        Args:
+            resource: 待取消标记的资源
+            kwargs: 其他参数
+
+        Returns:
+            bool: 是否成功取消标记资源为未被锁定
         """
         self._locked_resources.pop(resource.id, None)
+        return True
 
     def is_locked(self, resource: AgentClass) -> bool:
         """
         判断资源是否已被锁定
+
+        Args:
+            resource: 待判断的资源
+
+        Returns:
+            bool: 是否已被锁定
         """
         return resource.id in self._locked_resources
 
     def cancel_request_resource(self, req: simpy.Event):
         """
-        取消申请资源
+        取消申请资源，默认仅实现了use_simpy_store模式
+
+        Args:
+            req: 待取消的申请事件
         """
         if self.use_simpy_store:
             self.__store__.get_queue.remove(req)
@@ -99,34 +132,15 @@ class IAgentPool(ABC):
 
     def cancel_release_resource(self, req: simpy.Event):
         """
-        取消释放资源
+        取消释放资源，默认仅实现了use_simpy_store模式
+
+        Args:
+            req: 待取消的释放事件
         """
         if self.use_simpy_store:
             self.__store__.put_queue.remove(req)
         else:
             raise NotImplementedError("cancel_release_resource not implemented")
-
-    def do_request_resource(
-        self, **kwargs
-    ) -> Generator[simpy.Event, Any, Optional[AgentClass]]:
-        """
-        执行申请资源
-        """
-        if self.use_simpy_store:
-            assert self.__store__, "未初始化资源池，无法申请资源"
-            return self.__store__.get()
-        else:
-            raise NotImplementedError("do_request_resource not implemented")
-
-    def do_release_resource(self, resource: AgentClass, *args, **kwargs):
-        """
-        执行释放资源
-        """
-        if self.use_simpy_store:
-            assert self.__store__, "未初始化资源池，无法释放资源"
-            return self.__store__.put(resource)
-        else:
-            raise NotImplementedError("do_release_resource not implemented")
 
     @property
     def resources(self):
@@ -145,6 +159,13 @@ class IAgentPool(ABC):
     def add_agent(self, agent: IAgent):
         """
         添加智能体到资源池
+
+        Args:
+            agent: 智能体
+
+        Raises:
+            AssertionError: 如果资源池已满，则无法继续添加智能体
+
         """
         if self.capacity is not None:
             assert (
@@ -158,6 +179,12 @@ class IAgentPool(ABC):
     def is_type_of(self, t: Type) -> bool:
         """
         判断资源池是否是指定类型的资源
+
+        Args:
+            t: 资源类型
+
+        Returns:
+            bool: 是否是指定类型的资源
         """
         if not self.resources:
             return False
@@ -169,7 +196,7 @@ class IAgentPool(ABC):
         获取资源池中可用的资源数量
         """
         if self.use_simpy_store:
-            lx = len(self.__store__.items) if self.__store__ else None
+            lx = len(self.__store__.items) if self.__store__ else 0
             return lx
         else:
             lx = None
@@ -181,6 +208,12 @@ class IAgentPool(ABC):
     def get_resource_by_id(self, id: AgentId):
         """
         根据智能体id获取智能体
+
+        Args:
+            id: 智能体id
+
+        Returns:
+            Optional[IAgent]: 智能体
         """
         return self._all_resources.get(id, None)
 
@@ -190,16 +223,41 @@ class IAgentPool(ABC):
         """
         raise NotImplementedError("before_request_resource not implemented")
 
-    @deprecated("使用AgentSelectionStrategy.request")
+    def do_request_resource(
+        self, **kwargs
+    ) -> Generator[simpy.Event, Any, Optional[AgentClass]]:
+        """
+        真正地执行申请资源
+        """
+        if self.use_simpy_store:
+            assert self.__store__, "未初始化资源池，无法申请资源"
+            return self.__store__.get()
+        else:
+            raise NotImplementedError("do_request_resource not implemented")
+
+    @abstractmethod
+    def after_resource_requested(self, resource: AgentClass, **kwargs):
+        """
+        资源申请到之后的回调
+
+        Args:
+            resource: 已申请到的资源
+        """
+        pass
+
     @abstractmethod
     def request_resource(
         self,
-        strategy: Optional[AgentSelectionStrategyName] = None,
         fast_fail: bool = False,
         **kwargs,
     ) -> Generator[simpy.Event, Any, Optional[IAgent]]:
         """
-        申请资源
+        申请资源。此方法是个简单的方法组合（可能并不通用），内部会依次调用：
+        1. before_request_resource
+        2. do_request_resource
+        3. after_resource_requested
+
+        如果不满足您的需求，请自定义`IAgentSelectionStrategy`策略并实现`request`方法
 
         Args:
             strategy: 智能体选择策略
@@ -210,35 +268,74 @@ class IAgentPool(ABC):
             智能体事件生成器
         """
 
-    @abstractmethod
-    def after_resource_requested(self, **kwargs):
-        """
-        资源申请到之后的回调
-        """
-        pass
+        if fast_fail and self.available_quantity <= 0:
+            return None
 
-    def before_release_resource(self, **kwargs):
+        self.before_request_resource(**kwargs)
+        try:
+            req = self.do_request_resource()
+            resource: Optional["IAgent"] = yield req
+        except simpy.Interrupt:
+            self.cancel_request_resource(req)
+            resource = None
+
+        if resource:
+            self.after_resource_requested(resource=resource, **kwargs)
+        return resource
+
+    def before_release_resource(self, resource: AgentClass, **kwargs):
         """
         资源释放之前的回调
+
+        Args:
+            resource: 待释放的资源
         """
         raise NotImplementedError("before_release_resource not implemented")
 
-    @deprecated("使用AgentSelectionStrategy.release")
+    def do_release_resource(self, resource: AgentClass, **kwargs):
+        """
+        真正地执行释放资源
+
+        Args:
+            resource: 待释放的资源
+        """
+        if self.use_simpy_store:
+            assert self.__store__, "未初始化资源池，无法释放资源"
+            return self.__store__.put(resource)
+        else:
+            raise NotImplementedError("do_release_resource not implemented")
+
+    def after_resource_released(self, resource: AgentClass, **kwargs):
+        """
+        资源释放之后的回调
+
+        Args:
+            resource: 已释放的资源
+        """
+        raise NotImplementedError("after_resource_released not implemented")
+
     @abstractmethod
     def release_resource(self, resource: AgentClass, *args, **kwargs):
         """
-        释放资源
+        释放资源。此方法是个简单的方法组合（可能并不通用），内部会依次调用：
+        1. before_release_resource
+        2. do_release_resource
+        3. after_resource_released
+
+        如果不满足您的需求，请自定义`IAgentSelectionStrategy`策略并实现`release`方法
 
         Args:
             resource: 要释放的资源
             kwargs: 其他参数
         """
 
-    def after_resource_released(self, **kwargs):
-        """
-        资源释放之后的回调
-        """
-        raise NotImplementedError("after_resource_released not implemented")
+        agent_pool = self
+        agent_pool.before_release_resource(resource=resource, **kwargs)
+        e = agent_pool.do_release_resource(resource=resource)
+        # TODO: 这里是否不等待就可以
+        yield e
+        agent_pool.after_resource_released(resource=resource, **kwargs)
+        return True
 
     @abstractmethod
     def assign_resources(

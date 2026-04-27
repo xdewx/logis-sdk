@@ -11,11 +11,33 @@
 from logis.biz.sim.agent import IAgentSelectionStrategy, IAgent, IAgentPool
 
 
-class AlwaysTheFirstAgent(IAgentSelectionStrategy):
+class DefaultAgentSelectionStrategy(IAgentSelectionStrategy):
+    """
+    默认智能体选择策略
+    """
 
-    def select_agent(self, agent_pool: IAgentPool, **kwargs) -> IAgent:
+    def request(
+        self, agent_pool: Optional[IAgentPool] = None, fast_fail: bool = False, **kwargs
+    ):
+        """
+        选择所有智能体
+        """
         agent_pool = agent_pool or self.agent_pool
-        raise NotImplementedError()
+        assert agent_pool, "未指定资源池，无法申请资源"
+
+        if fast_fail and agent_pool.available_quantity <= 0:
+            return None
+
+        try:
+            req = agent_pool.do_request_resource()
+            resource: Optional["IAgent"] = yield req
+        except simpy.Interrupt:
+            agent_pool.cancel_request_resource(req)
+            resource = None
+
+        if resource:
+            agent_pool.after_resource_requested(resource=resource, **kwargs)
+        return resource
 
 ```
 
