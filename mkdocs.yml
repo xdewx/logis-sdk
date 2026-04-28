@@ -89,6 +89,7 @@ nav:
     - 高级用法:
       - 开发者必读: advanced/dev.md
       - 自定义策略: advanced/strategy.md
+      - 自定义蓝图: advanced/blueprint.md
   - 接口文档:
     - 通用模块:
       - 数据结构: type.md
