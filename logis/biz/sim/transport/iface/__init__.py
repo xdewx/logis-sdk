@@ -55,8 +55,11 @@ class ITransportBlueprint(IBlueprint):
         )
         assert self.destination_id, f"{self.name}未设置目的地"
 
-        self.destination_selection_strategy: Optional[str] = entity.properties.get(
-            "目的地选择策略"
+        self.destination_selection_strategy: Optional[str] = none_if_in(
+            entity.properties.get("目的地选择策略")
+            or entity.properties.get("工作站选择策略"),
+            "-1",
+            "null",
         )
         """目的地选择策略"""
         self.__destination_strategy__: Optional[IRackSelectionStrategy] = None
