@@ -1,6 +1,6 @@
 from abc import ABCMeta
 from numbers import Number
-from typing import Optional, Tuple
+from typing import Literal, Optional, Tuple
 
 from logis.biz.sim.data_type import LocationType
 from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG, NumberUnit, QuantifiedValue
@@ -53,6 +53,10 @@ class IStock(NumberUnit, metaclass=ABCMeta):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.__stage__: Optional[Literal["pickup", "delivery"]] = kwargs.get(
+            "__stage__"
+        )
+        """内部状态变量"""
 
     @property
     def unique_id(self):

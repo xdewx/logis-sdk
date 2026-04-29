@@ -1,8 +1,9 @@
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Any, Generator, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Generator, List, Literal, Optional, Tuple, Union
 
 import simpy
 from ipa.decorator import deprecated
+from more_itertools import first
 
 from logis.alg.path_finding import (
     PathFindingAlgorithm,
@@ -21,7 +22,7 @@ from logis.biz.sim.const import (
     AgentSelectionStrategyName,
     GoHomeStrategyFrequency,
 )
-from logis.biz.sim.iface.blueprint import IBlueprint
+from logis.biz.sim.iface.blueprint import IBlueprint, TaskManifest
 from logis.biz.sim.storage import IRackSelectionStrategy
 from logis.data_type import Speed, Time
 from logis.task import ITask
@@ -99,6 +100,44 @@ class ITransportBlueprint(IBlueprint):
         self.pathfinding_alg_name: str = entity.properties.get("寻路算法", "A*")
         """寻路算法名，默认A*算法"""
         self.__path_finding_strategy__: Optional[PathFindingAlgorithm] = None
+
+        self._pickup_task_manifest = TaskManifest(component_id=self.create_edit_id)
+        """取料任务清单"""
+        self._delivery_task_manifest = TaskManifest(component_id=self.create_edit_id)
+        """交付任务清单"""
+
+        self._pickup_lock = simpy.Resource(self.env, capacity=1)
+        """取料任务锁"""
+        self._delivery_lock = simpy.Resource(self.env, capacity=1)
+        """交付任务锁"""
+
+    def infer_working_stage(self, stocks: List["IStock"]):
+        """
+        获取当前工作阶段
+        """
+        demo_stock = first(stocks, None)
+
+        if not demo_stock:
+            return None
+        return demo_stock.__stage__
+
+    def get_task_manifest(self, stage: Literal["pickup", "delivery"]) -> TaskManifest:
+        """
+        由于搬运具有取料和交付两种任务，
+        因此需要分别设置取料任务清单和交付任务清单。
+
+        Args:
+            stage (Literal["pickup", "delivery"]): 任务阶段
+
+        Returns:
+            TaskManifest: 任务清单
+        """
+        if stage == "pickup":
+            return self._pickup_task_manifest
+        elif stage == "delivery":
+            return self._delivery_task_manifest
+        else:
+            raise ValueError(f"{self.name}未知任务阶段: {stage}")
 
     @property
     @abstractmethod
@@ -240,7 +279,7 @@ class ITransportBlueprint(IBlueprint):
 
         if self.go_home_frequency == "如果无其他任务":
             # FIXME: 此处判断逻辑待完善
-            return self.get_task_manifest().no_stock_task_left()
+            return self.get_task_manifest("delivery").no_stock_task_left()
 
         return True
 
