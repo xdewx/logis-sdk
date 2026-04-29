@@ -57,7 +57,13 @@ class IBlueprint(ISimProxy, ITaskHandler, IComponent, IControl):
         """
         return kind in (self.kinds() or [])
 
-    def handle(self, try_interval: float = 10, max_concurrency: int = 10, **kwargs):
+    def handle(
+        self,
+        try_interval: float = 10,
+        max_concurrency: int = 10,
+        task_manifest: Optional[TaskManifest] = None,
+        **taskkwargs,
+    ):
         """
         循环处理任务队列中的任务直到队列为空
         1. 任务之间是串行还是并行由max_concurrency决定
@@ -66,6 +72,7 @@ class IBlueprint(ISimProxy, ITaskHandler, IComponent, IControl):
         Args:
             try_interval (float, optional): 尝试处理任务的时间间隔，单位秒。默认值为10。
             max_concurrency (int, optional): 最大并发处理任务数量。默认值为10。
+            task_manifest (TaskManifest, optional): 任务清单。如果不传则使用实例的任务清单。
         """
         raise NotImplementedError("ITaskHandler.handle尚未实现")
 
