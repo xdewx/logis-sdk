@@ -7,6 +7,7 @@ with open("requirements.txt", "r") as f:
     install_requires = f.readlines()
     install_requires = [x.strip() for x in install_requires if x]
 install_requires = list(filter(lambda x: not x.startswith("#"), install_requires))
+install_requires = list(map(lambda x: x.split(" ")[0], install_requires))
 
 setup(
     name="logis-sdk",
