@@ -93,7 +93,7 @@ class Context(BaseContext):
         获取当前仿真案例所对应的数据目录
         """
         sim_id = sim_id or cls.sim_id()
-        d = sim_data_dir(sim_id, data_dir=cls.APP_CONFIG.get_data_dir())
+        d = sim_data_dir(sim_id, data_dir=cls.APP_CONFIG.get_result_dir())
         d.mkdir(parents=True, exist_ok=True)
         return d
 
@@ -191,7 +191,7 @@ class Context(BaseContext):
         def _new_db_engine():
             sim_id = cls.sim_id()
             assert sim_id, "仿真ID缺失"
-            d = sim_data_dir(sim_id)
+            d = sim_data_dir(sim_id, data_dir=cls.APP_CONFIG.get_result_dir())
             d.mkdir(parents=True, exist_ok=True)
             db_file = d / f"{sim_id}{SQLITE_EXT}"
             return create_engine(f"sqlite:///{db_file.resolve().as_posix()}")
