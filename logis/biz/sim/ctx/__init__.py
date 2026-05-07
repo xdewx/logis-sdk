@@ -40,7 +40,8 @@ class Context(BaseContext):
 
     @classmethod
     def id_instance_map(cls):
-        return cls.json_parser().id_instance_map
+        parser = cls.json_parser()
+        return parser.id_instance_map if parser else {}
 
     @classmethod
     def get_blueprint_by_name(cls, name: str) -> Optional["IBlueprint"]:

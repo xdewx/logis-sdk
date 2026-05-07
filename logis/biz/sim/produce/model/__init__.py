@@ -79,7 +79,7 @@ class ProduceProperties(BaseModel):
 
     model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
 
-    name: Optional[str] = Field(validation_alias=AliasChoices("名称"))
+    name: Optional[str] = Field(None, validation_alias=AliasChoices("名称", "name"))
 
     # 基本配方
     recipe: Optional[Recipe] = None
