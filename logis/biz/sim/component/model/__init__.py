@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict, Optional
 
 from logis.data_type import TmpId
+from logis.util import cast_if_not_none
 
 
 class ComponentForm:
@@ -14,8 +15,8 @@ class ComponentForm:
     def __init__(self, entity_data: Dict[str, Any], **kwargs):
         self.type: str = entity_data.get("Type")
         # 实际上是类型id
-        self.type_id = self.id = str(entity_data.get("ID"))
-        self.type_name: str = entity_data.get("Name", "Unknown")
+        self.type_id = self.id = cast_if_not_none(entity_data.get("ID"), str)
+        self.type_name: str = entity_data.get("Name", None)
         self.create_edit_id: str = str(entity_data.get("Create_Edit_ID", ""))
         # TODO：这个字段看起来没什么用，考虑去除
         self.agent_id: TmpId = entity_data.get("AgentID")

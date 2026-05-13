@@ -63,6 +63,13 @@ class ITransportBlueprint(IBlueprint):
         )
         """目的地选择策略"""
         self.__destination_strategy__: Optional[IRackSelectionStrategy] = None
+
+        self.infer_destination_by_downstream: bool = (
+            none_if_in(entity.properties.get("是否根据下游推测目的地"), "-1", "null")
+            or False
+        )
+        """是否根据下游推测目的地"""
+
         self.retrieval_location_selection_strategy: Optional[str] = (
             entity.properties.get("取料位置选择策略")
         )
