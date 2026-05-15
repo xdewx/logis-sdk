@@ -25,16 +25,8 @@ class IBlueprint(ISimProxy, ITaskHandler, IComponent, IControl):
         获取任务清单
         """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.name: Optional[str] = None
-        """蓝图实例的名称"""
-        self.create_edit_id: Optional[str] = None
-        """蓝图实例的ID"""
-        self.type_id: Optional[str] = None
-        """蓝图的类型ID"""
-        self.type_name: Optional[str] = None
-        """蓝图的类型名称"""
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @classmethod
     def verbose_name(cls, *args, **kwargs):
@@ -100,39 +92,3 @@ BlueprintClass = TypeVar("BlueprintClass", bound=IBlueprint)
 """
 蓝图类类型
 """
-
-C = TypeVar("C")
-
-
-class ICodeBlueprint(IBlueprint):
-    """
-    代码蓝图组件的抽象基类
-    """
-
-    def instantiate_strategy(
-        self, strategy_type: Type[C], index: int = -1, **kwargs
-    ) -> Optional[C]:
-        """
-        实例化策略
-
-        Args:
-            strategy_type (Type[C]): 策略的父类
-            index (int, optional): 策略的索引。默认值为-1。
-            kwargs (dict): 其他参数
-
-        Returns:
-            Optional[C]: 策略实例，如果成功实例化策略，否则返回None
-
-        Raises:
-            NotImplementedError: 如果不支持实例化策略
-        """
-        raise NotImplementedError("instantiate_strategy 未实现")
-
-
-from logis.iface import Shape
-
-
-class IShapeBlueprint(IBlueprint, Shape):
-    """
-    形状蓝图组件的抽象基类,例如点节点、举行节点
-    """

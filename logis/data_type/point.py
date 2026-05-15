@@ -90,6 +90,7 @@ class GenericPoint(Generic[Num]):
             z (T | None, optional): Z coordinate. Defaults to None.
             precision (int | None, optional): Precision. Defaults to None.
         """
+        super().__init__()
         self.precision = precision
         if (p := self.precision) is not None:
             assert p > 0, "precision must be greater than 0."

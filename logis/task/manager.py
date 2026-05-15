@@ -183,6 +183,7 @@ class TaskGraph(AbstractTaskManager):
     __KEY_TASK__ = "task"
 
     def __init__(self, **attr):
+        super().__init__()
         self.__graph__ = DiGraph()
         self.__id_task_map__ = defaultdict()
 

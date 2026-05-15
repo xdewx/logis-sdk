@@ -29,6 +29,9 @@ class ITaskHandler(IHandler):
     任务处理接口
     """
 
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+
     def get_current_task_concurrency(self, *args, **kwargs):
         """
         获取当前正在处理的任务并发数

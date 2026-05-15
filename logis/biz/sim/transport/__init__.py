@@ -16,7 +16,16 @@ from typing import (
 from pydantic import BaseModel, Field
 
 from logis.biz.sim.agent import IAgent
-from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG, Point, get_time, get_time_3d
+from logis.biz.sim.data_type import SimEvent
+from logis.biz.sim.event import *
+from logis.data_type import (
+    DEFAULT_PYDANTIC_MODEL_CONFIG,
+    Point,
+    ThreeDimensionalVelocity,
+    Time,
+    get_time,
+    get_time_3d,
+)
 
 from .iface import *
 from .model import TransportProperties
@@ -36,32 +45,96 @@ class ITransportDevice(IAgent):
         inst.props = p
         return inst
 
-    props: Optional[TransportProperties] = None
+    def __init__(self, **kwargs):
+        self.props: Optional[TransportProperties] = TransportProperties()
+        super().__init__(**kwargs)
 
-    def load(self, *args, **kwargs):
+    def load(
+        self, loading_time: Optional[Time] = None, stock: "IStock" = None, **kwargs
+    ):
         """
-        装载过程
+        装载过程：基类中只记录时间、推进仿真
         """
-        t = get_time(self.props.load_distance, self.props.load_speed)
+
+        loading_time = loading_time or get_time(
+            self.props.load_distance, self.props.load_speed
+        )
+        t = loading_time.seconds()
+        self.emit(
+            RECORD_LOADING,
+            SimEvent(
+                time=self.env.now,
+                entity_id=self.id,
+                entity_type=self.type_id,
+                stock_id=stock.id,
+                duration=t,
+                carrier_id=self.id,
+                payload_id=stock.id,
+            ),
+        )
         yield self.env.timeout(t)
 
-    def unload(self, *args, **kwargs):
+    def unload(
+        self, unloading_time: Optional[Time] = None, stock: "IStock" = None, **kwargs
+    ):
         """
-        卸载过程
+        卸载过程：基类中只记录时间、推进仿真
         """
-        l = self.props.unload_distance or self.props.load_distance
-        v = self.props.unload_speed or self.props.load_speed
-        t = get_time(l, v)
+        if unloading_time:
+            unloading_time = unloading_time
+        else:
+            l = self.props.unload_distance or self.props.load_distance
+            v = self.props.unload_speed or self.props.load_speed
+            unloading_time = get_time(l, v)
+        t = unloading_time.seconds()
+        self.emit(
+            RECORD_UNLOADING,
+            SimEvent(
+                time=self.env.now,
+                entity_id=self.id,
+                entity_type=self.type_id,
+                stock_id=stock.id,
+                start_point=self.context.resolve_location_point(
+                    stock.current_location, getter="stock"
+                ),
+                duration=t,
+                carrier_id=self.id,
+                payload_id=stock.id,
+            ),
+        )
         yield self.env.timeout(t)
 
-    def move(self, *args, **kwargs):
+    def get_moving_duration(
+        self, distance: Union[Point], speed: ThreeDimensionalVelocity, **kwargs
+    ):
+        # TODO：一开始就带上单位
+        if distance.unit is None:
+            distance.unit = "cm"
+        return get_time_3d(distance, speed)
+
+    def move(
+        self,
+        target: Point,
+        speed: Union[ThreeDimensionalVelocity, None] = None,
+        **kwargs,
+    ):
         """
         移动过程
         """
-        d = self.props.distance_vector
+        assert isinstance(
+            self.current_location, Point
+        ), f"当前位置类型不符合预期:{self.current_location}"
+        d = target - self.current_location
         assert d is not None, "coordinates given can't be None"
-        yield self.env.timeout(get_time_3d(d, self.props.speed))
-        self.props.current_location = copy.copy(self.props.target_location)
+
+        speed = speed or self.props.speed
+        assert isinstance(
+            speed, ThreeDimensionalVelocity
+        ), f"要求速度为3维向量，实际却是: {speed}"
+        duration = self.get_moving_duration(distance=d, speed=speed).seconds()
+        self.record_movement(self.current_location, target, duration)
+        yield self.env.timeout(duration)
+        self.props.current_location = self.current_location = target
 
     def find_path(self, *args, **kwargs):
         """
@@ -122,6 +195,7 @@ class ManagedMovable(metaclass=ABCMeta):
         pass
 
     def __init__(self, *args, **kwargs):
+        super().__init__()
         self.__control_queue__ = Queue()
         self.routine: Queue[Point] = Queue()
         self.__state__: Optional[Literal["paused", "stopped", "active"]] = None

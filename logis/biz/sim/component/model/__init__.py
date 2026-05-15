@@ -12,7 +12,13 @@ class ComponentForm:
     TODO:类型标注、泛型
     """
 
-    def __init__(self, entity_data: Dict[str, Any], **kwargs):
+    def __init__(
+        self,
+        entity_data: Dict[str, Any],
+        properties: Optional[Dict[str, Any]] = None,
+        **kwargs,
+    ):
+        super().__init__()
         self.type: str = entity_data.get("Type")
         # 实际上是类型id
         self.type_id = self.id = cast_if_not_none(entity_data.get("ID"), str)
@@ -23,7 +29,7 @@ class ComponentForm:
         # TODO：这个字段还没看到在哪用的
         self.link_ids: Dict[str, Any] = entity_data.get("LinkIDs", {})
         self.extends_dict: Dict[str, Any] = {}
-        self.properties: Dict[str, Any] = {}
+        self.properties: Dict[str, Any] = properties or {}
         self.disabled: bool = entity_data.get("disabled", False)
 
         if not self.create_edit_id:

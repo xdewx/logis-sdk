@@ -24,8 +24,8 @@ class ISimPathGraph(IPathGraph[DirEdge, Point]):
     def env(self) -> simpy.Environment:
         pass
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__()
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
         # TODO: 是否直接继承会更方便？
         self._graph_ = DiGraph()
         self._lock_nodes_map: Dict[str, Set[Point]] = defaultdict(lambda: set())

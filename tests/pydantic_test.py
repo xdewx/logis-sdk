@@ -16,7 +16,7 @@ class NumberUnit(metaclass=ABCMeta):
     quantity: Union[int, float] = 1
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__()
 
 
 class QuantifiedValue(NumberUnit, BaseModel):

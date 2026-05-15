@@ -108,27 +108,35 @@ class OldSimEvent(SimMetadata):
     entity_id: Optional[TmpId] = Field(
         validation_alias=AliasChoices("entity_id", "agent_id", "id"), default=None
     )
-    # 智能体类型
+    """虽然叫实体ID，但实际全是智能体ID，正逐步使用carrier_id、payload_id代替"""
     entity_type: Optional[ComponentId] = None
-    # 起始位置
+    """虽然叫实体类型，但实际全是智能体类型，正逐步使用carrier_type、payload_type代替"""
     start_pos: Optional[List[float]] = None
+    """起始位置（x, y, z）"""
     start_point: Optional[Point] = None
-    # 结束位置
+    """起始位置（Point）"""
     end_pos: Optional[List[float]] = None
+    """结束位置（x, y, z）"""
     end_point: Optional[Point] = None
-    # 时长
+    """结束位置（Point）"""
     duration: Optional[Union[int, float]] = None
-    # FIXME:名字叫货架ID，但实际上存的全是stock_id
+    """时长（秒）"""
     payload_id: Optional[TmpId] = Field(
         validation_alias=AliasChoices("shelf_id", "payload_id"), default=None
     )
+    """载荷ID"""
     rack_id: Optional[TmpId] = None
-    # 货物载体ID
+    """FIXME:名字叫货架ID，但实际上存的全是stock_id"""
+
     carrier_id: Optional[TmpId] = None
+    """货物载体ID"""
 
     init_stock: Optional[bool] = None
+    """是否是初始化货物"""
     stock: Optional[Any] = None
+    """货物"""
     stock_id: Optional[TmpId] = None
+    """货物ID"""
 
     model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
 

@@ -1,18 +1,56 @@
+import logging
 from abc import ABC
-from typing import Iterable, Protocol, Self, Type, runtime_checkable
+from typing import (
+    TYPE_CHECKING,
+    Iterable,
+    Optional,
+    Protocol,
+    Self,
+    Type,
+    runtime_checkable,
+)
+
+from logis.biz.sim.const import ComponentType
+from logis.iface import Interface
 
 from ..data_type import ComponentConfigItem
 
+if TYPE_CHECKING:
+    from logis.biz.sim.component import ComponentForm
 
-class IComponent(ABC):
+
+class IComponent(Interface):
     """
     类型标识
     历史逻辑区分蓝图和空间标记两种概念，为了统一衍生出此接口
     但后续在改造的过程中，逐步把空间标记也视为蓝图，因此此接口似乎就没太多必要，不过作为更抽象的接口，还是保留着
     """
 
-    def __init__(self, *args, **kwargs):
-        pass
+    TYPE: ComponentType = ComponentType.NoneType
+    """
+    组件类型枚举值
+    """
+
+    def __init__(self, entity: Optional["ComponentForm"] = None, **kwargs):
+        super().__init__(**kwargs)
+        self.__entity_data__ = entity
+        attrs = entity.properties if entity else {}
+        self.name: Optional[str] = attrs.get("名称") or kwargs.get("name", None)
+        """蓝图实例的名称"""
+        self.create_edit_id: Optional[str] = entity.create_edit_id if entity else None
+        """蓝图实例的ID"""
+        self.type_id: Optional[str] = (entity.type_id if entity else None) or attrs.get(
+            "type_id", self.TYPE.id_str()
+        )
+        """蓝图的类型ID"""
+        self.type_name: Optional[str] = (
+            entity.type_name if entity else None
+        ) or attrs.get("type_name", self.TYPE.label())
+        """蓝图的类型名称"""
+        self.show_name: Optional[str] = attrs.get("显示名称")
+
+        if not self.type_id:
+            logging.warning(f"{self}未在初始化阶段解析到类型ID")
 
     def is_valid(self):
         """

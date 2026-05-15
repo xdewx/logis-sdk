@@ -19,6 +19,7 @@ class QuantifiedContainer:
     def __init__(
         self, capacity: QuantifiedValue, env: simpy.Environment, *args, **kwargs
     ):
+        super().__init__()
         self.__quantified_value__ = capacity
         self.__container__ = simpy.Container(env, capacity.quantity)
 

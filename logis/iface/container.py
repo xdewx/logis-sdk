@@ -36,6 +36,9 @@ class Storable(Protocol):
     使用鸭子类型实现，相比ABC更灵活
     """
 
+    def __init__(self, **kwargs) -> None:
+        super().__init__()
+
     def pre_store(self, *args, **kwargs):
         """
         预存储，一般用来实现资源检查、校验
@@ -61,12 +64,19 @@ class Storable(Protocol):
         pass
 
 
-class QuantifiedValueContainer(Storable):
+class QuantifiedValueContainer:
 
     def __init__(self):
+        super().__init__()
         self.__container__: Dict[str, Dict[str, NumberType]] = defaultdict(
             defaultdict(0)
         )
+
+    def pre_store(self, *args, **kwargs):
+        pass
+
+    def pre_retrieve(self, *args, **kwargs):
+        pass
 
     def store(self, v: "NumberUnit"):
         self.__container__[v.kind][v.unit] += v.quantity

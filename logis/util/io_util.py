@@ -69,6 +69,7 @@ class WriteBuffer(ABC, Generic[T]):
     """
 
     def __init__(self, config: WriteBufferConfig, **kwargs):
+        super().__init__()
         self._config = config
         self._handler = self._config.handler
 

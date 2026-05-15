@@ -2,13 +2,14 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Iterable, List, Tuple
 
 from logis.data_type import Point
+from logis.iface import Interface
 
 if TYPE_CHECKING:
     from logis.biz.sim.agent import IAgent
     from logis.biz.sim.storage import IRack
 
 
-class IGrid(ABC):
+class IGrid(Interface):
     """
     网格
     """

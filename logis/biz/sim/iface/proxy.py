@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Type
 import simpy
 from networkx import DiGraph
 
+from logis.biz.sim.data_type import SimEvent
+from logis.iface import Interface
 from logis.metric import MetricModelType
 from logis.task import TaskGraph
 
@@ -16,10 +18,13 @@ if TYPE_CHECKING:
     from ..data_type import SimContext
 
 
-class ISimProxy(ABC):
+class ISimProxy(Interface):
     """
     仿真模块接口
     """
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
 
     @property
     @abstractmethod
@@ -176,3 +181,14 @@ class ISimProxy(ABC):
     def event_loop(self):
         ctx = self.sim_ctx
         return ctx.event_loop if ctx else None
+
+    @abstractmethod
+    def emit(self, event_name: str, ev: Optional[SimEvent] = None, **kwargs):
+        """发送事件
+
+        Args:
+            event_name: 事件名称
+            ev: 事件对象
+            kwargs: 其他参数
+        """
+        pass

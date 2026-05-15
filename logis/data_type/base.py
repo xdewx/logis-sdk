@@ -17,6 +17,7 @@ from typing import (
 )
 
 import humps
+import pint
 from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import TypeAlias
 
@@ -40,7 +41,7 @@ else:
 T = TypeVar("T")
 Predicate: TypeAlias = Callable[[T], bool]
 
-Unit = NewType("Unit", str)
+Unit: TypeAlias = Union[pint.Unit, str]
 
 # 倍率计算器，输入源单位、目标单位，输出倍率
 RatioComputer: TypeAlias = Callable[[Unit, Unit], Decimal]
@@ -71,7 +72,9 @@ class CallableInput(BaseModel):
 
 
 class InvokeResult:
-    def __init__(self):
+
+    def __init__(self, **kwargs):
+        super().__init__()
         self.is_generator = False
         self.return_value: Any = None
         self.yield_values: Any = []

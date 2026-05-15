@@ -6,7 +6,7 @@ import simpy
 from logis.biz.sim import AgentId, IBlueprint, LocationType
 from logis.biz.sim.component import IGrid
 from logis.biz.sim.graph import ISimPathGraph
-from logis.data_type import Point, Speed
+from logis.data_type import Length, Point, Speed, ThreeDimensionalVelocity, Time
 
 if TYPE_CHECKING:
     from logis.alg.path_finding import PathFindingAlgorithm
@@ -15,6 +15,18 @@ class IAgent(IBlueprint):
     """
     智能体抽象基类
     """
+
+    @abstractmethod
+    def record_movement(self, start: Point, end: Point, duration: float, **kwargs):
+        """
+        记录移动
+
+        Args:
+            start (Point): 移动起始点
+            end (Point): 移动目标点
+            duration (float): 移动时间以seconds为单位
+        """
+        pass
 
     @abstractmethod
     def resolve_binding_graph(self, *args, **kwargs) -> Union["IGrid", "ISimPathGraph"]:
@@ -51,8 +63,8 @@ class IAgent(IBlueprint):
         """
         pass
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.origin_location: Optional[Point] = None
         """初始位置"""
         # TODO: 这里主要是因为Stock是个特例，后续考虑分离
@@ -95,6 +107,28 @@ class IAgent(IBlueprint):
         TODO: 考虑将speed等参数作为agent的内部属性，而不是在这里传参
         """
         pass
+
+    @property
+    def speed_3d(self) -> Optional[ThreeDimensionalVelocity]:
+        """
+        智能体的3维速度
+        """
+        raise NotImplementedError(f"{self}未实现3维速度属性")
+
+    def get_moving_duration(
+        self, distance: Union[Point], speed: ThreeDimensionalVelocity, **kwargs
+    ) -> Time:
+        """
+        计算移动时间
+
+        Args:
+            distance (Union[Point]): 移动距离，三维表示
+            speed (ThreeDimensionalVelocity): 移动速度，三维表示
+
+        Returns:
+            Time: 移动时间
+        """
+        raise NotImplementedError(f"{self}未实现get_moving_duration方法")
 
 
 AgentClass = TypeVar("AgentClass", bound=IAgent)

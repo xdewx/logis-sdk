@@ -63,6 +63,13 @@ class IStock(NumberUnit, metaclass=ABCMeta):
         return self.code or self.name
 
     @property
+    def id(self):
+        """
+        货物的ID
+        """
+        raise NotImplementedError(f"{self}未实现id属性")
+
+    @property
     def target_location(self) -> LocationType:
         raise NotImplementedError()
 

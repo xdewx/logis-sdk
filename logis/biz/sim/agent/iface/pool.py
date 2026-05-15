@@ -15,9 +15,10 @@ if TYPE_CHECKING:
     from ..model import AgentManifest, TaskType
 
 T = TypeVar("T")
+from logis.iface import Interface
 
 
-class IAgentPool(ABC):
+class IAgentPool(Interface):
     """
     智能体资源池，生命周期钩子如下：
     1. 初始化资源池
@@ -57,8 +58,8 @@ class IAgentPool(ABC):
         """
         pass
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__()
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
         self.capacity: Optional[int] = None
         """资源池容量"""
 

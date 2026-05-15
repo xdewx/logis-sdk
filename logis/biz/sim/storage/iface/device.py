@@ -9,7 +9,7 @@ from logis.biz.sim.const import OperationType
 from logis.biz.sim.stock.model import IStock, QuantifiedStock
 from logis.data_type.point import Point
 from logis.data_type.unitable import unify_quantified_value
-from logis.iface import Storable
+from logis.iface import Interface
 from logis.math import euclid_distance
 
 from .base import *
@@ -22,7 +22,8 @@ if TYPE_CHECKING:
 
     from .select import *
 
-class IStorage(Storable):
+
+class IStorage(Interface):
     """
     存储设备
     """
@@ -58,6 +59,7 @@ class IStorage(Storable):
             props: 存储设备的属性
             exclusive: 是否独占，适用于储位、货架、货架组等
         """
+        super().__init__(**kwargs)
         self.props = props
         # 这里以一个不可能达到的数值表示共享
         self.__occupied__ = simpy.Resource(self.env, 1 if exclusive else 10**12)
@@ -107,6 +109,14 @@ class IStorage(Storable):
     @property
     def free_capacity(self):
         return self.__container__.free_capacity
+
+    @abstractmethod
+    def pre_store(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def pre_retrieve(self, *args, **kwargs):
+        pass
 
     def store(self, v: QuantifiedStock, *args, **kwargs):
         """
@@ -197,8 +207,8 @@ class IRack(IStorage):
     货架
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     @property
     @abstractmethod

@@ -14,7 +14,6 @@ from logis.biz.sim import *
 from logis.biz.sim.command.model import SetupArgs
 from logis.biz.sim.const import SQLITE_EXT
 from logis.biz.sim.data_type import SimContext
-from logis.biz.sim.graph import IPathGraph
 
 # TODO: metric是否有必要放到sdk中
 from logis.biz.sim.metric import ProductionLineMetric
@@ -25,6 +24,7 @@ from logis.logging import LoggerBuilder
 from logis.metric import IMetricCollector
 from logis.task.manager import TaskGraph
 
+C = TypeVar("C")
 
 class Context(BaseContext):
     """
@@ -37,6 +37,24 @@ class Context(BaseContext):
     _simulation_lock = asyncio.Lock()
 
     APP_CONFIG: IAppConfig
+
+    @classmethod
+    @abstractmethod
+    def resolve_location_point(
+        location_obj: Any, getter: Literal["agv", "forklift", "stock", "agent"] = None
+    ) -> Optional[Point]:
+        """
+        TODO：此接口放在这不是很合适，考虑调整
+        获取位置坐标点
+
+        Args:
+            location_obj: 位置对象
+            getter: 获取位置对象类型，默认None
+
+        Returns:
+            Optional[Point]: 位置坐标点，如果成功解析位置对象，否则返回None
+        """
+        pass
 
     @classmethod
     def id_instance_map(cls):
@@ -74,6 +92,7 @@ class Context(BaseContext):
             Exception: 如果无法实例化策略，会抛出异常
 
         """
+        from logis.biz.sim.component import ICodeBlueprint
 
         bp = cls.get_blueprint_by_id(code_id)
         if not bp:

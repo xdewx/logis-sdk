@@ -10,6 +10,7 @@ def test():
     print("This is a test function in the sim module.")
 
 
+from .component import IShapeBlueprint
 from .data_type import *
 from .iface import *
 from .storage import ICell, IRack, IRackGroup

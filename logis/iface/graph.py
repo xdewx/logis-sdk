@@ -8,6 +8,9 @@ class INode(ABC):
 
 class IEdge(ABC):
 
+    def __init__(self, **kwargs):
+        super().__init__()
+
     @abstractmethod
     def get_weight(self, *args, **kwargs) -> float:
         """

@@ -4,6 +4,8 @@ from fractions import Fraction
 from functools import reduce
 from typing import Any, Dict, List, Optional, Self, Tuple, Union
 
+import pint
+from pint import UnitRegistry, set_application_registry
 from pydantic import BaseModel
 
 from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG as MODEL_CONFIG
@@ -11,6 +13,12 @@ from logis.data_type import NumberType, Unit
 
 from .point import *
 
+# 1. 初始化单位注册表
+ureg = UnitRegistry()
+# 设置为全局注册表（避免重复注册）
+set_application_registry(ureg)
+
+Quantity = ureg.Quantity
 
 class NumberUnit(metaclass=ABCMeta):
     """
@@ -18,14 +26,20 @@ class NumberUnit(metaclass=ABCMeta):
     """
 
     quantity: NumberType = 0
-    unit: Optional[Unit] = None
+    # TODO: 尝试全部使用pint.Unit
+    unit: Union[Unit, None] = None
 
     # 自定义倍率转换器
     _unit_config_: Optional["UnitConfig"] = None
 
     def __init__(self, **kwargs):
+        super().__init__()
         self.quantity = kwargs.get("quantity", 0)
-        self.unit = kwargs.get("unit", None)
+        unit = kwargs.get("unit", None)
+        # TODO: 这里是为了避免大幅重构，先临时使用旧的逻辑
+        if isinstance(unit, pint.Unit):
+            unit = f"{unit:~}"
+        self.unit = unit
 
     @property
     def kind(self):
@@ -134,6 +148,9 @@ class NumberUnit(metaclass=ABCMeta):
     def decrease(self, num: NumberType):
         self.quantity -= num
 
+    def to_unit(self, target_unit: str, **kwargs) -> Self:
+        return unify_quantified_value(self, target_unit, **kwargs)
+
 
 class QuantifiedValue(BaseModel, NumberUnit):
     """
@@ -145,6 +162,10 @@ class QuantifiedValue(BaseModel, NumberUnit):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        # 借助 pydantic 的初始化逻辑，确保单位和数量被正确解析
+        kwargs["unit"] = self.unit
+        kwargs["quantity"] = self.quantity
+        NumberUnit.__init__(self, **kwargs)
 
 
 class Capacity(QuantifiedValue):
@@ -195,22 +216,43 @@ class Time(QuantifiedValue):
 
     pass
 
+    @staticmethod
+    def zero():
+        return Time.of(0, unit="s")
+
+    def seconds(self):
+        """
+        转换成秒
+        """
+        return self.to_unit("s").quantity
+
 
 def get_time(l: Length, v: Speed):
     """
     距离/速度=时间
-    TODO：处理单位
     """
     assert l.value is not None, "length is not specified"
     assert v.value is not None, "speed is not specified"
     assert v.value != 0, "speed cannot be zero"
-    return abs(l.value / v.value)
+    lu = ureg(l.unit)
+    vu = ureg(v.unit)
+    tu = (lu / vu).to("second")
+    tv = abs(l.value / v.value) * tu.magnitude
+    return Time.of(tv, unit=tu.units)
 
 
 def get_time_3d(delta_distance: Point, v: ThreeDimensionalVelocity):
     """
     分别计算各维度的时间，取最大值
+
+    Args:
+        delta_distance (Point): 3D距离
+        v (ThreeDimensionalVelocity): 三维速度
+
+    Returns:
+        移动时间
     """
+
     lz, ly, lx, lunit = (
         delta_distance.z,
         delta_distance.y,
@@ -218,22 +260,14 @@ def get_time_3d(delta_distance: Point, v: ThreeDimensionalVelocity):
         delta_distance.unit,
     )
     return max(
-        0 if not lx else get_time(Length(quantity=lx, unit=lunit), v.x),
-        0 if not ly else get_time(Length(quantity=ly, unit=lunit), v.y),
-        0 if not lz else get_time(Length(quantity=lz, unit=lunit), v.z),
+        Time.zero() if not lx else get_time(Length(quantity=lx, unit=lunit), v.x),
+        Time.zero() if not ly else get_time(Length(quantity=ly, unit=lunit), v.y),
+        Time.zero() if not lz else get_time(Length(quantity=lz, unit=lunit), v.z),
     )
 
 
 DEFAULT_UNIT_CONFIG = dict()
 
-from pint import UnitRegistry, set_application_registry
-
-# 1. 初始化单位注册表
-ureg = UnitRegistry()
-# 设置为全局注册表（避免重复注册）
-set_application_registry(ureg)
-
-Quantity = ureg.Quantity
 
 # 2. 将中文与内置单位关联
 # 长度单位
@@ -326,6 +360,7 @@ class UnitConfigBuilder:
     """
 
     def __init__(self, base_unit: Unit):
+        super().__init__()
         self.__unit_config__ = UnitConfig([[base_unit, 1]])
 
     @staticmethod
@@ -371,6 +406,7 @@ def unify_quantified_value(
 ):
     """
     单位转换
+    TODO：结合pint使用
     """
     same_unit = self.unit == target_unit
     if unit_config is None:

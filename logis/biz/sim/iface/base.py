@@ -17,11 +17,14 @@ class IExpose(ABC):
     """
 
     def __init__(self, ctx: "Context", **kwargs) -> None:
+        super().__init__()
         self.ctx = ctx
 
 
 class IDataReport(ABC):
-    pass
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__()
 
 
 class IJsonParser(ABC):
@@ -39,18 +42,27 @@ class IJsonParser(ABC):
 
 
 class IResultGenerator(ABC):
-    pass
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__()
 
 
 class IExcelParser(ABC):
-    pass
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__()
 
 
 class IOrderManager(ABC):
-    pass
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__()
 
 
 class IUnitManager(ABC):
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__()
 
     @abstractmethod
     def find_unit_level(
@@ -64,8 +76,12 @@ class IUnitManager(ABC):
 
 
 class IResourceManager(ABC):
-    pass
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__()
 
 
 class IStorageManager(ABC):
-    pass
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__()

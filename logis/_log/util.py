@@ -160,6 +160,7 @@ class DictConfigBuilder:
         return self
 
     def __init__(self):
+        super().__init__()
         self._log_dir: Optional[Path] = None
         self.__dict_config__ = get_dict_config_tmpl()
         self.__loggers__: Dict[str, Dict[str, Any]] = self.__dict_config__["loggers"]

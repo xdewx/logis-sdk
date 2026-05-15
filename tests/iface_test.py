@@ -3,6 +3,7 @@ import pytest
 from logis.iface import Storable
 
 
+# TODO: 不要继承Storable
 class MyBox(Storable):
 
     def store(self, item, **config):

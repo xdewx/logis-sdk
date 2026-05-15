@@ -39,8 +39,8 @@ class ITransportBlueprint(IBlueprint):
     搬运蓝图基类
     """
 
-    def __init__(self, entity: Entity, *args, **kwargs):
-        super().__init__(entity, *args, **kwargs)
+    def __init__(self, entity: Entity, **kwargs):
+        super().__init__(entity=entity, **kwargs)
 
         # 位置相关
         self.pickup_location_id: Optional[str] = none_if_in(

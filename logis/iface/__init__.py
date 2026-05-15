@@ -5,8 +5,10 @@ from typing import Dict, Generic, Protocol, TypeVar, Union, runtime_checkable
 from logis.data_type import NumberType, NumberUnit, SpatialProps
 from logis.util.num_util import get_numeric_value
 
+from .base import *
 
-class Shape(metaclass=ABCMeta):
+
+class Shape(Interface):
     """
     形状，例如路径、节点等
     """
@@ -17,6 +19,7 @@ class Shape(metaclass=ABCMeta):
         return v or 0
 
     def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.props: Union[SpatialProps, None] = None
 
 

@@ -11,6 +11,7 @@ class DirEdge(IEdge):
     """
 
     def __init__(self, starter: Point, ender: Point, speed: float = -1, **kwargs):
+        super().__init__(**kwargs)
         self.starter = starter
         self.ender = ender
         # TODO:之前一直用的是欧几里得距离，在仓储场景下，好像曼哈顿距离更合适

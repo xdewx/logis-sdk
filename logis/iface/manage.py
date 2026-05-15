@@ -8,3 +8,6 @@ class IControl(Protocol):
     """
 
     disabled: bool = False
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__()

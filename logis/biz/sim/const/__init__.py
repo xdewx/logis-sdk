@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Literal, NewType, TypeAlias, Union
+from typing import Literal, NewType, Optional, TypeAlias, Union
 
 default_model_name = "default"
 
@@ -8,6 +8,11 @@ class ComponentType(Enum):
     """
     组件类型枚举
     """
+
+    NoneType = (
+        None,
+        None,
+    )
 
     RectangularNode = (
         60003,
@@ -41,6 +46,10 @@ class ComponentType(Enum):
         70003,
         "货物智能体",
     )
+    StackerAgent = (
+        61003,
+        "堆垛机智能体",
+    )
 
     def label(self):
         return self.value[1]
@@ -48,8 +57,10 @@ class ComponentType(Enum):
     def id(self):
         return self.value[0]
 
-    def id_str(self) -> str:
-        return str(self.id())
+    def id_str(self) -> Optional[str]:
+        if (x := self.id()) is not None:
+            return str(x)
+        return None
 
     def has_id(self, id: Union[str, int]):
         """

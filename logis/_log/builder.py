@@ -18,6 +18,7 @@ class LoggerBuilder:
     """
 
     def __init__(self, **kwargs) -> None:
+        super().__init__()
         self.dir(Path(user_data_dir()) / "logs").name("root").level(
             logging.WARNING
         ).encoding("utf-8").backup_count(5).rotation_when("h").max_bytes(

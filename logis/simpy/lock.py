@@ -4,8 +4,10 @@ import simpy
 import simpy.resources.resource
 from ipa.decorator import deprecated
 
+from logis.iface import Interface
 
-class ISimLock(ABC):
+
+class ISimLock(Interface):
 
     @property
     @abstractmethod
@@ -13,6 +15,7 @@ class ISimLock(ABC):
         pass
 
     def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._occupied_ = simpy.Resource(self.env, capacity=1)
 
     @property
