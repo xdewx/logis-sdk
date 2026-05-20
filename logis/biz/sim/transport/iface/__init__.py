@@ -236,16 +236,30 @@ class ITransportBlueprint(IBlueprint):
             return default_factory() if default_factory else None
         return self.__pickup_strategy__
 
-    def get_destination_strategy(self, **kwargs) -> Optional["IRackSelectionStrategy"]:
+    def get_destination_strategy(
+        self,
+        default_factory: Callable[[], ILocationSelectionStrategy] = None,
+        strategy_type: Type[ILocationSelectionStrategy] = IRackSelectionStrategy,
+        **kwargs,
+    ) -> Optional["IRackSelectionStrategy"]:
         """
         目的地选择策略
+
+        Args:
+            default_factory (Callable[[], ILocationSelectionStrategy], optional): 默认策略工厂. Defaults to None.
+            strategy_type (Type, optional): 策略类型. Defaults to IRackSelectionStrategy.
+
+        Returns:
+            Optional["IRackSelectionStrategy"]: 策略
         """
         if not self.__destination_strategy__:
             self.__destination_strategy__ = self.context.resolve_code_strategy(
                 self.destination_selection_strategy,
-                IRackSelectionStrategy,
+                strategy_type=strategy_type,
                 ctx=self.context,
             )
+        if not self.__destination_strategy__ and default_factory:
+            return default_factory()
         return self.__destination_strategy__
 
     @deprecated("use get_destination_strategy instead")
