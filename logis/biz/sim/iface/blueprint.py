@@ -14,11 +14,18 @@ if TYPE_CHECKING:
     from logis.biz.sim.order import IOrder
     from logis.biz.sim.task.model import IStock
 
+    from ..ctx import Context
+
 
 class IBlueprint(IComponent, IControl, ITaskHandler):
     """
     所有蓝图组件的抽象基类
     """
+
+    @property
+    @abstractmethod
+    def context(self) -> "Context":
+        pass
 
     @abstractmethod
     def get_task_manifest[T](self) -> Optional[TaskManifest[T]]:

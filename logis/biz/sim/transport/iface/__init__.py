@@ -232,8 +232,8 @@ class ITransportBlueprint(IBlueprint):
             strategy_type=strategy_type,
             ctx=self.context,
         )
-        if not self.__pickup_strategy__:
-            return default_factory() if default_factory else None
+        if (not self.__pickup_strategy__) and default_factory:
+            self.__pickup_strategy__ = default_factory()
         return self.__pickup_strategy__
 
     def get_destination_strategy(
@@ -258,8 +258,8 @@ class ITransportBlueprint(IBlueprint):
                 strategy_type=strategy_type,
                 ctx=self.context,
             )
-        if not self.__destination_strategy__ and default_factory:
-            return default_factory()
+        if (not self.__destination_strategy__) and default_factory:
+            self.__destination_strategy__ = default_factory()
         return self.__destination_strategy__
 
     @deprecated("use get_destination_strategy instead")
