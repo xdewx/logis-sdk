@@ -6,6 +6,7 @@ __doc__ = """
 from .base import *
 from .blueprint import *
 from .component import *
+from .location import *
 from .order import *
 from .picking import *
 from .proxy import *

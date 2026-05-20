@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import AliasChoices, BaseModel, Field, field_validator
 
-from logis.data_type.base import DEFAULT_PYDANTIC_MODEL_CONFIG
+from logis.data_type.base import DEFAULT_PYDANTIC_MODEL_CONFIG, Interface
 from logis.data_type.point import Point
 from logis.data_type.unitable import Length, QuantifiedValue
 

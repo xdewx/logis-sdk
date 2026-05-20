@@ -23,7 +23,7 @@ from logis.biz.sim.const import (
     GoHomeStrategyFrequency,
 )
 from logis.biz.sim.iface.blueprint import IBlueprint, TaskManifest
-from logis.biz.sim.storage import IRackSelectionStrategy
+from logis.biz.sim.storage import IRackSelectionStrategy, LocationSelectionStrategy
 from logis.data_type import Speed, Time
 from logis.task import ITask
 from logis.util import none_if_in
@@ -62,7 +62,9 @@ class ITransportBlueprint(IBlueprint):
             "null",
         )
         """目的地选择策略"""
-        self.__destination_strategy__: Optional[IRackSelectionStrategy] = None
+        self.__destination_strategy__: Union[
+            LocationSelectionStrategy, IRackSelectionStrategy, None
+        ] = None
 
         self.infer_destination_by_downstream: bool = (
             none_if_in(entity.properties.get("是否根据下游推测目的地"), "-1", "null")
@@ -74,7 +76,9 @@ class ITransportBlueprint(IBlueprint):
             entity.properties.get("取料位置选择策略")
         )
         """取料位置选择策略"""
-        self.__pickup_strategy__: Optional[IRackSelectionStrategy] = None
+        self.__pickup_strategy__: Union[
+            LocationSelectionStrategy, IRackSelectionStrategy, None
+        ] = None
 
         self.transport_resource_id: str = none_if_in(
             entity.properties.get("选择搬运资源"), "-1", "null"

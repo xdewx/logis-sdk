@@ -13,7 +13,7 @@ def test():
 from .component import IShapeBlueprint
 from .data_type import *
 from .iface import *
-from .storage import ICell, IRack, IRackGroup
+from .storage import ICell, IRack, IRackGroup, IStorage
 
 Location: TypeAlias = Union[ICell, IRack, IRackGroup, IShapeBlueprint]
 
@@ -29,3 +29,8 @@ class ILocationGetter(IExpose):
         获取位置
         """
         pass
+
+
+LocationLike: TypeAlias = Union[
+    Locatable, IBlueprint, IStorage, ICell, IRack, IRackGroup
+]

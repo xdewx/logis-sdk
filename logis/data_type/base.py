@@ -3,14 +3,15 @@ from decimal import Decimal
 from fractions import Fraction
 from numbers import Number
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
     Generic,
     List,
-    Literal,
     NewType,
     Optional,
+    Self,
     Tuple,
     TypeVar,
     Union,
@@ -50,6 +51,9 @@ EventType = NewType("EventType", str)
 TaskType = NewType("TaskType", str)
 
 TuplePoint: TypeAlias = Tuple[Optional[Number], Optional[Number], Optional[Number]]
+
+if TYPE_CHECKING:
+    from .unitable import Length
 
 # 这里不要随便改，如果不满足自己的需求，可以新建配置
 DEFAULT_PYDANTIC_MODEL_CONFIG = ConfigDict(
@@ -94,7 +98,7 @@ class Data(BaseModel, Generic[T]):
     description: Optional[str] = None
 
 
-from abc import ABCMeta
+from abc import ABC, ABCMeta, abstractmethod
 from enum import EnumMeta
 
 
@@ -105,3 +109,36 @@ class ABCEnumMeta(EnumMeta, ABCMeta):
     """
 
     pass
+
+
+class Interface(ABC):
+    """
+    为了避免多继承的参数传递问题，这里兜底处理所有多余参数
+
+    使用时全部继承本接口即可
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__()
+
+
+class Locatable(Interface):
+    """
+    可定位的，带有位置信息
+    """
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+
+    @abstractmethod
+    def distance_to(self, target: Self, **kwargs) -> "Length":
+        """
+        到目标的距离
+
+        Args:
+            target: 目标
+
+        Returns:
+            距离
+        """
+        pass

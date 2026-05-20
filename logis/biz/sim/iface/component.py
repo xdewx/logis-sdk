@@ -7,28 +7,31 @@ from typing import (
     Protocol,
     Self,
     Type,
+    Union,
     runtime_checkable,
 )
 
 from logis.biz.sim.const import ComponentType
-from logis.iface import Interface
+from logis.data_type.unitable import Length
+from logis.simpy import ISimLock
 
-from ..data_type import ComponentConfigItem
+from ..data_type import ComponentConfigItem, Point
+from .location import Locatable
 
 if TYPE_CHECKING:
     from logis.biz.sim.component import ComponentForm
 
 
-class IComponent(Interface):
+class IComponent(Locatable, ISimLock):
     """
     类型标识
     历史逻辑区分蓝图和空间标记两种概念，为了统一衍生出此接口
-    但后续在改造的过程中，逐步把空间标记也视为蓝图，因此此接口似乎就没太多必要，不过作为更抽象的接口，还是保留着
+    但后续在改造的过程中，逐步把空间标记也视为蓝图，此接口作为更抽象的接口存在
     """
 
     TYPE: ComponentType = ComponentType.NoneType
     """
-    组件类型枚举值
+    组件类型枚举值, 默认值为NoneType
     """
 
     def __init__(self, entity: Optional["ComponentForm"] = None, **kwargs):
@@ -49,8 +52,19 @@ class IComponent(Interface):
         """蓝图的类型名称"""
         self.show_name: Optional[str] = attrs.get("显示名称")
 
-        if not self.type_id:
-            logging.warning(f"{self}未在初始化阶段解析到类型ID")
+        if (entity or attrs) and (not self.type_id):
+            logging.warning(f"{self.__class__}({self.name})未在初始化阶段解析到类型ID")
+
+        self.center_point: Optional[Point] = None
+        """中心点"""
+
+    def distance_to(self, target: Self, **kwargs) -> Union[Length, None]:
+        """
+        默认实现是：计算源点和目标点的中心距离
+        """
+        if self.center_point is None:
+            return None
+        return self.center_point.distance_to(target.center_point)
 
     def is_valid(self):
         """

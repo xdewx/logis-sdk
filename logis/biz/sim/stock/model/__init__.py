@@ -1,11 +1,12 @@
 from abc import ABCMeta
 from numbers import Number
-from typing import Literal, Optional, Tuple
+from typing import TYPE_CHECKING, Literal, Optional, Tuple
 
-from logis.biz.sim.data_type import LocationType
 from logis.data_type import DEFAULT_PYDANTIC_MODEL_CONFIG, NumberUnit, QuantifiedValue
 from logis.task import ITask
 
+if TYPE_CHECKING:
+    from logis.biz.sim import LocationLike
 
 class QuantifiedStock(QuantifiedValue):
     """
@@ -70,30 +71,30 @@ class IStock(NumberUnit, metaclass=ABCMeta):
         raise NotImplementedError(f"{self}未实现id属性")
 
     @property
-    def target_location(self) -> LocationType:
+    def target_location(self) -> "LocationLike":
         raise NotImplementedError()
 
     @target_location.setter
-    def target_location(self, location: LocationType):
+    def target_location(self, location: "LocationLike"):
         raise NotImplementedError()
 
     @property
-    def current_location(self) -> LocationType:
+    def current_location(self) -> "LocationLike":
         raise NotImplementedError()
 
     @current_location.setter
-    def current_location(self, location: LocationType):
+    def current_location(self, location: "LocationLike"):
         raise NotImplementedError()
 
     @property
-    def final_target_location(self) -> LocationType:
+    def final_target_location(self) -> "LocationLike":
         """
         起初只有当前位置和目标位置，但是后来发现有些场景下目标位置只是短期目标，短期目标会经常更换
         """
         raise NotImplementedError()
 
     @final_target_location.setter
-    def final_target_location(self, loc: LocationType):
+    def final_target_location(self, loc: "LocationLike"):
         raise NotImplementedError()
 
     @property

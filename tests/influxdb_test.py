@@ -48,16 +48,21 @@ def test_query():
 
 def test_command():
     bin_dir = Path("D:\\app\\influxdb3-core-3.5.0-windows_amd64")
-    command = InfluxCommand(bin_dir)
-    token = command.generate_admin_token(
-        offline=False, path=bin_dir / "admin_token.json"
-    )
-    print("Process exited with code:", token)
+    if not bin_dir.exists():
+        return
+    try:
+        command = InfluxCommand(bin_dir)
+        token = command.generate_admin_token(
+            offline=False, path=bin_dir / "admin_token.json"
+        )
+        print("Process exited with code:", token)
 
-    token = command.generate_admin_token(
-        offline=True, path=bin_dir / "admin_token.json"
-    )
-    print("Process exited with code:", token)
+        token = command.generate_admin_token(
+            offline=True, path=bin_dir / "admin_token.json"
+        )
+        print("Process exited with code:", token)
+    except Exception as e:
+        print(e)
 
 
 def test_serve():

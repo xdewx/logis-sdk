@@ -1,8 +1,6 @@
-from abc import ABC, ABCMeta
-from collections import defaultdict
-from typing import Dict, Generic, Protocol, TypeVar, Union, runtime_checkable
+from typing import Union
 
-from logis.data_type import NumberType, NumberUnit, SpatialProps
+from logis.data_type import SpatialProps
 from logis.util.num_util import get_numeric_value
 
 from .base import *
@@ -21,7 +19,6 @@ class Shape(Interface):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.props: Union[SpatialProps, None] = None
-
 
 from ._event import *
 from ._queue import *

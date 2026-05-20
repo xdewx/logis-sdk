@@ -1,14 +1,17 @@
 from decimal import ROUND_HALF_UP, Decimal
 from itertools import count
 from numbers import Number
-from typing import Dict, Generic, Optional, Tuple, TypeVar
+from typing import TYPE_CHECKING, Dict, Generic, Optional, Self, Tuple, TypeVar
 
 from logis.data_type import Number, TuplePoint
 
 from ._math import compute
+from .base import Locatable
+
+if TYPE_CHECKING:
+    pass
 
 Num = TypeVar("T", bound=Number)
-
 
 def round_if_not_none(
     value: Optional[Num], ndigits: Optional[int] = None, rounding=ROUND_HALF_UP
@@ -156,7 +159,7 @@ class GenericPoint(Generic[Num]):
         )
 
 
-class Point(GenericPoint[float]):
+class Point(GenericPoint[float], Locatable):
     """
     此类不通用，历史遗留，不建议使用，如有需要建议使用GenericPoint
     支持x,y,z三维坐标点，也可当作二维坐标使用
@@ -165,6 +168,17 @@ class Point(GenericPoint[float]):
 
     __counter = count(0, step=1)
     __global_precision__ = 3
+
+    def distance_to(self, target: Self, **kwargs):
+        assert (
+            self.unit == target.unit
+        ), f"要求传入的参数单位必须一致： {self.unit} != {target.unit}"
+        from logis.data_type import Length
+        from logis.math import euclid_distance
+
+        kwargs.setdefault("precision", self.precision)
+        v = euclid_distance(self, target, **kwargs)
+        return v if isinstance(v, Length) else Length(v, unit=self.unit)
 
     @classmethod
     def try_parse(cls, dc: dict, **kwargs) -> "Point":

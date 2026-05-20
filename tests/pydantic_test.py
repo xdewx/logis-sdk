@@ -6,29 +6,34 @@ from typing import Optional, Union
 import pytest
 from pydantic import AliasChoices, BaseModel, ConfigDict, Field, ValidationError
 
+from logis.data_type import Interface
+
 MODEL_CONFIG = ConfigDict(
     arbitrary_types_allowed=True, validate_by_alias=True, validate_by_name=True
 )
 
 
-class NumberUnit(metaclass=ABCMeta):
+class NumberUnit(Interface):
     unit: Optional[str] = None
     quantity: Union[int, float] = 1
 
     def __init__(self, **kwargs):
-        super().__init__()
+        super().__init__(**kwargs)
 
 
-class QuantifiedValue(NumberUnit, BaseModel):
+class QuantifiedValue(BaseModel, NumberUnit):
 
-    def __init__(cls, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(cls, **kwargs):
+        super().__init__(**kwargs)
 
     model_config = MODEL_CONFIG
     name: Optional[str] = None
 
 
 class OverideQuantifiedValue(QuantifiedValue):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     unit: str = Field(validation_alias=AliasChoices("xxx", "unit"))
 

@@ -3,14 +3,12 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, Generator, Tuple, TypeVar
 
 import simpy
-from ipa.decorator import deprecated
 
 from logis.biz.sim.const import OperationType
+from logis.biz.sim.iface import IComponent, Locatable
 from logis.biz.sim.stock.model import IStock, QuantifiedStock
 from logis.data_type.point import Point
 from logis.data_type.unitable import unify_quantified_value
-from logis.iface import Interface
-from logis.math import euclid_distance
 
 from .base import *
 from .container import *
@@ -23,9 +21,9 @@ if TYPE_CHECKING:
     from .select import *
 
 
-class IStorage(Interface):
+class IStorage(IComponent):
     """
-    存储设备
+    存储设备接口
     """
 
     store_strategy: Optional[StoreStrategy] = StoreStrategy()
@@ -82,17 +80,19 @@ class IStorage(Interface):
         """
         self.current_jobs += 1
 
-    @deprecated("use agent.distance_to instead")
-    def distance_to(self, **kwargs) -> float:
+    def distance_to(
+        self,
+        agent: Optional["IAgent"] = None,
+        stock: Optional["IStock"] = None,
+        **kwargs,
+    ):
         """
-        获取到货物源头的距离
-        TODO：其实这里按理说应该包括取货距离和送货距离，且放在这里似乎也不太合适
+        获取自身中心点到指定智能体或货物的距离
         """
-        from logis.biz.sim.agent import IAgent
-
         # TODO: 考虑过stock不再继承IAgent，所以这里也要考虑改变
-        x: IAgent = kwargs.get("agent", None) or kwargs.get("stock", None)
-        return euclid_distance(self.center_point, x.resolve_center_point())
+        x = agent or stock
+        assert isinstance(x, Locatable), "待计算距离的实体必须实现Locatable接口"
+        return self.center_point.distance_to(x.center_point)
 
     @property
     def level(self):
@@ -161,6 +161,14 @@ class ICell(IStorage):
     """
     储位
     """
+
+    @property
+    @abstractmethod
+    def rack(self) -> Optional["IRack"]:
+        """
+        获取所属货架
+        """
+        pass
 
     @property
     @abstractmethod

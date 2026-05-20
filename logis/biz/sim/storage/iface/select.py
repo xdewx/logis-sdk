@@ -1,14 +1,64 @@
-from abc import ABC, abstractmethod
-from typing import List, Optional, Union
+from abc import abstractmethod
+from typing import Generic, List, Optional, TypeVar, Union
 
 from logis.biz.sim.const import OperationType, StorageSelectionStrategy
-from logis.biz.sim.iface import IExpose
+from logis.biz.sim.iface import IExpose, Locatable
 from logis.biz.sim.stock.model import IStock
 
 from .device import CellClass, IRack, RackClass, RackGroupClass
 
+L = TypeVar("L", bound=Locatable)
 
-class IRackSelectionStrategy(IExpose):
+
+class LocationSelectionStrategy(IExpose, Generic[L]):
+    """
+    位置选择策略
+    """
+
+    def __init__(self, candidates: Optional[List[L]] = None, **kwargs):
+        """
+        Args:
+            candidates (Optional[List[L]], optional): 可选位置列表. Defaults to None.
+        """
+        super().__init__(**kwargs)
+        self.candidates = candidates
+
+    @abstractmethod
+    def select_location(
+        self,
+        operation: OperationType,
+        stock: IStock,
+        candidates: Optional[List[L]] = None,
+        **kwargs,
+    ) -> Union["L", List["L"], None]:
+        """
+        选择位置
+
+        Args:
+            operation (OperationType): 操作类型
+            stock (IStock): 货物
+            candidates (Optional[List[L]], optional): 可选位置. 如果不填则初始化时应传入
+
+        Returns:
+            选择的位置
+        """
+
+
+class DefaultLocationSelectionStrategy(LocationSelectionStrategy[L]):
+    def __init__(self, candidates: List[L] | None = None, **kwargs):
+        super().__init__(candidates=candidates, **kwargs)
+
+    def select_location(
+        self,
+        operation: OperationType,
+        stock: IStock,
+        candidates: List[L] | None = None,
+        **kwargs,
+    ) -> L | List[L] | None:
+        pass
+
+
+class IRackSelectionStrategy(LocationSelectionStrategy[IRack]):
     """
     货架选择策略，从若干货架中筛选出符合操作需求的货架
     """
@@ -24,6 +74,17 @@ class IRackSelectionStrategy(IExpose):
         """
         super().__init__(**kwargs)
         self.rack_group = rack_group
+
+    def select_location(
+        self,
+        operation: OperationType,
+        stock: IStock,
+        candidates: RackGroupClass | None = None,
+        **kwargs,
+    ) -> List[IRack]:
+        return self.select_racks(
+            operation=operation, stock=stock, rack_group=candidates, **kwargs
+        )
 
     @abstractmethod
     def select_racks(

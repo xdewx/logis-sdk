@@ -20,9 +20,6 @@ from .component import *
 
 T = TypeVar("T")
 
-LocationType = Union[Point, Storable]
-
-
 class SimMetadata(BaseModel):
     """
     仿真元数据

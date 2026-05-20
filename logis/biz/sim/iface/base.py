@@ -5,11 +5,10 @@ from networkx import DiGraph
 
 from logis.data_type import UnitConfig
 
-from .blueprint import IBlueprint
-
 if TYPE_CHECKING:
     from logis.biz.sim.ctx import Context
 
+    from .blueprint import IBlueprint
 
 class IExpose(ABC):
     """
@@ -33,7 +32,7 @@ class IJsonParser(ABC):
         self.logic_graph: Optional[DiGraph] = None
         self._produce_recipe_graph: Optional[DiGraph] = None
         # TODO：考虑使用id_instance_map来代替
-        self.object_map: Optional[Dict[str, IBlueprint]] = None
+        self.object_map: Optional[Dict[str, "IBlueprint"]] = None
 
     @property
     def id_instance_map(self) -> Dict[str, "IBlueprint"]:

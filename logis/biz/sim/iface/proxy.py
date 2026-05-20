@@ -27,37 +27,28 @@ class ISimProxy(Interface):
         super().__init__(**kwargs)
 
     @property
-    @abstractmethod
-    def data_report(self) -> Optional["IDataReport"]:
-        pass
-
-    @property
-    @abstractmethod
     def log(self) -> logging.Logger:
-        pass
+        return self.context.logger()
 
     @property
-    @abstractmethod
+    def data_report(self) -> Optional["IDataReport"]:
+        return self.context.data_report()
+
+    @property
+    def unit_manager(self) -> Optional["IUnitManager"]:
+        return self.context.unit_manager()
+
+    @property
     def json_parser(self) -> Optional["IJsonParser"]:
-        pass
+        return self.context.json_parser()
 
     @property
-    @abstractmethod
     def result_generator(self) -> Optional["IResultGenerator"]:
-        """获取结果生成器（子类需实现）"""
-        pass
+        return self.context.result_generator()
 
     @property
-    @abstractmethod
     def storage_manager(self) -> Optional["IStorageManager"]:
-        """获取存储管理器（子类需实现）"""
-        pass
-
-    @property
-    @abstractmethod
-    def network(self) -> DiGraph:
-        """获取网络模块（子类需实现）"""
-        pass
+        return self.context.storage_manager()
 
     @property
     def env(self) -> simpy.Environment:
@@ -75,22 +66,20 @@ class ISimProxy(Interface):
         return Context
 
     @property
-    @abstractmethod
+    def network(self) -> DiGraph:
+        return self.context.network()
+
+    @property
     def task_graph(self) -> TaskGraph:
-        """获取任务图（子类需实现）"""
-        pass
+        return self.context.task_graph()
 
     @property
-    @abstractmethod
     def rack_graph(self) -> DiGraph:
-        """获取机架图（子类需实现）"""
-        pass
+        return self.context.rack_graph()
 
     @property
-    @abstractmethod
     def sim_ctx(self) -> Optional["SimContext"]:
-        """获取仿真上下文（子类需实现）"""
-        pass
+        return self.context.get_sim_context(auto_create=False)
 
     @property
     def debug(self) -> bool:
@@ -98,10 +87,8 @@ class ISimProxy(Interface):
         return self.setup_args.debug
 
     @property
-    @abstractmethod
     def setup_args(self) -> "SetupArgs":
-        """获取启动参数（子类需实现）"""
-        pass
+        return self.context.setup_args()
 
     def start_timing_if_not(self, key: str):
         """
@@ -125,7 +112,6 @@ class ISimProxy(Interface):
 
         return Context.stop_timing(key, now=self.env.now)
 
-    @abstractmethod
     def collect_metric(self, metric: MetricModelType):
         """
         收集指标数据（子类需实现）
@@ -133,7 +119,7 @@ class ISimProxy(Interface):
         Args:
             metric: 指标模型
         """
-        pass
+        return self.context.metric_collector().collect(metric)
 
     @property
     def logic_graph(self) -> Optional[DiGraph]:

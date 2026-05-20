@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import TYPE_CHECKING, List, Optional, Type, TypeVar
+from typing import TYPE_CHECKING, List, Optional, TypeVar
 
 from logis.biz.sim.task.model import TaskManifest
 from logis.iface import IControl
@@ -14,7 +14,8 @@ if TYPE_CHECKING:
     from logis.biz.sim.order import IOrder
     from logis.biz.sim.task.model import IStock
 
-class IBlueprint(ISimProxy, ITaskHandler, IComponent, IControl):
+
+class IBlueprint(IComponent, IControl, ITaskHandler):
     """
     所有蓝图组件的抽象基类
     """
@@ -87,6 +88,7 @@ class IBlueprint(ISimProxy, ITaskHandler, IComponent, IControl):
         Args:
             graph (ISimPathGraph): 路径、布局连接图
         """
+
 
 BlueprintClass = TypeVar("BlueprintClass", bound=IBlueprint)
 """
