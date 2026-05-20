@@ -1,5 +1,16 @@
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Any, Generator, List, Literal, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generator,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 import simpy
 from ipa.decorator import deprecated
@@ -23,7 +34,7 @@ from logis.biz.sim.const import (
     GoHomeStrategyFrequency,
 )
 from logis.biz.sim.iface.blueprint import IBlueprint, TaskManifest
-from logis.biz.sim.storage import IRackSelectionStrategy, LocationSelectionStrategy
+from logis.biz.sim.storage import ILocationSelectionStrategy, IRackSelectionStrategy
 from logis.data_type import Speed, Time
 from logis.task import ITask
 from logis.util import none_if_in
@@ -63,7 +74,7 @@ class ITransportBlueprint(IBlueprint):
         )
         """目的地选择策略"""
         self.__destination_strategy__: Union[
-            LocationSelectionStrategy, IRackSelectionStrategy, None
+            ILocationSelectionStrategy, IRackSelectionStrategy, None
         ] = None
 
         self.infer_destination_by_downstream: bool = (
@@ -77,7 +88,7 @@ class ITransportBlueprint(IBlueprint):
         )
         """取料位置选择策略"""
         self.__pickup_strategy__: Union[
-            LocationSelectionStrategy, IRackSelectionStrategy, None
+            ILocationSelectionStrategy, IRackSelectionStrategy, None
         ] = None
 
         self.transport_resource_id: str = none_if_in(
@@ -179,10 +190,22 @@ class ITransportBlueprint(IBlueprint):
         )
         return inst.get() if inst else None
 
-    def get_pickup_strategy(self, **kwargs):
+    def get_pickup_strategy(
+        self,
+        default_factory: Callable[[], ILocationSelectionStrategy] = None,
+        strategy_type: Type[ILocationSelectionStrategy] = IRackSelectionStrategy,
+        **kwargs,
+    ):
         """
         取料位置选择策略
         如果没有设置取料位置选择策略，尝试从前一个蓝图块获取
+
+        Args:
+            default_factory (Callable[[], ILocationSelectionStrategy], optional): 默认策略工厂. Defaults to None.
+            strategy_type (Type, optional): 策略类型. Defaults to IRackSelectionStrategy.
+
+        Returns:
+            ILocationSelectionStrategy: 策略
         """
         if self.__pickup_strategy__:
             return self.__pickup_strategy__
@@ -206,9 +229,11 @@ class ITransportBlueprint(IBlueprint):
                         break
         self.__pickup_strategy__ = self.context.resolve_code_strategy(
             strategy,
-            IRackSelectionStrategy,
+            strategy_type=strategy_type,
             ctx=self.context,
         )
+        if not self.__pickup_strategy__:
+            return default_factory() if default_factory else None
         return self.__pickup_strategy__
 
     def get_destination_strategy(self, **kwargs) -> Optional["IRackSelectionStrategy"]:

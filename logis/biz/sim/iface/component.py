@@ -55,8 +55,22 @@ class IComponent(Locatable, ISimLock):
         if (entity or attrs) and (not self.type_id):
             logging.warning(f"{self.__class__}({self.name})未在初始化阶段解析到类型ID")
 
-        self.center_point: Optional[Point] = None
+        self.__center_point__: Optional[Point] = Point.try_parse(attrs)
         """中心点"""
+
+    @property
+    def center_point(self) -> Optional[Point]:
+        """
+        获取中心点
+        """
+        return self.__center_point__
+
+    @center_point.setter
+    def center_point(self, value: Optional[Point]):
+        """
+        设置中心点
+        """
+        self.__center_point__ = value
 
     def distance_to(self, target: Self, **kwargs) -> Union[Length, None]:
         """

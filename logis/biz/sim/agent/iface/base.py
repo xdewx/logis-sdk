@@ -35,13 +35,6 @@ class IAgent(IBlueprint):
         """
         pass
 
-    @abstractmethod
-    def resolve_center_point(self) -> Optional[Point]:
-        """
-        获取智能体的中心点
-        """
-        pass
-
     @property
     @abstractmethod
     def id(self) -> AgentId:

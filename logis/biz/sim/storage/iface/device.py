@@ -65,7 +65,6 @@ class IStorage(IComponent):
             self.__container__ = QuantifiedContainer(props.capacity, env=self.env)
         else:
             self.__container__ = None
-        self.center_point: Optional[Point] = None
         self.current_jobs: int = 0
 
     def decrease_jobs(self, *args, **kwargs):

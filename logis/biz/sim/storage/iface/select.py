@@ -1,7 +1,11 @@
 from abc import abstractmethod
 from typing import Generic, List, Optional, TypeVar, Union
 
-from logis.biz.sim.const import OperationType, StorageSelectionStrategy
+from logis.biz.sim.const import (
+    LocationSelectionStrategy,
+    OperationType,
+    StorageSelectionStrategy,
+)
 from logis.biz.sim.iface import IExpose, Locatable
 from logis.biz.sim.stock.model import IStock
 
@@ -10,7 +14,7 @@ from .device import CellClass, IRack, RackClass, RackGroupClass
 L = TypeVar("L", bound=Locatable)
 
 
-class LocationSelectionStrategy(IExpose, Generic[L]):
+class ILocationSelectionStrategy(IExpose, Generic[L]):
     """
     位置选择策略
     """
@@ -44,7 +48,7 @@ class LocationSelectionStrategy(IExpose, Generic[L]):
         """
 
 
-class DefaultLocationSelectionStrategy(LocationSelectionStrategy[L]):
+class DefaultLocationSelectionStrategy(ILocationSelectionStrategy[L]):
     def __init__(self, candidates: List[L] | None = None, **kwargs):
         super().__init__(candidates=candidates, **kwargs)
 
@@ -53,12 +57,20 @@ class DefaultLocationSelectionStrategy(LocationSelectionStrategy[L]):
         operation: OperationType,
         stock: IStock,
         candidates: List[L] | None = None,
+        strategy: Optional[LocationSelectionStrategy] = None,
         **kwargs,
     ) -> L | List[L] | None:
-        pass
+        if LocationSelectionStrategy.DistanceAscend.matches(strategy):
+            return sorted(
+                candidates,
+                key=lambda x: x.distance_to(stock=stock, target=stock, **kwargs),
+            )
+        elif strategy:
+            raise NotImplementedError(f"暂不支持 {strategy} 策略")
+        return candidates
 
 
-class IRackSelectionStrategy(LocationSelectionStrategy[IRack]):
+class IRackSelectionStrategy(ILocationSelectionStrategy[IRack]):
     """
     货架选择策略，从若干货架中筛选出符合操作需求的货架
     """

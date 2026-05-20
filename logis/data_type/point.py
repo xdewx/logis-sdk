@@ -178,7 +178,7 @@ class Point(GenericPoint[float], Locatable):
 
         kwargs.setdefault("precision", self.precision)
         v = euclid_distance(self, target, **kwargs)
-        return v if isinstance(v, Length) else Length(v, unit=self.unit)
+        return v if isinstance(v, Length) else Length(quantity=v, unit=self.unit)
 
     @classmethod
     def try_parse(cls, dc: dict, **kwargs) -> "Point":

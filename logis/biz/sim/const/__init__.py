@@ -100,7 +100,6 @@ LegencyStorageSelectionStrategyName: TypeAlias = Literal[
     "按距离近的货架优先",
 ]
 
-
 class StorageSelectionStrategy(Enum):
     """
     存储选择策略枚举，此枚举试图统一并兼容历史逻辑
@@ -129,6 +128,7 @@ class StorageSelectionStrategy(Enum):
             return self == StorageSelectionStrategy.DistanceAscend
         return self == strategy or self.value == strategy
 
+LocationSelectionStrategy = StorageSelectionStrategy
 
 AgentSelectionStrategyName: TypeAlias = Literal["距离近优先", "空闲优先", "自定义"]
 AgentIdleStrategyOption: TypeAlias = Literal["返回到归属地位置", "停留在原地", "自定义"]
