@@ -40,8 +40,10 @@ class IComponent(Locatable, ISimLock):
         attrs = entity.properties if entity else {}
         self.name: Optional[str] = attrs.get("名称") or kwargs.get("name", None)
         """蓝图实例的名称"""
-        self.create_edit_id: Optional[str] = entity.create_edit_id if entity else None
-        """蓝图实例的ID"""
+        self.create_edit_id: Union[str, int, None] = (
+            entity.create_edit_id if entity else None
+        )
+        """蓝图实例的ID,这个字段命名是历史原因，暂时保留，后续统一为id？"""
         self.type_id: Optional[str] = (entity.type_id if entity else None) or attrs.get(
             "type_id", self.TYPE.id_str()
         )
