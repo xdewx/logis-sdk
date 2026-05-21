@@ -104,6 +104,12 @@ class IStock(NumberUnit, metaclass=ABCMeta):
         """
         return (self.name, self.unit)
 
+    def set_arrived(self):
+        """
+        设置货物到达目标位置
+        """
+        self.current_location = self.target_location
+
 
 class StockTask(ITask, IStock):
     pass

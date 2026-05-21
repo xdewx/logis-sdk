@@ -173,7 +173,7 @@ class ITransportBlueprint(IBlueprint):
         from logis.biz.sim import ILocationGetter
 
         inst = self.context.resolve_code_strategy(
-            self.pickup_location_id, ILocationGetter, ctx=self.context
+            self.pickup_location_id, strategy_type=ILocationGetter, ctx=self.context
         )
         return inst.get() if inst else None
 
@@ -186,7 +186,7 @@ class ITransportBlueprint(IBlueprint):
         from logis.biz.sim import ILocationGetter
 
         inst = self.context.resolve_code_strategy(
-            self.destination_id, ILocationGetter, ctx=self.context
+            self.destination_id, strategy_type=ILocationGetter, ctx=self.context
         )
         return inst.get() if inst else None
 
@@ -250,8 +250,9 @@ class ITransportBlueprint(IBlueprint):
             strategy_type (Type, optional): 策略类型. Defaults to IRackSelectionStrategy.
 
         Returns:
-            Optional["IRackSelectionStrategy"]: 策略
+            ILocationSelectionStrategy: 策略
         """
+
         if not self.__destination_strategy__:
             self.__destination_strategy__ = self.context.resolve_code_strategy(
                 self.destination_selection_strategy,
@@ -290,7 +291,9 @@ class ITransportBlueprint(IBlueprint):
             self.__path_finding_strategy__ = alg_class()
         else:
             self.__path_finding_strategy__ = self.context.resolve_code_strategy(
-                self.pathfinding_alg_name, PathFindingAlgorithm, ctx=self.context
+                self.pathfinding_alg_name,
+                strategy_type=PathFindingAlgorithm,
+                ctx=self.context,
             )
 
         return self.__path_finding_strategy__
@@ -304,7 +307,7 @@ class ITransportBlueprint(IBlueprint):
         if not self.__agent_selection_strategy__:
             self.__agent_selection_strategy__ = self.context.resolve_code_strategy(
                 self.agent_selection_strategy_name,
-                IAgentSelectionStrategy,
+                strategy_type=IAgentSelectionStrategy,
                 ctx=self.context,
                 agent_pool=self.transport_resource,
             )
@@ -353,7 +356,7 @@ class ITransportBlueprint(IBlueprint):
         else:
             self.__agent_idle_strategy__ = self.context.resolve_code_strategy(
                 self.after_release_resource,
-                AgentIdleStrategy,
+                strategy_type=AgentIdleStrategy,
                 ctx=self.context,
             )
         return self.__agent_idle_strategy__

@@ -80,6 +80,8 @@ class ITransportDevice(IAgent):
         """
         卸载过程：基类中只记录时间、推进仿真
         """
+        stock.set_arrived()
+
         if unloading_time:
             unloading_time = unloading_time
         else:
