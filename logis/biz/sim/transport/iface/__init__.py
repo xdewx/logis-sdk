@@ -241,7 +241,7 @@ class ITransportBlueprint(IBlueprint):
         default_factory: Callable[[], ILocationSelectionStrategy] = None,
         strategy_type: Type[ILocationSelectionStrategy] = IRackSelectionStrategy,
         **kwargs,
-    ) -> Optional["IRackSelectionStrategy"]:
+    ):
         """
         目的地选择策略
 

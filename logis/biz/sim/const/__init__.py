@@ -128,6 +128,14 @@ class StorageSelectionStrategy(Enum):
             return self == StorageSelectionStrategy.DistanceAscend
         return self == strategy or self.value == strategy
 
+    @classmethod
+    def of(cls, value: Union[str]):
+        for item in cls:
+            if item.matches(value):
+                return item
+        return None
+
+
 LocationSelectionStrategy = StorageSelectionStrategy
 
 AgentSelectionStrategyName: TypeAlias = Literal["距离近优先", "空闲优先", "自定义"]
