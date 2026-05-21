@@ -37,7 +37,7 @@ class ComponentForm:
         self.properties: Dict[str, Any] = properties or {}
         self.disabled: bool = entity_data.get("disabled", False)
 
-        if not self.create_edit_id:
+        if (not self.create_edit_id) and (entity_data):
             logging.warning(
                 f"Warning: Entity {self.type_name} is missing 'Create_Edit_ID'"
             )
