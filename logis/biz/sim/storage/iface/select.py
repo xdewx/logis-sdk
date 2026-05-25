@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import Generic, List, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Generic, List, Optional, TypeVar, Union
 
 from logis.biz.sim.const import (
     LocationSelectionStrategy,
@@ -13,6 +13,8 @@ from .device import CellClass, IRack, RackClass, RackGroupClass
 
 L = TypeVar("L", bound=Locatable)
 
+if TYPE_CHECKING:
+    from logis.biz.sim.agent import IAgent
 
 class ILocationSelectionStrategy(IExpose, Generic[L]):
     """
@@ -61,9 +63,10 @@ class DefaultLocationSelectionStrategy(ILocationSelectionStrategy[L]):
         **kwargs,
     ) -> L | List[L] | None:
         if LocationSelectionStrategy.DistanceAscend.matches(strategy):
+            agent: "IAgent" = kwargs.get("agent") or kwargs.get("stock")
             return sorted(
                 candidates,
-                key=lambda x: x.distance_to(stock=stock, target=stock, **kwargs),
+                key=lambda x: x.distance_to(target=agent, stock=stock, **kwargs),
             )
         elif strategy:
             raise NotImplementedError(f"暂不支持 {strategy} 策略")

@@ -60,6 +60,18 @@ class IComponent(Locatable, ISimLock):
         self.__center_point__: Optional[Point] = Point.try_parse(attrs)
         """中心点"""
 
+    def on_scene_parsed(self, **kwargs):
+        """
+        场景解析完成时调用
+
+        之所以有这个方法，是因为有些组件的属性依赖于其他组件初始化完成，但组件初始化的顺序不可控，
+        这里索性支持在所有组件初始化完成后调用此放啊补全
+
+        Args:
+            kwargs: 其他参数
+        """
+        pass
+
     @property
     def center_point(self) -> Optional[Point]:
         """

@@ -81,17 +81,16 @@ class IStorage(IComponent):
 
     def distance_to(
         self,
-        agent: Optional["IAgent"] = None,
-        stock: Optional["IStock"] = None,
+        target: Locatable,
         **kwargs,
     ):
         """
         获取自身中心点到指定智能体或货物的距离
         """
         # TODO: 考虑过stock不再继承IAgent，所以这里也要考虑改变
-        x = agent or stock
-        assert isinstance(x, Locatable), "待计算距离的实体必须实现Locatable接口"
-        return self.center_point.distance_to(x.center_point)
+        target = target or kwargs.get("agent") or kwargs.get("stock")
+        assert isinstance(target, Locatable), "待计算距离的实体必须实现Locatable接口"
+        return self.center_point.distance_to(target.center_point)
 
     @property
     def level(self):
