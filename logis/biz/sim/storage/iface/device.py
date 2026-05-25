@@ -224,6 +224,19 @@ class IRack(IStorage):
         """
         pass
 
+    def __contains__(self, item: Any):
+        item_id = None
+        if isinstance(item, (str, int)):
+            item_id = item
+        elif isinstance(item, ICell):
+            item_id = item.id
+
+        if item_id is None:
+            return False
+
+        cell_ids = [cell.id for cell in self.cells]
+        return item_id in cell_ids
+
     @abstractmethod
     def is_able_to(
         self, operation: OperationType, stock: IStock, strict: bool = False, **kwargs

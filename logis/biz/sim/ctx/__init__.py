@@ -229,6 +229,10 @@ class Context(BaseContext):
 
     @classmethod
     def path_graph(cls, v=None) -> Optional["ISimPathGraph"]:
+        """
+        路径连接图，主要用在寻路
+        """
+
         key = "__path_graph__"
         if v is not None:
             cls.set(key, v)
@@ -321,6 +325,12 @@ class Context(BaseContext):
 
     @classmethod
     def network(cls, sim_id: Optional[str] = None) -> DiGraph:
+        """
+        网络连接关系图（非完整）+ 蓝图连接关系图，目前主要涉及传送带、生产设备
+
+        如果是寻路使用path_graph，此属性仅适合特殊场景
+        """
+
         return cls.get_sim_context(sim_id=sim_id).network
 
     @classmethod

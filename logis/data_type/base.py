@@ -74,6 +74,12 @@ class CallableInput(BaseModel):
     def of(*args, **kwargs):
         return CallableInput(args=args, kwargs=kwargs)
 
+    def get(self, key: str, default=None):
+        """
+        从kwargs中获取参数
+        """
+        return self.kwargs.get(key, default)
+
 
 class InvokeResult:
 

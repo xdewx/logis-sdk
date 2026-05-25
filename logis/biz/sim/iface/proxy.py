@@ -67,6 +67,12 @@ class ISimProxy(Interface):
 
     @property
     def network(self) -> DiGraph:
+        """
+        网络连接关系图（非完整）+ 蓝图连接关系图，目前主要涉及传送带、生产设备
+
+        如果是寻路使用path_graph，此属性仅适合特殊场景
+        """
+
         return self.context.network()
 
     @property

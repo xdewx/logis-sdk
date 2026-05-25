@@ -12,16 +12,20 @@ T = TypeVar("T")
 
 
 class EventContext(BaseModel, Generic[T]):
-    # 事件所携带的数据
+    """
+    事件上下文，包含事件发生时的所有必要信息
+    """
+
     payload: Optional[T] = None
-    # 事件源ID
+    """事件携带的数据"""
     source_id: Optional[str] = None
-    # 事件目标ID
+    """事件发生者ID"""
     target_id: Optional[Any] = None
-    # 事件名称
+    """事件目标ID"""
     name: str
-    # 附加数据
+    """事件名称"""
     extra: Any = None
+    """事件附加数据"""
 
     model_config = DEFAULT_PYDANTIC_MODEL_CONFIG
 
