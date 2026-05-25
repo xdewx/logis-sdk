@@ -134,6 +134,8 @@ class NumberUnit(metaclass=ABCMeta):
         """
         if not input:
             return None
+        if not isinstance(input, str):
+            raise ValueError("unexpected type: " + str(type(input)))
         tmps = input.strip().split(delimiter)
         assert len(tmps) == 2, "unexpected format: " + input
         return cls(quantity=number_type(tmps[0]), unit=tmps[1])

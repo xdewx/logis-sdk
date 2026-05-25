@@ -66,6 +66,9 @@ class IAgent(IBlueprint):
         self.path_finding_strategy: Optional["PathFindingAlgorithm"] = None
         """寻路策略"""
 
+        self.__speed__: Union[Speed, ThreeDimensionalVelocity, None] = None
+        """移动速度"""
+
     @property
     @abstractmethod
     def is_free(self, **kwargs) -> bool:
@@ -102,11 +105,15 @@ class IAgent(IBlueprint):
         pass
 
     @property
-    def speed_3d(self) -> Optional[ThreeDimensionalVelocity]:
+    def speed(self) -> Union[Speed, ThreeDimensionalVelocity, None]:
         """
-        智能体的3维速度
+        智能体的速度
         """
-        raise NotImplementedError(f"{self}未实现3维速度属性")
+        return self.__speed__
+
+    @speed.setter
+    def speed(self, value: Union[Speed, ThreeDimensionalVelocity, None]):
+        self.__speed__ = value
 
     def get_moving_duration(
         self, distance: Union[Point], speed: ThreeDimensionalVelocity, **kwargs

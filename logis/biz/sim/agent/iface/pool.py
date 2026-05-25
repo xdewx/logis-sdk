@@ -1,7 +1,17 @@
 import logging
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Type, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+)
 
 import simpy
 from ipa.decorator import deprecated
@@ -9,7 +19,7 @@ from ipa.decorator import deprecated
 from logis.biz.sim import AgentId
 from logis.biz.sim.const import AgentSelectionStrategyName
 
-from .base import AgentClass, IAgent
+from .base import AgentClass, IAgent, Speed, ThreeDimensionalVelocity
 
 if TYPE_CHECKING:
     from ..model import AgentManifest, TaskType
@@ -62,6 +72,8 @@ class IAgentPool(Interface):
         super().__init__(**kwargs)
         self.capacity: Optional[int] = None
         """资源池容量"""
+        self.speed: Union[Speed, ThreeDimensionalVelocity, None] = None
+        """资源池速度"""
 
         self.use_simpy_store: bool = False
         """是否使用simpy.Store来模拟资源池"""

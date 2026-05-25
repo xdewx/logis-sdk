@@ -35,7 +35,7 @@ from logis.biz.sim.const import (
 )
 from logis.biz.sim.iface.blueprint import IBlueprint, TaskManifest
 from logis.biz.sim.storage import ILocationSelectionStrategy, IRackSelectionStrategy
-from logis.data_type import Speed, Time
+from logis.data_type import Speed, ThreeDimensionalVelocity, Time
 from logis.task import ITask
 from logis.util import none_if_in
 from logis.util.dict_util import get_the_first_existent_key
@@ -49,6 +49,27 @@ class ITransportBlueprint(IBlueprint):
     """
     搬运蓝图基类
     """
+
+    @property
+    def speed(self):
+        """
+        获取搬运速度，优先级是：
+        1. 自身速度
+        2. 所使用的资源池的速度
+        """
+
+        types = (
+            Speed,
+            ThreeDimensionalVelocity,
+        )
+        s: Union[Speed, ThreeDimensionalVelocity, None] = None
+        if self.__speed__:
+            s = s if isinstance(s, types) else Speed.parse_str(self.__speed__)
+        elif isinstance(self.transport_resource.speed, types):
+            return self.transport_resource.speed
+        elif self.transport_resource.speed is not None:
+            s = Speed(quantity=self.transport_resource.speed, unit="厘米每秒")
+        return s
 
     def __init__(self, entity: Entity, **kwargs):
         super().__init__(entity=entity, **kwargs)
@@ -107,8 +128,8 @@ class ITransportBlueprint(IBlueprint):
         """装载时间"""
         self.unloading_time = Time.parse_str(entity.properties.get("卸载时间", "0|秒"))
         """卸载时间"""
-        self._moving_speed = none_if_in(
-            entity.properties.get("移动速度"), "DefaultValue"
+        self.__speed__ = Speed.parse_str(
+            none_if_in(entity.properties.get("移动速度"), "DefaultValue")
         )
 
         # 资源释放策略
@@ -366,14 +387,6 @@ class ITransportBlueprint(IBlueprint):
     def transport_resource(self) -> Optional["IAgentPool"]:
         """
         所使用的搬运资源
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def moving_speed(self) -> Optional[Speed]:
-        """
-        移动速度
         """
         pass
 
