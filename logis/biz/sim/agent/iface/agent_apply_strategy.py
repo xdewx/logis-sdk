@@ -69,10 +69,23 @@ class DefaultAgentSelectionStrategy(IAgentSelectionStrategy):
     """
 
     def request(
-        self, agent_pool: Optional[IAgentPool] = None, fast_fail: bool = False, **kwargs
+        self,
+        agent_pool: Optional[IAgentPool] = None,
+        fast_fail: bool = False,
+        resource_id: Optional[str] = None,
+        **kwargs,
     ):
         """
         选择所有智能体
+
+        Args:
+            agent_pool: 智能体池，如果不传，默认使用初始化时指定的智能体池
+            fast_fail: 是否快速失败，如果为True，且当前智能体池没有可用智能体，则直接返回None
+            resource_id: 资源ID
+            kwargs: 其他参数
+
+        Returns:
+            Optional[IAgent]: 符合需求的智能体
         """
         agent_pool = agent_pool or self.agent_pool
         assert agent_pool, "未指定资源池，无法申请资源"
@@ -81,7 +94,7 @@ class DefaultAgentSelectionStrategy(IAgentSelectionStrategy):
             return None
 
         try:
-            req = agent_pool.do_request_resource()
+            req = agent_pool.do_request_resource(resource_id=resource_id)
             resource: Optional["IAgent"] = yield req
         except simpy.Interrupt:
             agent_pool.cancel_request_resource(req)

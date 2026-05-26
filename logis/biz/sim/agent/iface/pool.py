@@ -77,7 +77,7 @@ class IAgentPool(Interface):
 
         self.use_simpy_store: bool = False
         """是否使用simpy.Store来模拟资源池"""
-        self.__store__: Optional[simpy.Store] = None
+        self.__store__: Optional[simpy.FilterStore] = None
         self.__lock__ = simpy.Resource(self.env, 1)
         # 所有资源
         self._all_resources: Dict[AgentId, IAgent] = defaultdict()
@@ -88,7 +88,7 @@ class IAgentPool(Interface):
         """
         初始化simpy资源池
         """
-        self.__store__ = simpy.Store(self.env, self.capacity)
+        self.__store__ = simpy.FilterStore(self.env, self.capacity)
 
     def set_locked(self, resource: AgentClass, **kwargs):
         """
@@ -237,13 +237,24 @@ class IAgentPool(Interface):
         raise NotImplementedError("before_request_resource not implemented")
 
     def do_request_resource(
-        self, **kwargs
+        self, resource_id: Optional[str] = None, **kwargs
     ) -> Generator[simpy.Event, Any, Optional[AgentClass]]:
         """
         真正地执行申请资源
+
+        Args:
+            resource_id: 资源id
+            kwargs: 其他参数
+
+        Returns:
+            Generator[simpy.Event, Any, Optional[IAgent]]: 申请资源生成的生成器
         """
         if self.use_simpy_store:
             assert self.__store__, "未初始化资源池，无法申请资源"
+            if resource_id is not None:
+                return self.__store__.get(
+                    filter=lambda item, rid=resource_id: item.id == rid
+                )
             return self.__store__.get()
         else:
             raise NotImplementedError("do_request_resource not implemented")
@@ -262,6 +273,7 @@ class IAgentPool(Interface):
     def request_resource(
         self,
         fast_fail: bool = False,
+        resource_id: Optional[str] = None,
         **kwargs,
     ) -> Generator[simpy.Event, Any, Optional[IAgent]]:
         """
@@ -275,6 +287,7 @@ class IAgentPool(Interface):
         Args:
             strategy: 智能体选择策略
             fast_fail: 是否快速失败，如果为True，当资源池中没有可用资源时，直接返回None
+            resource_id: 资源id
             kwargs: 其他参数
 
         Returns:
@@ -286,7 +299,7 @@ class IAgentPool(Interface):
 
         self.before_request_resource(**kwargs)
         try:
-            req = self.do_request_resource()
+            req = self.do_request_resource(resource_id=resource_id)
             resource: Optional["IAgent"] = yield req
         except simpy.Interrupt:
             self.cancel_request_resource(req)

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, Literal, Optional
+from typing import TYPE_CHECKING, Dict, Literal, Optional, Type
 
 from networkx import DiGraph
 
@@ -38,6 +38,28 @@ class IJsonParser(ABC):
     def id_instance_map(self) -> Dict[str, "IBlueprint"]:
         assert self.object_map, "请先解析JSON文件"
         return self.object_map
+
+    def filter_type_of[T](self, cls: Type[T]):
+        """
+        过滤出所有指定类型的实例
+
+        Args:
+             cls (Type[T]): [description]
+
+        Returns:
+            List[T]: 所有指定类型实例的列表
+        """
+        return filter(lambda v: isinstance(v, cls), self.id_instance_map.values())
+
+    def parse_logic_topology(self, **kwargs):
+        """
+        解析逻辑拓扑图
+        """
+
+    def parse_scene_topology(self, **kwargs):
+        """
+        解析场景拓扑图
+        """
 
 
 class IResultGenerator(ABC):
