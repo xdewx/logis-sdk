@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from abc import abstractmethod
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Dict, Optional, Type
+from typing import TYPE_CHECKING, Any, Callable, Dict, Literal, Optional, Type, TypeVar
 from uuid import uuid4
 
 import simpy
@@ -29,6 +30,7 @@ if TYPE_CHECKING:
         IStorageManager,
         IUnitManager,
     )
+    from logis.data_type import Point
 
 # TODO: metric是否有必要放到sdk中
 from logis.biz.sim.metric import ProductionLineMetric
@@ -40,6 +42,7 @@ from logis.metric import IMetricCollector
 from logis.task.manager import TaskGraph
 
 C = TypeVar("C")
+
 
 class Context(BaseContext):
     """
