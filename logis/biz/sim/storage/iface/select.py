@@ -84,16 +84,21 @@ class IRackSelectionStrategy(ILocationSelectionStrategy[IRack]):
     """
 
     def __init__(
-        self, rack_group: Union[RackGroupClass, None] = None, **kwargs
+        self,
+        rack_group: Union[RackGroupClass, None] = None,
+        allowed_rack_ids: Optional[set[str]] = None,
+        **kwargs,
     ) -> None:
         """
         初始化货架选择策略
 
         Args:
             rack_group: 货架组，如果此策略仅针对特定货架组则建议传，否则忽略即可
+            allowed_rack_ids: 如果设置，则只允许从这些货架 ID 中选择
         """
         super().__init__(**kwargs)
         self.rack_group = rack_group
+        self.allowed_rack_ids = allowed_rack_ids
 
     def select_location(
         self,
@@ -112,6 +117,7 @@ class IRackSelectionStrategy(ILocationSelectionStrategy[IRack]):
         operation: OperationType,
         stock: IStock,
         rack_group: Optional[RackGroupClass] = None,
+        allowed_rack_ids: Optional[set[str]] = None,
         **kwargs,
     ) -> List[IRack]:
         """
@@ -121,15 +127,24 @@ class IRackSelectionStrategy(ILocationSelectionStrategy[IRack]):
             operation: 操作类型
             stocks: 货物列表
             rack_group: 货架组，如果不传则使用初始化时传的货架组
+            allowed_rack_ids: 如果设置，则只允许从这些货架 ID 中选择
 
         Returns:
             符合操作需求的货架列表
         """
         rack_group = rack_group or self.rack_group
         assert rack_group is not None, "未传入货架组，无法选择货架"
+        allowed_rack_ids = (
+            allowed_rack_ids if allowed_rack_ids is not None else self.allowed_rack_ids
+        )
         result: List[RackClass] = []
         for rack in rack_group.racks:
             if not rack.is_able_to(operation, stock):
+                continue
+            if (
+                allowed_rack_ids is not None
+                and rack.create_edit_id not in allowed_rack_ids
+            ):
                 continue
             result.append(rack)
         return result
@@ -146,6 +161,7 @@ class DefaultRackSelectionStrategy(IRackSelectionStrategy):
         stock: IStock,
         rack_group: Optional[RackGroupClass] = None,
         strategy: Optional[StorageSelectionStrategy] = None,
+        allowed_rack_ids: Optional[set[str]] = None,
         **kwargs,
     ):
         """
@@ -156,12 +172,17 @@ class DefaultRackSelectionStrategy(IRackSelectionStrategy):
             stock: 货物
             rack_group: 货架组，如果不传则使用初始化时传的货架组
             strategy: 此方式实际上不是规范的策略模式，仅仅是为了少写代码
+            allowed_rack_ids: 如果设置，则只允许从这些货架 ID 中选择
 
         Returns:
             符合操作需求的货架列表
         """
         racks = super().select_racks(
-            operation=operation, stock=stock, rack_group=rack_group, **kwargs
+            operation=operation,
+            stock=stock,
+            rack_group=rack_group,
+            allowed_rack_ids=allowed_rack_ids,
+            **kwargs,
         )
         if not racks:
             return racks

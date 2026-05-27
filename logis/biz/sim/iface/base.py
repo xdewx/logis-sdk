@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Dict, Literal, Optional, Type
+from typing import TYPE_CHECKING, Dict, Iterator, Literal, Optional, Type
 
 from networkx import DiGraph
 
@@ -39,7 +39,7 @@ class IJsonParser(ABC):
         assert self.object_map, "请先解析JSON文件"
         return self.object_map
 
-    def filter_type_of[T](self, cls: Type[T]):
+    def filter_type_of[T](self, cls: Type[T]) -> Iterator[T]:
         """
         过滤出所有指定类型的实例
 
@@ -47,7 +47,7 @@ class IJsonParser(ABC):
              cls (Type[T]): [description]
 
         Returns:
-            List[T]: 所有指定类型实例的列表
+            Iterator[T]: 所有指定类型实例的迭代器
         """
         return filter(lambda v: isinstance(v, cls), self.id_instance_map.values())
 
