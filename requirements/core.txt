@@ -8,7 +8,7 @@ python-dateutil
 more-itertools
 toolz
 tabulate
-ipa-python-kit
+ipa-python-kit>=1.1.0
 Pint
 pyhumps
 python-i18n
