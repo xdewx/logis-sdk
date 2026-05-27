@@ -68,6 +68,11 @@ class DefaultLocationSelectionStrategy(ILocationSelectionStrategy[L]):
                 candidates,
                 key=lambda x: x.distance_to(target=agent, stock=stock, **kwargs),
             )
+        if LocationSelectionStrategy.BusyLevelAscend.matches(strategy):
+            return sorted(
+                candidates,
+                key=lambda x: x.current_jobs,
+            )
         elif strategy:
             raise NotImplementedError(f"暂不支持 {strategy} 策略")
         return candidates

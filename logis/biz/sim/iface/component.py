@@ -59,6 +59,27 @@ class IComponent(Locatable, ISimLock):
 
         self.__center_point__: Optional[Point] = Point.try_parse(attrs)
         """中心点"""
+        self.current_jobs: int = 0
+        """当前作业数"""
+
+    def increase_jobs(self, *args, **kwargs):
+        """
+        增加作业数
+        """
+        self.current_jobs += 1
+
+    def decrease_jobs(self, *args, **kwargs):
+        """
+        减少作业数
+        """
+        self.current_jobs -= 1
+        if self.current_jobs < 0:
+            logging.warning(
+                "%s(%s)作业数低于0，当前为%s",
+                self.__class__.__name__,
+                self.create_edit_id,
+                self.current_jobs,
+            )
 
     def on_scene_parsed(self, **kwargs):
         """

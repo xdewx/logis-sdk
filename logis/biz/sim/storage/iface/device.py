@@ -65,20 +65,6 @@ class IStorage(IComponent):
             self.__container__ = QuantifiedContainer(props.capacity, env=self.env)
         else:
             self.__container__ = None
-        self.current_jobs: int = 0
-
-    def decrease_jobs(self, *args, **kwargs):
-        """
-        减少作业数
-        """
-        self.current_jobs -= 1
-
-    def increase_jobs(self, *args, **kwargs):
-        """
-        增加作业数
-        """
-        self.current_jobs += 1
-
     def distance_to(
         self,
         target: Locatable,
