@@ -1,19 +1,34 @@
+from __future__ import annotations
+
 import asyncio
 import logging
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Dict, Optional, Type
+from typing import TYPE_CHECKING, Callable, Dict, Optional, Type
 from uuid import uuid4
 
 import simpy
 from networkx import DiGraph
 from sqlmodel import Session, create_engine
 
-from logis.biz.sim import *
 from logis.biz.sim.command.model import SetupArgs
 from logis.biz.sim.const import SQLITE_EXT
 from logis.biz.sim.data_type import SimContext
+
+if TYPE_CHECKING:
+    from logis.biz.sim.iface import (
+        IBlueprint,
+        IDataReport,
+        IExcelParser,
+        IJsonParser,
+        IOrderManager,
+        IResourceManager,
+        IResultGenerator,
+        ISimPathGraph,
+        IStorageManager,
+        IUnitManager,
+    )
 
 # TODO: metric是否有必要放到sdk中
 from logis.biz.sim.metric import ProductionLineMetric

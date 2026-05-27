@@ -1,0 +1,6 @@
+simpy>=4.1.1
+networkx
+pandas
+sqlmodel
+prometheus-client
+influxdb-client

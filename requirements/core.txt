@@ -1,0 +1,15 @@
+pydantic
+pyee
+requests
+typing_extensions
+colorlog
+platformdirs
+python-dateutil
+more-itertools
+toolz
+tabulate
+ipa-python-kit
+Pint
+pyhumps
+python-i18n
+networkx

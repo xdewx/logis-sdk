@@ -1,0 +1,11 @@
+-r core.txt
+-r optional/alg.txt
+-r optional/biz.txt
+-r optional/math.txt
+-r optional/metric.txt
+-r optional/mq.txt
+-r optional/simpy.txt
+-r optional/web.txt
+-r optional/ai.txt
+-r optional/visualization.txt
+-r dev.txt
