@@ -50,6 +50,14 @@ class ComponentType(Enum):
         61003,
         "堆垛机智能体",
     )
+    GoodsToPerson = (
+        40017,
+        "货到人",
+    )
+    AGVTransport = (
+        40022,
+        "AGV搬运",
+    )
 
     def label(self):
         return self.value[1]
