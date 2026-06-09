@@ -341,6 +341,66 @@ class ITransportBlueprint(IBlueprint):
             )
         return self.__agent_selection_strategy__
 
+    def _release_agent(
+        self, agent: "IAgent", **kwargs
+    ) -> Generator[simpy.Event, Any, bool]:
+        """
+        释放智能体到资源池，通过选择策略统一处理
+
+        Args:
+            agent: 待释放的智能体
+            **kwargs: 透传给选择策略的 release 方法（如 order）
+
+        Returns:
+            bool: 是否成功释放
+        """
+        agent_selection_strategy = self.get_agent_selection_strategy()
+        if not agent_selection_strategy:
+            return False
+        yield self.env.process(
+            agent_selection_strategy.release(
+                agent=agent,
+                agent_pool=self.transport_resource,
+                **kwargs,
+            )
+        )
+        return True
+
+    def _assign_agent(
+        self,
+        task_type: str,
+        resource_id: Optional[str] = None,
+        order: Optional["ITask"] = None,
+        **kwargs,
+    ) -> Generator[simpy.Event, Any, Optional["IAgent"]]:
+        """
+        从资源池申请智能体
+
+        Args:
+            task_type: 任务类型，透传给选择策略
+            resource_id: 指定资源 ID，为空则自动选择
+            order: 关联的订单任务
+
+        Returns:
+            Generator: 通过 yield 获取申请到的智能体，失败返回 None
+        """
+        agent_selection_strategy = self.get_agent_selection_strategy()
+        if not agent_selection_strategy:
+            return None
+
+        agent = yield self.env.process(
+            agent_selection_strategy.request(
+                agent_pool=self.transport_resource,
+                task_type=task_type,
+                order=order,
+                strategy=self.agent_selection_strategy_name,
+                resource_id=resource_id,
+            )
+        )
+        if agent:
+            agent.path_finding_strategy = self.get_path_finding_strategy()
+        return agent
+
     def can_return_original_place(self, agent: Union["IAgent"], **kwargs):
         """
         检查指定智能体是否可以返回原始位置
