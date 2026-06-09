@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from logis.biz.sim.ctx import Context
 
     from .blueprint import IBlueprint
+    from .order import IOrderTask
 
 class IExpose(ABC):
     """
@@ -78,6 +79,23 @@ class IOrderManager(ABC):
 
     def __init__(self, **kwargs) -> None:
         super().__init__()
+
+    @property
+    @abstractmethod
+    def id_task_map(self) -> Dict[str, "IOrderTask"]:
+        pass
+
+    def find_task_by_id(self, task_id: str) -> Optional["IOrderTask"]:
+        """
+        根据任务ID查找任务实例
+
+        Args:
+            task_id: 任务ID
+
+        Returns:
+            Optional["IOrderTask"]: 任务实例
+        """
+        return self.id_task_map.get(task_id) if self.id_task_map else None
 
 
 class IUnitManager(ABC):

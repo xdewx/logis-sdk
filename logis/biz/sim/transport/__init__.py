@@ -15,7 +15,7 @@ from typing import (
 
 from pydantic import BaseModel, Field
 
-from logis.biz.sim.agent import IAgent
+from logis.biz.sim.agent import IAgent, IAgentPool
 from logis.biz.sim.data_type import SimEvent
 from logis.biz.sim.event import *
 from logis.data_type import (
@@ -143,6 +143,34 @@ class ITransportDevice(IAgent):
         寻找路径
         """
         raise NotImplementedError("find_path method not implemented")
+
+    @classmethod
+    def from_resource_pool(
+        cls, pool: "IAgentPool", index: int
+    ) -> Optional["ITransportDevice"]:
+        """
+        从资源池数据构造设备实例，子类按需实现
+
+        Args:
+            pool: 所属资源池
+            index: 设备在池中的序号（从 0 开始）
+
+        Returns:
+            Optional[ITransportDevice]: 构造的设备实例，无法构造时返回 None
+
+        Raises:
+            NotImplementedError: 子类未实现时抛出
+        """
+        raise NotImplementedError
+
+    def on_registered(self, pool: "IAgentPool"):
+        """
+        设备注册到资源池后的钩子，用于执行初始化副作用（如加入 path graph）
+
+        Args:
+            pool: 所属资源池
+        """
+        pass
 
 
 class ObstacleDetectorConfig(BaseModel):

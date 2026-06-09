@@ -2,8 +2,13 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Union
 
+from logis.task.model import QuantifiedTask
+
 
 class IOrder(ABC):
+    """
+    订单接口，表达一个完整的客户订单
+    """
 
     @abstractmethod
     def get_priority(self) -> int:
@@ -31,3 +36,13 @@ class IOrder(ABC):
         订单时间
         """
         pass
+
+
+class IOrderTask(IOrder, QuantifiedTask):
+    """
+    订单任务接口，表达一个订单拆分出来的单个任务
+    同时继承订单信息（IOrder）和量化任务能力（QuantifiedTask）
+    """
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)

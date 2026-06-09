@@ -68,6 +68,17 @@ class IAgentPool(Interface):
         """
         pass
 
+    @property
+    @abstractmethod
+    def item_type_id(self) -> Optional[str]:
+        """
+        池内资源（智能体）的类型 ID
+
+        Returns:
+            Optional[str]: 智能体类型 ID
+        """
+        pass
+
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self.capacity: Optional[int] = None
