@@ -223,6 +223,19 @@ class InfluxRestClient:
             item["name"] = item.pop("iox::database")
         return r
 
+    def ping(self) -> bool:
+        """
+        检查 InfluxDB 服务是否可连接
+
+        Returns:
+            bool: 连接成功返回 True，否则 False
+        """
+        try:
+            result = self.show_databases()
+            return result.success
+        except Exception:
+            return False
+
     def create_database(self, database: str, strict: bool = True):
         r = requests.post(
             f"{self._url}/configure/database",
