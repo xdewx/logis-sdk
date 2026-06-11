@@ -7,6 +7,8 @@ from logis.task import ITask
 
 if TYPE_CHECKING:
     from logis.biz.sim import LocationLike
+    from logis.biz.sim.agent import IAgent
+
 
 class QuantifiedStock(QuantifiedValue):
     """
@@ -52,12 +54,34 @@ class IStock(NumberUnit, metaclass=ABCMeta):
 
     stage: Optional[str] = None
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    virtual: Optional[bool] = None
+    """
+    是否是虚拟的
+    """
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.__stage__: Optional[Literal["pickup", "delivery"]] = kwargs.get(
             "__stage__"
         )
         """内部状态变量"""
+        self.__agent__: Optional["IAgent"] = kwargs.get("__agent__", None)
+        """
+        仅临时记录当前货物被谁搬运
+        """
+
+    @property
+    def carrier(self) -> Optional["IAgent"]:
+        return self.__agent__
+
+    def bind_carrier(self, agent: Optional["IAgent"]):
+        self.__agent__ = agent
+
+    def unbind_carrier(self):
+        self.__agent__ = None
+
+    def reset_stage(self):
+        self.__stage__ = None
 
     @property
     def unique_id(self):
