@@ -56,7 +56,7 @@ class IStock(NumberUnit, metaclass=ABCMeta):
 
     virtual: Optional[bool] = None
     """
-    是否是虚拟的
+    是否是虚拟的,默认None兼容历史逻辑
     """
 
     def __init__(self, **kwargs):

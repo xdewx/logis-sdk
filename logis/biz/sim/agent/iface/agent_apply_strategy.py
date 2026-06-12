@@ -60,6 +60,7 @@ class IAgentSelectionStrategy(IExpose):
         # TODO: 这里是否不等待就可以
         yield e
         agent_pool.after_resource_released(resource=agent, **kwargs)
+        # yield self.ctx.get_env(auto_create=False).timeout(0)
         return True
 
 

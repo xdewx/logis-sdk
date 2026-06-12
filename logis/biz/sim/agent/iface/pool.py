@@ -130,7 +130,7 @@ class IAgentPool(Interface):
         self._locked_resources.pop(resource.id, None)
         return True
 
-    def is_locked(self, resource: AgentClass) -> bool:
+    def is_resource_locked(self, resource: AgentClass) -> bool:
         """
         判断资源是否已被锁定
 

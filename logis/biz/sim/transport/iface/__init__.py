@@ -354,8 +354,10 @@ class ITransportBlueprint(IBlueprint):
         Returns:
             bool: 是否成功释放
         """
+        log = self.context.logger()
         agent_selection_strategy = self.get_agent_selection_strategy()
         if not agent_selection_strategy:
+            log.warning("%s未设置智能体选择策略", self)
             return False
         yield self.env.process(
             agent_selection_strategy.release(
