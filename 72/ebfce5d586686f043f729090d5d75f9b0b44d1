@@ -1,0 +1,29 @@
+requirements/core.txt
+  s_9067c77c298aa0::t_aca837fa80f815 7
+setup.py
+  s_9067c77c298aa0::t_303405e714cdf9 61
+  s_9067c77c298aa0::t_6fb59c4e360883 49
+  s_9067c77c298aa0::t_a9f3e316b4ebd1 31
+  s_9067c77c298aa0::t_5a7343ecc5b865 59
+requirements/all.txt
+  s_9067c77c298aa0::t_405e9b47b3e932 10
+README.md
+  s_9067c77c298aa0::t_4ca337e45e4077 63
+  s_9067c77c298aa0::t_e936757dcd2758 75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "72ebfce5d586686f043f729090d5d75f9b0b44d1",
+  "prompts": {},
+  "sessions": {
+    "s_9067c77c298aa0": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0fcb0bb23ffeNcc0S1LT7KsY1e",
+        "model": "unknown"
+      },
+      "human_author": "xdewx <present150608@sina.com>"
+    }
+  }
+}
