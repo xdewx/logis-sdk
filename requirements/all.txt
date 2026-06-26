@@ -7,5 +7,5 @@
 -r optional/simpy.txt
 -r optional/web.txt
 -r optional/ai.txt
--r optional/visualization.txt
+-r optional/viz.txt
 -r dev.txt

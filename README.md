@@ -60,7 +60,7 @@ pip install 'logis-sdk[simulation]'
 pip install 'logis-sdk[data]'
 
 # 可视化（charts + diagrams）
-pip install 'logis-sdk[visualization]'
+pip install 'logis-sdk[viz]'
 
 # Web 服务
 pip install 'logis-sdk[web]'
@@ -72,7 +72,7 @@ pip install 'logis-sdk[messaging]'
 ### 全部安装
 
 ```bash
-pip install 'logis-sdk[full]'
+pip install 'logis-sdk[all]'
 ```
 
 ### 开发者

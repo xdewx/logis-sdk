@@ -1,15 +1,7 @@
-pydantic
 pyee
 requests
 typing_extensions
-colorlog
-platformdirs
-python-dateutil
 more-itertools
 toolz
 tabulate
-ipa-python-kit>=1.1.0
-Pint
-pyhumps
-python-i18n
-networkx
+ipa-python-kit[system,datetime,logging,i18n,unit,network,websocket,hmr]>=1.2.0

@@ -28,7 +28,7 @@ extras_require = {
     "simpy": _read("optional/simpy.txt"),
     "web": _read("optional/web.txt"),
     "ai": _read("optional/ai.txt"),
-    "visualization": _read("optional/visualization.txt"),
+    "viz": _read("optional/viz.txt"),
     "dev": _read("dev.txt"),
 }
 
@@ -46,7 +46,7 @@ extras_require["data"] = list(
 extras_require["messaging"] = _read("optional/mq.txt")
 extras_require["ai"] = _read("optional/ai.txt")
 
-# "full" = 所有子模块可选依赖
+# "all" = 所有子模块可选依赖
 _MODULE_KEYS = {
     "alg",
     "biz",
@@ -56,9 +56,9 @@ _MODULE_KEYS = {
     "simpy",
     "web",
     "ai",
-    "visualization",
+    "viz",
 }
-extras_require["full"] = list(set().union(*(extras_require[k] for k in _MODULE_KEYS)))
+extras_require["all"] = list(set().union(*(extras_require[k] for k in _MODULE_KEYS)))
 
 setup(
     name="logis-sdk",
