@@ -1,0 +1,24 @@
+logis/math/__init__.py
+  s_2bb3acb5e754d8::t_74a593aec915dd 12-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.3",
+  "base_commit_sha": "c866f0999c3058fbe3ae12a9075cad30517586ac",
+  "prompts": {},
+  "humans": {
+    "h_6539c3a3cd32c4": {
+      "author": "xdewx <present150608@sina.com>"
+    }
+  },
+  "sessions": {
+    "s_2bb3acb5e754d8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_0fbec08fdffeQrDNCmQxuX3ruJ",
+        "model": "unknown"
+      },
+      "human_author": "xdewx <present150608@sina.com>"
+    }
+  }
+}
