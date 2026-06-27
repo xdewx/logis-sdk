@@ -2,8 +2,6 @@ import math
 import random
 from typing import List, Optional, Tuple
 
-from scipy.spatial.distance import cityblock
-
 from logis.data_type import Point
 
 
@@ -11,6 +9,8 @@ def manhattan_distance(start_point: Point, end_point: Point) -> float:
     """
     计算曼哈顿距离，又称为街道距离
     """
+    from scipy.spatial.distance import cityblock
+
     return float(cityblock(start_point.to_tuple(), end_point.to_tuple()))
     distance = abs(start_point.x - end_point.x) + abs(start_point.y - end_point.y)
     return distance
